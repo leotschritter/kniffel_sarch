@@ -1,0 +1,119 @@
+body {
+    font-family: "Ubuntu", "Verdana", "Arial", sans-serif;
+    background-image: radial-gradient(forestgreen, black);
+    /*background-repeat: no-repeat;*/
+    color: white;
+}
+
+/* fallback */
+@font-face {
+    font-family: 'Material Symbols Outlined';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/material_icons.woff2') format('woff2');
+}
+
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    vertical-align: middle;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+}
+
+.navbar-nav {
+    --bs-nav-link-color: none;
+}
+
+a.nav-link.active, a.navbar-brand.active {
+    color: white !important;
+    font-weight: 600;
+}
+
+a.dropdown-item.active {
+    background-color: unset;
+}
+
+a.dropdown-item.active:hover, a.dropdown-item:hover {
+    --bs-link-color-rgb: var(--bs-link-hover-color-rgb);
+    --bs-dropdown-link-active-color: var(--bs-nav-link-hover-color);
+}
+
+.dropdown-menu {
+    --bs-dropdown-link-hover-color: var(--bs-nav-link-hover-color);
+    --bs-dropdown-link-hover-bg: var(--bs-body-color);
+    --bs-dropdown-link-color: var(--bs-white);
+}
+
+#chatroom {
+    padding: 30px;
+    border: 1px solid black;
+    border-radius: 15px;
+    width: 400px;
+    background-color: rgba(var(--bs-dark-rgb));
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.date {
+    color: #b3b3b3;
+}
+
+#messages {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid white;
+}
+
+#chatContainer {
+    position: fixed;
+    -webkit-animation-name: animatebottom;
+    -webkit-animation-duration: 0.4s;
+    animation-name: animatebottom;
+    animation-duration: 0.4s;
+    right: 20px;
+    bottom: 20px;
+    z-index: 5;
+}
+
+@-webkit-keyframes animatebottom {
+    from {
+        bottom: -300px;
+        opacity: 0
+    }
+    to {
+        bottom : 5%;
+        opacity: 1
+    }
+}
+
+@keyframes animatebottom {
+    from {
+        bottom: -300px;
+        opacity: 0
+    }
+    to {
+        bottom: 5%;
+        opacity: 1
+    }
+}
+
+#chatButton {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 5;
+}
+
+#your-message {
+    max-height: 350px;
+}
