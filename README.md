@@ -2,7 +2,7 @@
 
 ![MAIN status](https://github.com/leotschritter/kniffel/actions/workflows/scala.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/leotschritter/kniffel/badge.svg)](https://coveralls.io/github/leotschritter/kniffel)
-
+[![Coverage Status](https://coveralls.io/repos/github/leotschritter/kniffel_sarch/badge.svg?branch=main)](https://coveralls.io/github/leotschritter/kniffel_sarch?branch=main)
 ### Usage
 
 This is a normal sbt project. You can compile code with `sbt compile`, run it with `sbt run`, and `sbt console` will start a Scala 3 REPL.
