@@ -3,6 +3,8 @@ package model.gameComponent.gameBaseImpl
 
 import model.gameComponent.IGame
 
+import scala.annotation.tailrec
+
 case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves: Int, resultNestedList: List[List[Int]]) extends IGame :
   def this(numberOfPlayers: Int)
   = this((for (s <- 0 until numberOfPlayers) yield Player(s, "Player " + (s + 1))).toList,
@@ -17,7 +19,7 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
       Some(Game(playersList, getNextPlayer, remainingMoves - 1, resultNestedList))
   }
 
-  def getPreviousPlayer: Player = {
+  private def getPreviousPlayer: Player = {
     if (playersList.indexOf(currentPlayer) - 1 < 0)
       playersList(playersList.last.playerID)
     else
@@ -25,10 +27,10 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
   }
 
 
-  def getNextPlayer: Player =
+  private def getNextPlayer: Player =
     playersList((playersList.indexOf(currentPlayer) + 1) % playersList.length)
 
-  def getSums(value: Int, y: Int, player: Player): (Int, Int, Int) = {
+  private def getSums(value: Int, y: Int, player: Player): (Int, Int, Int) = {
     val sumTop: Int = if y < 6 then value + resultNestedList(playersList.indexOf(player)).head else
       resultNestedList(playersList.indexOf(player)).head
     val sumBottom: Int = if y > 8 then value + resultNestedList(playersList.indexOf(player))(3) else
@@ -67,4 +69,10 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
 
   def getRemainingMoves: Int = remainingMoves
 
-  def getPlayerTuples: List[(Int, String)] = for(x <- playersList) yield (x.playerID, x.playerName)
+  def getPlayerTuples: List[(Int, String)] =
+    @tailrec
+    def getPlayerTuplesHelper(players: List[Player], acc: List[(Int, String)]): List[(Int, String)] = players match
+      case Nil => acc.reverse
+      case player :: rest => getPlayerTuplesHelper(rest, (player.playerID, player.playerName) :: acc)
+    getPlayerTuplesHelper(playersList, Nil)
+

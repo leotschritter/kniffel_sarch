@@ -79,7 +79,7 @@ class FileIO extends IFileIO {
     diceCup
   }
 
-  def gameToJson(game: IGame): JsObject = {
+  private def gameToJson(game: IGame): JsObject = {
     Json.obj(
       "game" -> Json.obj(
         "nestedList" -> game.getNestedList.map(_.mkString(",")).mkString(";"),
@@ -99,7 +99,7 @@ class FileIO extends IFileIO {
     )
   }
 
-  def fieldToJson(field: IField, matrix: IMatrix): JsObject = {
+  private def fieldToJson(field: IField, matrix: IMatrix): JsObject = {
     Json.obj(
       "field" -> Json.obj(
         "numberOfPlayers" -> JsNumber(field.numberOfPlayers),
@@ -119,7 +119,7 @@ class FileIO extends IFileIO {
     )
   }
 
-  def diceCupToJson(diceCup: IDiceCup): JsObject = {
+  private def diceCupToJson(diceCup: IDiceCup): JsObject = {
     Json.obj(
       "dicecup" -> Json.obj(
         "locked" -> diceCup.getLocked.mkString(","),

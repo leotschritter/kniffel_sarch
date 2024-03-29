@@ -3,31 +3,52 @@ package model.fieldComponent.fieldBaseImpl
 
 import model.fieldComponent.IField
 
+import scala.annotation.tailrec
 
 
-case class Field(matrix: Matrix[String]) extends IField :
+case class Field(matrix: Matrix[String]) extends IField:
   def this(numberOfPlayers: Int) = this(new Matrix[String](numberOfPlayers))
 
-  val defaultPlayers: Int = matrix.rows.flatten.length / 19
+  private val defaultPlayers: Int = matrix.rows.flatten.length / 19
 
-  val first_column: List[String] =
+  private val first_column: List[String] =
     List("1", "2", "3", "4", "5", "6", "G", "B", "O", "3x", "4x", "FH", "KS", "GS", "KN", "CH", "U", "O", "E")
 
   def cells(cellWidth: Int = 3, numberOfPlayers: Int = defaultPlayers, desc: String = "", v: List[String] = List.fill(defaultPlayers)("")): String =
-    "|" + desc.padTo(cellWidth, ' ') + (for (s <- v) yield "|" + s.padTo(cellWidth, ' ')).mkString("") + "|" + '\n'
+    def generateBars(strings: List[String]): String = strings match
+      case Nil => ""
+      case head :: tail => "|" + head.padTo(cellWidth, ' ') + generateBars(tail)
+    "|" + desc.padTo(cellWidth, ' ') + generateBars(v) + "|" + '\n'
 
   def bar(cellWidth: Int = 3, numberOfPlayers: Int = defaultPlayers): String = (("+" + "-" * cellWidth)
     * (numberOfPlayers + 1)) + "+" + '\n'
 
   def header(cellWidth: Int = 3, numberOfPlayers: Int = defaultPlayers): List[String] =
-    (" " * (cellWidth + 1)) :: (for (n <- List.range(1, numberOfPlayers + 1)) yield "|"
-      + ("P" + n).padTo(cellWidth, ' '))
+    def buildPlayerHeaders(n: Int): List[String] =
+      if (n <= numberOfPlayers)
+        ("|" + ("P" + n).padTo(cellWidth, ' ')) :: buildPlayerHeaders(n + 1)
+      else
+        Nil
+    (" " * (cellWidth + 1)) :: buildPlayerHeaders(1)
 
   def mesh(cellWidth: Int = 3, numberOfPlayers: Int = defaultPlayers): String =
-    (header() :+ "\n" :+ (for (s <- 0 to 18) yield bar(cellWidth)
-      + cells(cellWidth, numberOfPlayers, first_column.apply(s), matrix.rows.toList.flatten.slice(
-      0 + s * numberOfPlayers, s * numberOfPlayers + numberOfPlayers
-    ))).mkString("") :+ bar(cellWidth)).mkString("")
+    @tailrec
+    def buildMeshString(index: Int, acc: List[String]): List[String] =
+      if (index <= 18)
+        val rowCells = cells(
+          cellWidth,
+          numberOfPlayers,
+          first_column.apply(index),
+          matrix.rows.toList.flatten.slice(index * numberOfPlayers, (index + 1) * numberOfPlayers)
+        )
+        val rowString = bar(cellWidth) + rowCells
+        buildMeshString(index + 1, acc :+ rowString)
+      else
+        acc
+
+    val headerString = header() :+ "\n"
+    (headerString ++ buildMeshString(0, List.empty) :+ bar(cellWidth)).mkString("")
+
 
   def undoMove(valueList: List[String], x: Int, y: Int): Field = putMulti(valueList, "", x, y)
 
@@ -42,4 +63,4 @@ case class Field(matrix: Matrix[String]) extends IField :
 
   def getMatrix: Matrix[String] = matrix
 
-  override def toString = mesh()
+  override def toString: String = mesh()
