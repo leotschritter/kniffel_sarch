@@ -13,39 +13,37 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
 
   def remainingDices: Int = remDices
   
-  def dropListEntriesFromList(entriesToDelete: List[Int], shortenedList: List[Int], n: Int = 0): List[Int] = {
+  def dropListEntriesFromList(entriesToDelete: List[Int])(shortenedList: List[Int])(n: Int = 0): List[Int] = {
     if (entriesToDelete.size != n)
-      dropListEntriesFromList(entriesToDelete,
-        shortenedList.take(shortenedList.lastIndexOf(entriesToDelete.apply(n)))
-          ++ shortenedList.drop(shortenedList.lastIndexOf(entriesToDelete.apply(n)) + 1),
-        n + 1)
+      dropListEntriesFromList(entriesToDelete)(shortenedList.take(shortenedList.lastIndexOf(entriesToDelete.apply(n)))
+        ++ shortenedList.drop(shortenedList.lastIndexOf(entriesToDelete.apply(n)) + 1))(n + 1)
     else
       shortenedList
   }
 
   def nextRound(): DiceCup = DiceCup(List.fill(0)(0), List.fill(0)(0), 2)
 
-  private def listIsSubListOfList(inOrOut: List[Int], existingList: List[Int]): Boolean =
-    existingList.length - inOrOut.length == dropListEntriesFromList(inOrOut, existingList).length
+  private def listIsSubListOfList(inOrOut: List[Int])(existingList: List[Int]): Boolean =
+    existingList.length - inOrOut.length == dropListEntriesFromList(inOrOut)(existingList)(0).length
 
   def putDicesIn(sortIn: List[Int]): DiceCup = {
-    if (listIsSubListOfList(sortIn, locked))
-      DiceCup(dropListEntriesFromList(sortIn, locked), inCup ++ sortIn, remDices)
+    if (listIsSubListOfList(sortIn)(locked))
+      DiceCup(dropListEntriesFromList(sortIn)(locked)(0), inCup ++ sortIn, remDices)
     else
       this
   }
 
   def putDicesOut(sortOut: List[Int]): DiceCup = {
-    if (listIsSubListOfList(sortOut, inCup))
-      DiceCup(sortOut ++ locked, dropListEntriesFromList(sortOut, inCup), remDices)
+    if (listIsSubListOfList(sortOut)(inCup))
+      DiceCup(sortOut ++ locked, dropListEntriesFromList(sortOut)(inCup)(0), remDices)
     else
       this
   }
 
-  private def mergeLists(list1: List[Int], list2: List[Int]): List[Int] = list1 ::: list2
+  private def mergeLists(list1: List[Int])(list2: List[Int]): List[Int] = list1 ::: list2
 
   def result(index: Int): Int =
-    val list: List[Int] = mergeLists(inCup, locked)
+    val list: List[Int] = mergeLists(inCup)(locked)
     index match {
       case 0 | 1 | 2 | 3 | 4 | 5 => list.filter(_ == index + 1).sum
       case 9 => new Evaluator(EvaluateStrategy.threeOfAKind).result(list)
