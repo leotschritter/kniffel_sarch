@@ -32,13 +32,13 @@ trait IController extends Observable {
 
   def toString: String
 
-  def getField: IField
+  def field: IField
 
-  def getDicecup: IDiceCup
+  def diceCup: IDiceCup
 
-  def getGame: IGame
+  def game: IGame
 
-  def save: Unit
+  def save(): Unit
 
-  def load: Unit
+  def load(): Unit
 }

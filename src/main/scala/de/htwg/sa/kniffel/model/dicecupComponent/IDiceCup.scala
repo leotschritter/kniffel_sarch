@@ -6,13 +6,13 @@ import scala.collection.immutable.ListMap
 trait IDiceCup {
   def nextRound(): IDiceCup
 
-  def getInCup: List[Int]
+  def inCup: List[Int]
 
-  def getLocked: List[Int]
+  def locked: List[Int]
 
-  def getRemainingDices: Int
+  def remainingDices: Int
 
-  def getResult(index: Int): Int
+  def result(index: Int): Int
 
   def putDicesIn(list: List[Int]): IDiceCup
 

@@ -61,21 +61,15 @@ class Controller(using var field: IField, var diceCup: IDiceCup, var game: IGame
   def dice(): IDiceCup = diceCup.dice()
 
   def nextRound(): IDiceCup = diceCup.nextRound()
-
-  def getField: IField = field
-
-  def getDicecup: IDiceCup = diceCup
-
-  def getGame: IGame = game
-
-  def save: Unit = {
+  
+  def save(): Unit = {
     file.saveGame(game)
-    file.saveField(field, field.getMatrix)
+    file.saveField(field, field.matrix)
     file.saveDiceCup(diceCup)
     notifyObservers(Event.Save)
   }
 
-  def load: Unit = {
+  def load(): Unit = {
     field = file.loadField
     game = file.loadGame
     diceCup = file.loadDiceCup

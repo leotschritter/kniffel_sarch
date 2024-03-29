@@ -5,7 +5,7 @@ import model.dicecupComponent.dicecupBaseImpl.DiceCup
 import model.fieldComponent.fieldBaseImpl.{Field, Matrix}
 import model.gameComponent.gameBaseImpl.{Game, Player}
 
-import scala.io.Source
+import scala.io.{BufferedSource, Source}
 import model.fileIOComponent.IFileIO
 import model.dicecupComponent.IDiceCup
 import model.fieldComponent.IField
@@ -40,12 +40,15 @@ class FileIO extends IFileIO {
   }
 
   override def loadGame: IGame = {
-    val source: String = Source.fromFile("game.json").getLines.mkString
+
+    val bufferedSource: BufferedSource = Source.fromFile("game.json")
+    val source: String = bufferedSource.getLines.mkString
+    bufferedSource.close()
     val json: JsValue = Json.parse(source)
     val remainingMoves: Int = (json \ "game" \ "remainingMoves").get.toString.toInt
     val currentPlayerId: Int = (json \ "game" \ "currentPlayerID").get.toString.toInt
     val currentPlayerName: String = (json \ "game" \ "currentPlayerName").get.toString.replace("\"", "")
-    val nestedList: List[List[Int]] = getNestedListGame((json \ "game" \ "nestedList").get.toString.replace("\"", ""))
+    val nestedList: List[List[Int]] = nestedListGame((json \ "game" \ "nestedList").get.toString.replace("\"", ""))
     val ids = (json \\ "id").map(x => x.as[Int])
     val names = (json \\ "name").map(x => x.as[String].replace("\"", ""))
     val playersList: List[Player] = (for (x <- ids.indices) yield Player(ids(x), names(x))).toList
@@ -54,7 +57,9 @@ class FileIO extends IFileIO {
   }
 
   override def loadField: IField = {
-    val source: String = Source.fromFile("field.json").getLines.mkString
+    val bufferedSource: BufferedSource = Source.fromFile("field.json")
+    val source: String = bufferedSource.getLines.mkString
+    bufferedSource.close()
     val json: JsValue = Json.parse(source)
     val numberOfPlayers: Int = (json \ "field" \ "numberOfPlayers").get.toString.toInt
     var matrixVector = Vector.tabulate(19, numberOfPlayers) { (cols, row_s) => "" }
@@ -69,7 +74,9 @@ class FileIO extends IFileIO {
   }
 
   override def loadDiceCup: IDiceCup = {
-    val source: String = Source.fromFile("dicecup.json").getLines.mkString
+    val bufferedSource: BufferedSource = Source.fromFile("dicecup.json")
+    val source: String = bufferedSource.getLines.mkString
+    bufferedSource.close()
     val json: JsValue = Json.parse(source)
     val remainingDices: Int = (json \ "dicecup" \ "remaining-dices").get.toString.toInt
     val locked: List[Int] = if ((json \ "dicecup" \ "locked").get.toString.replace("\"", "").isEmpty) List[Int]() else (json \ "dicecup" \ "locked").get.toString.replace("\"", "").split(",").map(_.toInt).toList
@@ -82,13 +89,13 @@ class FileIO extends IFileIO {
   private def gameToJson(game: IGame): JsObject = {
     Json.obj(
       "game" -> Json.obj(
-        "nestedList" -> game.getNestedList.map(_.mkString(",")).mkString(";"),
-        "remainingMoves" -> JsNumber(game.getRemainingMoves),
-        "currentPlayerID" -> JsNumber(game.getPlayerID),
-        "currentPlayerName" -> game.getPlayerName,
+        "nestedList" -> game.nestedList.map(_.mkString(",")).mkString(";"),
+        "remainingMoves" -> JsNumber(game.remainingMoves),
+        "currentPlayerID" -> JsNumber(game.playerID),
+        "currentPlayerName" -> game.playerName,
         "players" -> Json.toJson(
           Seq(for {
-            x <- game.getPlayerTuples
+            x <- game.playerTuples
           } yield {
             Json.obj(
               "id" -> JsNumber(x._1),
@@ -122,14 +129,14 @@ class FileIO extends IFileIO {
   private def diceCupToJson(diceCup: IDiceCup): JsObject = {
     Json.obj(
       "dicecup" -> Json.obj(
-        "locked" -> diceCup.getLocked.mkString(","),
-        "incup" -> diceCup.getInCup.mkString(","),
-        "remaining-dices" -> JsNumber(diceCup.getRemainingDices)
+        "locked" -> diceCup.locked.mkString(","),
+        "incup" -> diceCup.inCup.mkString(","),
+        "remaining-dices" -> JsNumber(diceCup.remainingDices)
       )
     )
   }
 
-  def getNestedListGame(values: String): List[List[Int]] = {
+  def nestedListGame(values: String): List[List[Int]] = {
     val valueList: List[String] = values.split(";").toList
     (for (x <- valueList.indices) yield valueList(x).split(",").map(_.toInt).toList).toList
   }

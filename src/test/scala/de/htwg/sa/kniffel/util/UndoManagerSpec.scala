@@ -23,27 +23,27 @@ class UndoManagerSpec extends AnyWordSpec {
       var r = undoManager.doStep(game.get, field, SetCommand(Move("12", 0, 0)))
       var iGame:IGame = Option(r._1).get
       var iField:IField = r._2
-      iGame.getPlayerName should be ("Player1")
+      iGame.playerName should be ("Player1")
 
       r = undoManager.undoStep(game.get, field)
       iGame = Option(r._1).get
       iField = r._2
-      iGame.getPlayerName should be ("Player4")
+      iGame.playerName should be ("Player4")
 
       r = undoManager.undoStep(game.get, field)
       iGame = Option(r._1).get
       iField = r._2
-      iGame.getPlayerName should be ("Player1")
+      iGame.playerName should be ("Player1")
 
       r = undoManager.redoStep(game.get, field)
       iGame = Option(r._1).get
       iField = r._2
-      iGame.getPlayerName should be ("Player2")
+      iGame.playerName should be ("Player2")
 
       r = undoManager.redoStep(game.get, field)
       iGame = Option(r._1).get
       iField = r._2
-      iGame.getPlayerName should be ("Player1")
+      iGame.playerName should be ("Player1")
     }
   }
 }

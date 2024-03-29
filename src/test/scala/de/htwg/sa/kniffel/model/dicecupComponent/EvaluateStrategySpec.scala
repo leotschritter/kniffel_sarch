@@ -38,8 +38,8 @@ class EvaluateStrategySpec extends AnyWordSpec {
         EvaluateStrategy.sum(list) should be(30)
       }
       "get different sums depending on predicate" in {
-        EvaluateStrategy.getSum(list3, EvaluateStrategy.checkBigStreet(list3)) should be(0)
-        EvaluateStrategy.getSum(list, EvaluateStrategy.checkBigStreet(list2)) should be(30)
+        EvaluateStrategy.sum(list3, EvaluateStrategy.checkBigStreet(list3)) should be(0)
+        EvaluateStrategy.sum(list, EvaluateStrategy.checkBigStreet(list2)) should be(30)
       }
       "check if player has diced a bigStreet" in {
         EvaluateStrategy.checkBigStreet(list) should be(false)

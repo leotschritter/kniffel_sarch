@@ -25,7 +25,7 @@ class FileIOXmlSpec extends AnyWordSpec {
       "saved to xml" should {
         "equal the previously saved field after loading" in {
 
-          fileIO.saveField(field, field.getMatrix)
+          fileIO.saveField(field, field.matrix)
           fileIO.loadField should be(field)
         }
       }

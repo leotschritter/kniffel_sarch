@@ -21,33 +21,33 @@ class SetCommandSpec extends AnyWordSpec {
         val r = setCommand.doStep(game, field)
         game = r._1
         field = r._2
-        field.getMatrix.cell(0, 0) should be("11")
+        field.matrix.cell(0, 0) should be("11")
       }
       "be able to undo the step and should not be able to more undo steps than there are on the undoStack" in {
         val r = setCommand.undoStep(game, field)
         game = r._1
         field = r._2
-        field.getMatrix.cell(0, 0) should be("")
+        field.matrix.cell(0, 0) should be("")
         val r2 = setCommand.undoStep(game, field)
         game = r2._1
         field = r2._2
-        field.getMatrix.cell(0, 0) should be("")
+        field.matrix.cell(0, 0) should be("")
       }
       "be able to redo the ste and should not be able to more redo steps than there are on the redoStack" in {
         val r = setCommand.redoStep(game, field)
         game = r._1
         field = r._2
-        field.getMatrix.cell(0, 0) should be("11")
+        field.matrix.cell(0, 0) should be("11")
         val r2 = setCommand.redoStep(game, field)
         game = r2._1
         field = r2._2
-        field.getMatrix.cell(0, 0) should be("11")
+        field.matrix.cell(0, 0) should be("11")
       }
       "be able to do a no step" in {
         val r = setCommand.noStep(game, field)
         game = r._1
         field = r._2
-        field.getMatrix.cell(0, 0) should be("11")
+        field.matrix.cell(0, 0) should be("11")
       }
     }
   }

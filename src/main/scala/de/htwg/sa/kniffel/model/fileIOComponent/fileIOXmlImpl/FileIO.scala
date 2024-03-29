@@ -90,22 +90,22 @@ class FileIO extends IFileIO {
   }
 
   def diceCupToXml(diceCup: IDiceCup): Elem = {
-    <dicecup remainingDices={diceCup.getRemainingDices.toString}>
-      <locked quantity={diceCup.getLocked.length.toString}>
+    <dicecup remainingDices={diceCup.remainingDices.toString}>
+      <locked quantity={diceCup.locked.length.toString}>
         {for {
-        index <- diceCup.getLocked.indices
+        index <- diceCup.locked.indices
       } yield {
         <dice>
-          {diceCup.getLocked(index)}
+          {diceCup.locked(index)}
         </dice>
       }}
       </locked>
-      <incup quantity={diceCup.getInCup.length.toString}>
+      <incup quantity={diceCup.inCup.length.toString}>
         {for {
-        index <- diceCup.getInCup.indices
+        index <- diceCup.inCup.indices
       } yield {
         <dice>
-          {diceCup.getInCup(index)}
+          {diceCup.inCup(index)}
         </dice>
       }}
       </incup>
@@ -113,26 +113,26 @@ class FileIO extends IFileIO {
   }
 
   def gameToXml(game: IGame): Elem = {
-    <game remainingMoves={game.getRemainingMoves.toString} currentPlayerID={game.getPlayerID.toString} currentPlayerName={game.getPlayerName}>
+    <game remainingMoves={game.remainingMoves.toString} currentPlayerID={game.playerID.toString} currentPlayerName={game.playerName}>
       <scores>
         {for {
-        col <- game.getPlayerTuples.indices
+        col <- game.playerTuples.indices
       } yield {
-        <player playerid={game.getPlayerTuples(col)._1.toString} playername={game.getPlayerTuples(col)._2}>
+        <player playerid={game.playerTuples(col)._1.toString} playername={game.playerTuples(col)._2}>
           <total>
-            {game.getResultNestedList(col).head}
+            {game.resultNestedList(col).head}
           </total>
           <bonus>
-            {game.getResultNestedList(col)(1)}
+            {game.resultNestedList(col)(1)}
           </bonus>
           <total_of_upper_section>
-            {game.getResultNestedList(col)(2)}
+            {game.resultNestedList(col)(2)}
           </total_of_upper_section>
           <total_of_lower_section>
-            {game.getResultNestedList(col)(3)}
+            {game.resultNestedList(col)(3)}
           </total_of_lower_section>
           <grand_total>
-            {game.getResultNestedList(col).last}
+            {game.resultNestedList(col).last}
           </grand_total>
         </player>
       }}

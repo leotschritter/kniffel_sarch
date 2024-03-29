@@ -60,7 +60,5 @@ case class Field(matrix: Matrix[String]) extends IField:
   }
 
   def numberOfPlayers: Int = defaultPlayers
-
-  def getMatrix: Matrix[String] = matrix
-
+  
   override def toString: String = mesh()
