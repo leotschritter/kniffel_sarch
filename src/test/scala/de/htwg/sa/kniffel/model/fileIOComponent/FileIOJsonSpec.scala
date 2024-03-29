@@ -36,7 +36,7 @@ class FileIOJsonSpec extends AnyWordSpec {
     }
     "helper method getNestedListGame() is called" should {
       "have a nested list matching the following pattern" in {
-        fileio.getNestedListGame("23,44,12,23,97,123;12,69,67,26,23,32;12,21,87,32,12,213;92,23,123,12,23,200") should be (List(List(23, 44, 12, 23, 97, 123), List(12, 69, 67, 26, 23, 32), List(12, 21, 87, 32, 12, 213), List(92, 23, 123, 12, 23, 200)))
+        fileio.nestedListGame("23,44,12,23,97,123;12,69,67,26,23,32;12,21,87,32,12,213;92,23,123,12,23,200") should be (List(List(23, 44, 12, 23, 97, 123), List(12, 69, 67, 26, 23, 32), List(12, 21, 87, 32, 12, 213), List(92, 23, 123, 12, 23, 200)))
       }
     }
   }

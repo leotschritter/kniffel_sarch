@@ -11,18 +11,18 @@ class EvaluatorSpec extends AnyWordSpec {
   val fullHouseEvaluator = new Evaluator(EvaluateStrategy.fullHouse)
   val bigStreetEvaluator = new Evaluator(EvaluateStrategy.bigStreet)
   val smallStreetEvaluator = new Evaluator(EvaluateStrategy.smallStreet)
-  val sumEvaluator = new Evaluator(EvaluateStrategy.sum)
+  val sumEvaluator = new Evaluator(EvaluateStrategy.sumChance)
   "An Evaluator" when {
     "created" should {
       val list: List[Int] = List(1, 2, 3, 4, 5)
       "have the belonging Evaluator" in {
-        kniffelEvaluator.getResult(list) should be(new Evaluator(EvaluateStrategy.kniffel).getResult(list))
-        threeOfAKindEvaluator.getResult(list) should be(new Evaluator(EvaluateStrategy.threeOfAKind).getResult(list))
-        fourOfAKindEvaluator.getResult(list) should be(new Evaluator(EvaluateStrategy.fourOfAKind).getResult(list))
-        fullHouseEvaluator.getResult(list) should be(new Evaluator(EvaluateStrategy.fullHouse).getResult(list))
-        bigStreetEvaluator.getResult(list) should be(new Evaluator(EvaluateStrategy.bigStreet).getResult(list))
-        smallStreetEvaluator.getResult(list) should be(new Evaluator(EvaluateStrategy.smallStreet).getResult(list))
-        sumEvaluator.getResult(list) should be(new Evaluator(EvaluateStrategy.sum).getResult(list))
+        kniffelEvaluator.result(list) should be(new Evaluator(EvaluateStrategy.kniffel).result(list))
+        threeOfAKindEvaluator.result(list) should be(new Evaluator(EvaluateStrategy.threeOfAKind).result(list))
+        fourOfAKindEvaluator.result(list) should be(new Evaluator(EvaluateStrategy.fourOfAKind).result(list))
+        fullHouseEvaluator.result(list) should be(new Evaluator(EvaluateStrategy.fullHouse).result(list))
+        bigStreetEvaluator.result(list) should be(new Evaluator(EvaluateStrategy.bigStreet).result(list))
+        smallStreetEvaluator.result(list) should be(new Evaluator(EvaluateStrategy.smallStreet).result(list))
+        sumEvaluator.result(list) should be(new Evaluator(EvaluateStrategy.sumChance).result(list))
       }
     }
   }

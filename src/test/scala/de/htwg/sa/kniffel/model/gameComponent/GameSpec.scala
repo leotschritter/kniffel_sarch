@@ -18,7 +18,7 @@ class GameSpec extends AnyWordSpec {
       }
       "have the first player at first" in {
         game.get.currentPlayer should be(players.head)
-        game.get.getPlayerName(0) should be("Player1")
+        game.get.playerName(0) should be("Player1")
       }
     }
     "move has ended" should {
@@ -60,7 +60,7 @@ class GameSpec extends AnyWordSpec {
     }
     "a nested list is requested" should {
       "return the nested list with the expected values" in {
-        game.get.getNestedList should be (game.get.resultNestedList)
+        game.get.nestedList should be (game.get.resultNestedList)
       }
     }
   }

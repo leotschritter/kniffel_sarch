@@ -8,7 +8,7 @@ trait IField {
 
   def numberOfPlayers: Int
 
-  def getMatrix: IMatrix
+  def matrix: IMatrix
 }
 
 trait IMatrix {

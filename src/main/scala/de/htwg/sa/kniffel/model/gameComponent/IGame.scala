@@ -8,17 +8,17 @@ trait IGame {
 
   def sum(value: Int, y: Int): IGame
 
-  def getPlayerID: Int
+  def playerID: Int
 
-  def getPlayerName: String
+  def playerName: String
 
-  def getPlayerName(x: Int): String
+  def playerName(x: Int): String
 
-  def getResultNestedList(x: Int): List[Int]
+  def resultNestedList: List[List[Int]]
 
-  def getNestedList: List[List[Int]]
+  def nestedList: List[List[Int]]
 
-  def getRemainingMoves: Int
+  def remainingMoves: Int
 
-  def getPlayerTuples: List[(Int, String)]
+  def playerTuples: List[(Int, String)]
 }

@@ -15,14 +15,14 @@ class TUI(using controller: IController) extends UI(controller) with Observer :
   var continue = true
 
   override def run(): Unit =
-    println(controller.getField.toString)
+    println(controller.field.toString)
     inputLoop()
 
   def update(e: Event): Unit =
     e match {
       case Event.Quit => continue = false
       case Event.Save => continue
-      case _ => println(controller.getField.toString + "\n" + controller.getDicecup.toString + controller.getGame.getPlayerName + " ist an der Reihe.")
+      case _ => println(controller.field.toString + "\n" + controller.diceCup.toString + controller.game.playerName + " ist an der Reihe.")
     }
 
 
@@ -42,14 +42,14 @@ class TUI(using controller: IController) extends UI(controller) with Observer :
       case "d" => controller.doAndPublish(controller.dice()); None
       case "u" => controller.undo(); None
       case "r" => controller.redo(); None
-      case "s" => controller.save; None
-      case "l" => controller.load; None
+      case "s" => controller.save(); None
+      case "l" => controller.load(); None
       case "wd" =>
         invalidInput(list) match {
           case Success(f) => val posAndDesc = list.tail.head
-            val index: Option[Int] = controller.getDicecup.indexOfField.get(posAndDesc)
-            if (index.isDefined && controller.getField.getMatrix.isEmpty(controller.getGame.getPlayerID, index.get))
-              Some(Move(controller.getDicecup.getResult(index.get).toString, controller.getGame.getPlayerID, index.get))
+            val index: Option[Int] = controller.diceCup.indexOfField.get(posAndDesc)
+            if (index.isDefined && controller.field.matrix.isEmpty(controller.game.playerID, index.get))
+              Some(Move(controller.diceCup.result(index.get).toString, controller.game.playerID, index.get))
             else
               println("Falsche Eingabe!"); None
           case Failure(v) => println("Falsche Eingabe"); None
