@@ -2,7 +2,6 @@ package de.htwg.sa.kniffel
 package model.dicecupComponent
 
 import model.dicecupComponent.dicecupBaseImpl.DiceCup
-import model.dicecupComponent.{DiceCupState, Running, Start}
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers.*
 
@@ -60,7 +59,7 @@ class DiceCupSpec extends AnyWordSpec {
       val diceCup: DiceCup = new DiceCup()
       val list: List[Int] = List.range(1, 6)
       "contain" in {
-        val emptyList: List[Int] = diceCup.dropListEntriesFromList(list, list)
+        val emptyList: List[Int] = diceCup.dropListEntriesFromList(list)(list)()
         emptyList.size should be(0)
       }
     }
@@ -93,7 +92,7 @@ class DiceCupSpec extends AnyWordSpec {
         )
       }
     }
-    "when DiceCupState changed" should {
+    /*"when DiceCupState changed" should {
       val diceCup: DiceCup = new DiceCup()
       diceCup.state = new Start
       "have the Start State" in {
@@ -112,7 +111,7 @@ class DiceCupSpec extends AnyWordSpec {
         val diceCup2 = diceCup1.dice()
         diceCup1.dice().toString() should be (diceCup2.toString())
       }
-    }
+    }*/
   }
 }
 

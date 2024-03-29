@@ -11,7 +11,7 @@ class EvaluatorSpec extends AnyWordSpec {
   val fullHouseEvaluator = new Evaluator(EvaluateStrategy.fullHouse)
   val bigStreetEvaluator = new Evaluator(EvaluateStrategy.bigStreet)
   val smallStreetEvaluator = new Evaluator(EvaluateStrategy.smallStreet)
-  val sumEvaluator = new Evaluator(EvaluateStrategy.sum)
+  val sumEvaluator = new Evaluator(EvaluateStrategy.sumChance)
   "An Evaluator" when {
     "created" should {
       val list: List[Int] = List(1, 2, 3, 4, 5)
@@ -22,7 +22,7 @@ class EvaluatorSpec extends AnyWordSpec {
         fullHouseEvaluator.result(list) should be(new Evaluator(EvaluateStrategy.fullHouse).result(list))
         bigStreetEvaluator.result(list) should be(new Evaluator(EvaluateStrategy.bigStreet).result(list))
         smallStreetEvaluator.result(list) should be(new Evaluator(EvaluateStrategy.smallStreet).result(list))
-        sumEvaluator.result(list) should be(new Evaluator(EvaluateStrategy.sum).result(list))
+        sumEvaluator.result(list) should be(new Evaluator(EvaluateStrategy.sumChance).result(list))
       }
     }
   }

@@ -35,7 +35,7 @@ class EvaluateStrategySpec extends AnyWordSpec {
         EvaluateStrategy.kniffel(list2) should be(0)
       }
       "get the sum result" in {
-        EvaluateStrategy.sum(list) should be(30)
+        EvaluateStrategy.sumChance(list) should be(30)
       }
       "get different sums depending on predicate" in {
         EvaluateStrategy.sum(list3, EvaluateStrategy.checkBigStreet(list3)) should be(0)
