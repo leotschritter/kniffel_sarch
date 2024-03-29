@@ -9,12 +9,7 @@ import scala.util.Random
 case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends IDiceCup :
   def this() = this(List.fill(0)(0), List.fill(5)(Random.between(1, 7)), 2)
 
-  var state: DiceCupState = new Running()
-
-  def dice(): DiceCup = state match {
-    case start: Start => state = new Running; state.throwDices(this)
-    case running: Running => state = new Running; state.throwDices(this)
-  }
+  def dice(): DiceCup = DiceCup(locked, List.fill(5 - locked.size)(Random.between(1, 7)), remDices - 1)
 
   def remainingDices: Int = remDices
   
@@ -28,10 +23,7 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
       shortenedList
   }
 
-  def nextRound(): DiceCup = {
-    state = new Start()
-    state.throwDices(DiceCup(List.fill(0)(0), List.fill(0)(0), 2))
-  }
+  def nextRound(): DiceCup = DiceCup(List.fill(0)(0), List.fill(0)(0), 2)
 
   private def listIsSubListOfList(inOrOut: List[Int], existingList: List[Int]): Boolean =
     existingList.length - inOrOut.length == dropListEntriesFromList(inOrOut, existingList).length
