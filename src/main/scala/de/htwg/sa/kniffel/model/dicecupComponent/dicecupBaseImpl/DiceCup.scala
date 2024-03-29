@@ -62,7 +62,7 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
       case 12 => new Evaluator(EvaluateStrategy.smallStreet).result(list)
       case 13 => new Evaluator(EvaluateStrategy.bigStreet).result(list)
       case 14 => new Evaluator(EvaluateStrategy.kniffel).result(list)
-      case 15 => new Evaluator(EvaluateStrategy.sum).result(list)
+      case 15 => new Evaluator(EvaluateStrategy.sumChance).result(list)
       case _ => 0
     }
 
