@@ -23,19 +23,17 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
 
   def nextRound(): DiceCup = DiceCup(List.fill(0)(0), List.fill(0)(0), 2)
 
-  private def listIsSubListOfList(inOrOut: List[Int])(existingList: List[Int]): Boolean =
-    existingList.length - inOrOut.length == dropListEntriesFromList(inOrOut)(existingList)(0).length
-
+  private def subsetOf(inOrOut: List[Int])(existingList: List[Int]): Boolean = inOrOut.forall(existingList.contains(_))
   def putDicesIn(sortIn: List[Int]): DiceCup = {
-    if (listIsSubListOfList(sortIn)(locked))
-      DiceCup(dropListEntriesFromList(sortIn)(locked)(0), inCup ++ sortIn, remDices)
+    if (subsetOf(sortIn)(locked))
+      DiceCup(dropListEntriesFromList(sortIn)(locked)(), inCup ++ sortIn, remDices)
     else
       this
   }
 
   def putDicesOut(sortOut: List[Int]): DiceCup = {
-    if (listIsSubListOfList(sortOut)(inCup))
-      DiceCup(sortOut ++ locked, dropListEntriesFromList(sortOut)(inCup)(0), remDices)
+    if (subsetOf(sortOut)(inCup))
+      DiceCup(sortOut ++ locked, dropListEntriesFromList(sortOut)(inCup)(), remDices)
     else
       this
   }
