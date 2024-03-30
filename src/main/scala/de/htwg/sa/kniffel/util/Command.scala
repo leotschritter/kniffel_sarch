@@ -21,21 +21,19 @@ class UndoManager[T, U]:
   def undoStep(game: T, field: U): (T, U) =
     undoStack match {
       case Nil => (game, field)
-      case head :: stack => {
+      case head :: stack =>
         val result = head.undoStep(game, field)
         undoStack = stack
         redoStack = head :: redoStack
         result
-      }
     }
 
   def redoStep(game: T, field: U): (T, U) =
     redoStack match {
       case Nil => (game, field)
-      case head :: stack => {
+      case head :: stack =>
         val result = head.redoStep(game, field)
         redoStack = stack
         undoStack = head :: undoStack
         result
-      }
     }
