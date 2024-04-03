@@ -62,13 +62,17 @@ class FileIO extends IFileIO {
     bufferedSource.close()
     val json: JsValue = Json.parse(source)
     val numberOfPlayers: Int = (json \ "field" \ "numberOfPlayers").get.toString.toInt
-    var matrixVector = Vector.tabulate(19, numberOfPlayers) { (cols, row_s) => "" }
-    for (index <- 0 until 19 * numberOfPlayers) {
-      val row = (json \\ "row") (index).as[Int]
-      val col = (json \\ "col") (index).as[Int]
-      val cell = (json \\ "cell") (index).as[String]
-      matrixVector = matrixVector.updated(row, matrixVector(row).updated(col, cell))
+
+    val matrixVector: Vector[Vector[String]] = {
+      val tempVector = Vector.tabulate(19, numberOfPlayers) { (cols, row_s) => "" }
+      (0 until 19 * numberOfPlayers).foldLeft(tempVector) { (matrixVec, index) =>
+        val row = (json \\ "row")(index).as[Int]
+        val col = (json \\ "col")(index).as[Int]
+        val cell = (json \\ "cell")(index).as[String]
+        matrixVec.updated(row, matrixVec(row).updated(col, cell))
+      }
     }
+
     val field: IField = Field(Matrix(matrixVector))
     field
   }
