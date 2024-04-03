@@ -141,16 +141,15 @@ class FileIO extends IFileIO {
       "field" -> Json.obj(
         "numberOfPlayers" -> JsNumber(field.numberOfPlayers),
         "cells" -> Json.toJson(
-          for {
-            col <- 0 until field.numberOfPlayers
-            row <- 0 until 19
-          } yield {
-            Json.obj(
-              "row" -> row,
-              "col" -> col,
-              "cell" -> Json.toJson(matrix.cell(col, row))
+          (0 until field.numberOfPlayers) flatMap (col =>
+            (0 until 19) map (row =>
+              Json.obj(
+                "row" -> row,
+                "col" -> col,
+                "cell" -> Json.toJson(matrix.cell(col, row))
+              )
+              )
             )
-          }
         )
       )
     )
