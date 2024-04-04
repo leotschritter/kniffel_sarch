@@ -56,7 +56,6 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
     ))
   }
 
-  // override def toString: String = currentPlayer.playerID.toString + " " + currentPlayer.playerName + "\n" + playersList + "\n" + (for(x <- playersList.indices) yield resultNestedList(x)).mkString + "\n" + remainingMoves
 
   def playerID: Int = currentPlayer.playerID
 

@@ -45,19 +45,20 @@ class TUI(using controller: IController) extends UI(controller) with Observer :
       case "s" => controller.save(); None
       case "l" => controller.load(); None
       case "wd" =>
-        invalidInput(list) match {
+        validInput(list) match {
           case Success(f) => val posAndDesc = list.tail.head
-            val index: Option[Int] = controller.diceCup.indexOfField.get(posAndDesc)
-            if (index.isDefined && controller.field.matrix.isEmpty(controller.game.playerID, index.get))
-              Some(Move(controller.diceCup.result(index.get).toString, controller.game.playerID, index.get))
-            else
-              println("Falsche Eingabe!"); None
+            controller.diceCup.indexOfField.get(posAndDesc)
+              .match {
+                case Some(index) => if (controller.field.matrix.isEmpty(controller.game.playerID, index))
+                  Some(Move(controller.diceCup.result(index).toString, controller.game.playerID, index)) else None
+                case None => println("Falsche Eingabe!"); None
+              }
           case Failure(v) => println("Falsche Eingabe"); None
         }
       case _ =>
         println("Falsche Eingabe!"); None
 
-  def invalidInput(list: List[String]): Try[String] = Try(list.tail.head)
+  def validInput(list: List[String]): Try[String] = Try(list.tail.head)
   
   def getController: IController = controller
          
