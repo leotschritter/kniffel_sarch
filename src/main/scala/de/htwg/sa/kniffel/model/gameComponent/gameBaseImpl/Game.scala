@@ -1,16 +1,17 @@
 package de.htwg.sa.kniffel
 package model.gameComponent.gameBaseImpl
 
-import model.gameComponent.IGame
+import de.htwg.sa.kniffel.model.gameComponent.IGame
 
 import scala.annotation.tailrec
 
 case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves: Int, resultNestedList: List[List[Int]]) extends IGame :
-  def this(numberOfPlayers: Int)
-  = this((for (s <- 0 until numberOfPlayers) yield Player(s, "Player " + (s + 1))).toList,
+  def this(numberOfPlayers: Int) = this(
+    (0 until numberOfPlayers).map(s => Player(s, "Player " + (s + 1))).toList,
     Player(0, "Player 1"),
     numberOfPlayers * 13,
-    List.fill(numberOfPlayers, 6)(0))
+    List.fill(numberOfPlayers, 6)(0)
+  )
 
   def next(): Option[Game] = {
     if (remainingMoves == 0)
@@ -55,7 +56,6 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
     ))
   }
 
-  // override def toString: String = currentPlayer.playerID.toString + " " + currentPlayer.playerName + "\n" + playersList + "\n" + (for(x <- playersList.indices) yield resultNestedList(x)).mkString + "\n" + remainingMoves
 
   def playerID: Int = currentPlayer.playerID
 

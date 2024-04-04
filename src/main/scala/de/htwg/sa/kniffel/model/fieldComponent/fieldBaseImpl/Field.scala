@@ -15,21 +15,26 @@ case class Field(matrix: Matrix[String]) extends IField:
     List("1", "2", "3", "4", "5", "6", "G", "B", "O", "3x", "4x", "FH", "KS", "GS", "KN", "CH", "U", "O", "E")
 
   def cells(cellWidth: Int = 3, numberOfPlayers: Int = defaultPlayers, desc: String = "", v: List[String] = List.fill(defaultPlayers)("")): String =
-    def generateBars(strings: List[String]): String = strings match
-      case Nil => ""
-      case head :: tail => "|" + head.padTo(cellWidth, ' ') + generateBars(tail)
-    "|" + desc.padTo(cellWidth, ' ') + generateBars(v) + "|" + '\n'
+    @tailrec
+    def generateBars(strings: List[String], acc: String): String = strings match
+      case Nil => acc
+      case head :: tail => generateBars(tail, acc + "|" + head.padTo(cellWidth, ' '))
+    
+    "|" + desc.padTo(cellWidth, ' ') + generateBars(v, "") + "|" + '\n'
 
   def bar(cellWidth: Int = 3, numberOfPlayers: Int = defaultPlayers): String = (("+" + "-" * cellWidth)
     * (numberOfPlayers + 1)) + "+" + '\n'
 
   def header(cellWidth: Int = 3, numberOfPlayers: Int = defaultPlayers): List[String] =
-    def buildPlayerHeaders(n: Int): List[String] =
+    @tailrec
+    def buildPlayerHeaders(n: Int, acc: List[String]): List[String] =
       if (n <= numberOfPlayers)
-        ("|" + ("P" + n).padTo(cellWidth, ' ')) :: buildPlayerHeaders(n + 1)
+        buildPlayerHeaders(n + 1, acc :+ ("|" + ("P" + n).padTo(cellWidth, ' ')))
       else
-        Nil
-    (" " * (cellWidth + 1)) :: buildPlayerHeaders(1)
+        acc
+
+    (" " * (cellWidth + 1)) :: buildPlayerHeaders(1, Nil)
+
 
   def mesh(cellWidth: Int = 3, numberOfPlayers: Int = defaultPlayers): String =
     @tailrec
@@ -60,5 +65,5 @@ case class Field(matrix: Matrix[String]) extends IField:
   }
 
   def numberOfPlayers: Int = defaultPlayers
-  
+
   override def toString: String = mesh()

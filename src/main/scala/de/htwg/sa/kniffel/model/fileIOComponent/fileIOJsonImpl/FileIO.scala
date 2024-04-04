@@ -13,7 +13,7 @@ import model.fieldComponent.IMatrix
 import model.gameComponent.IGame
 import play.api.libs.json.*
 
-import javax.management.ValueExp
+import scala.annotation.tailrec
 
 
 class FileIO extends IFileIO {
@@ -40,7 +40,6 @@ class FileIO extends IFileIO {
   }
 
   override def loadGame: IGame = {
-
     val bufferedSource: BufferedSource = Source.fromFile("game.json")
     val source: String = bufferedSource.getLines.mkString
     bufferedSource.close()
@@ -49,9 +48,22 @@ class FileIO extends IFileIO {
     val currentPlayerId: Int = (json \ "game" \ "currentPlayerID").get.toString.toInt
     val currentPlayerName: String = (json \ "game" \ "currentPlayerName").get.toString.replace("\"", "")
     val nestedList: List[List[Int]] = nestedListGame((json \ "game" \ "nestedList").get.toString.replace("\"", ""))
+
+    @tailrec
+    def createPlayers(index: Int, acc: List[Player], ids: Seq[Int], names: Seq[String]): List[Player] = {
+      if (index >= ids.length)
+        acc.reverse // Reverse the accumulated list since we're prepending players
+      else {
+        val id = ids(index)
+        val name = names(index)
+        createPlayers(index + 1, Player(id, name) :: acc, ids, names)
+      }
+    }
+
     val ids = (json \\ "id").map(x => x.as[Int])
     val names = (json \\ "name").map(x => x.as[String].replace("\"", ""))
-    val playersList: List[Player] = (for (x <- ids.indices) yield Player(ids(x), names(x))).toList
+    val playersList: List[Player] = createPlayers(0, Nil, ids.toList, names.toList) // Pass the ids and names as parameters
+
     val game: IGame = Game(playersList, Player(currentPlayerId, currentPlayerName), remainingMoves, nestedList)
     game
   }
@@ -62,13 +74,23 @@ class FileIO extends IFileIO {
     bufferedSource.close()
     val json: JsValue = Json.parse(source)
     val numberOfPlayers: Int = (json \ "field" \ "numberOfPlayers").get.toString.toInt
-    var matrixVector = Vector.tabulate(19, numberOfPlayers) { (cols, row_s) => "" }
-    for (index <- 0 until 19 * numberOfPlayers) {
-      val row = (json \\ "row") (index).as[Int]
-      val col = (json \\ "col") (index).as[Int]
-      val cell = (json \\ "cell") (index).as[String]
-      matrixVector = matrixVector.updated(row, matrixVector(row).updated(col, cell))
+
+    @tailrec
+    def updateMatrix(vector: Vector[Vector[String]], index: Int): Vector[Vector[String]] = {
+      if (index >= 19 * numberOfPlayers)
+        vector
+      else {
+        val row = (json \\ "row")(index).as[Int]
+        val col = (json \\ "col")(index).as[Int]
+        val cell = (json \\ "cell")(index).as[String]
+        val updatedRow = vector(row).updated(col, cell)
+        updateMatrix(vector.updated(row, updatedRow), index + 1)
+      }
     }
+
+    val initialMatrix: Vector[Vector[String]] = Vector.tabulate(19, numberOfPlayers) { (cols, row_s) => "" }
+    val matrixVector: Vector[Vector[String]] = updateMatrix(initialMatrix, 0)
+
     val field: IField = Field(Matrix(matrixVector))
     field
   }
@@ -87,21 +109,29 @@ class FileIO extends IFileIO {
   }
 
   private def gameToJson(game: IGame): JsObject = {
+    def playersToJson(playerTuples: List[(Int, String)]): JsArray = {
+      playerTuples match {
+        case Nil => Json.arr()
+        case (id, name) :: tail =>
+          Json.arr(Json.obj("id" -> JsNumber(id), "name" -> name)) ++ playersToJson(tail)
+      }
+    }
+
+    def nestedListToString(nestedList: List[List[Int]]): String = {
+      nestedList match {
+        case Nil => ""
+        case innerList :: remainingLists =>
+          innerList.mkString(",") + (if (remainingLists.nonEmpty) ";" else "") + nestedListToString(remainingLists)
+      }
+    }
+
     Json.obj(
       "game" -> Json.obj(
-        "nestedList" -> game.nestedList.map(_.mkString(",")).mkString(";"),
+        "nestedList" -> nestedListToString(game.nestedList),
         "remainingMoves" -> JsNumber(game.remainingMoves),
         "currentPlayerID" -> JsNumber(game.playerID),
         "currentPlayerName" -> game.playerName,
-        "players" -> Json.toJson(
-          Seq(for {
-            x <- game.playerTuples
-          } yield {
-            Json.obj(
-              "id" -> JsNumber(x._1),
-              "name" -> x._2)
-          })
-        )
+        "players" -> playersToJson(game.playerTuples)
       )
     )
   }
@@ -111,16 +141,15 @@ class FileIO extends IFileIO {
       "field" -> Json.obj(
         "numberOfPlayers" -> JsNumber(field.numberOfPlayers),
         "cells" -> Json.toJson(
-          for {
-            col <- 0 until field.numberOfPlayers
-            row <- 0 until 19
-          } yield {
-            Json.obj(
-              "row" -> row,
-              "col" -> col,
-              "cell" -> Json.toJson(matrix.cell(col, row))
+          (0 until field.numberOfPlayers) flatMap (col =>
+            (0 until 19) map (row =>
+              Json.obj(
+                "row" -> row,
+                "col" -> col,
+                "cell" -> Json.toJson(matrix.cell(col, row))
+              )
+              )
             )
-          }
         )
       )
     )
@@ -138,6 +167,16 @@ class FileIO extends IFileIO {
 
   def nestedListGame(values: String): List[List[Int]] = {
     val valueList: List[String] = values.split(";").toList
-    (for (x <- valueList.indices) yield valueList(x).split(",").map(_.toInt).toList).toList
+
+    def convertStringListToIntList(index: Int): List[List[Int]] = {
+      if (index >= valueList.length)
+        Nil
+      else {
+        val intList = valueList(index).split(",").map(_.toInt).toList
+        intList :: convertStringListToIntList(index + 1)
+      }
+    }
+
+    convertStringListToIntList(0)
   }
 }

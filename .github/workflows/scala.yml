@@ -2,7 +2,9 @@ name: Scala CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - 'SARCH-*'
   pull_request:
     branches: [ main ]
 
