@@ -1,9 +1,9 @@
 package de.htwg.sa.kniffel
 package model.dicecupComponent
 
-import model.dicecupComponent.dicecupBaseImpl.DiceCup
-import org.scalatest.wordspec.AnyWordSpec
+import de.htwg.sa.kniffel.model.dicecupComponent.dicecupBaseImpl.DiceCup
 import org.scalatest.matchers.should.Matchers.*
+import org.scalatest.wordspec.AnyWordSpec
 
 class DiceCupSpec extends AnyWordSpec {
   "Dice Cup" when {
@@ -53,6 +53,13 @@ class DiceCupSpec extends AnyWordSpec {
         val putIn: DiceCup = sortOut.putDicesIn(List(77, 435, 22))
         putIn.inCup.size should be (3)
         putIn.locked.size should be (2)
+      }
+      "after three and four dices the remaining Dices" in {
+        val diceCupAfterFour: DiceCup = new DiceCup().dice().dice().dice().dice()
+        val diceCupAfterThree: DiceCup = new DiceCup().dice().dice().dice()
+
+        diceCupAfterFour.remDices should be(diceCupAfterThree.remDices)
+
       }
     }
     "list Entries are dropped from another list" should {
