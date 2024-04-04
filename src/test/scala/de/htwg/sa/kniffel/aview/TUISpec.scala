@@ -41,9 +41,9 @@ class TUISpec extends AnyWordSpec {
       tui.analyseInput("q") should be(None)
     }
     "a list is validated" in {
-      val result = tui.invalidInput(List("wd"))
+      val result = tui.validInput(List("wd"))
       result.isSuccess should be(false)
-      val result2 = tui.invalidInput(List("wd", "1"))
+      val result2 = tui.validInput(List("wd", "1"))
       result2.isSuccess should be(true)
     }
   }
