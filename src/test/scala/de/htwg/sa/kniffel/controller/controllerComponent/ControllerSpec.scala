@@ -101,6 +101,14 @@ class ControllerSpec extends AnyWordSpec {
         controller.quit().toString should be(controller3.quit().toString)
       }
     }
+    "when no remaining moves are left game.next" should {
+      "be None" in {
+        val game: Game = Game(List(Player(1, "Harald"), Player(2, "Dieter")), Player(1, "Harald"), 0, List())
+        controller.game = game
+        controller.next()
+        controller.game should be(game)
+      }
+    }
   }
 }
 
