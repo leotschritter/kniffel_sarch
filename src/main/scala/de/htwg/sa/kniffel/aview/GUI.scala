@@ -102,7 +102,7 @@ class GUI(using controller: IController) extends Frame, UI(controller) :
       i <- 0 until 19
       j <- 0 until numberOfPlayers
     } yield new Label {
-      text = controller.field.matrix.cell(j, i)
+      text = controller.field.matrix.cell(j, i).map(cell => cell.toString).getOrElse("")
       font = field_font
       opaque = true
       if (j == xIndex)
@@ -357,4 +357,4 @@ class GUI(using controller: IController) extends Frame, UI(controller) :
 
     // def errorMessage(): Unit = Dialog.showMessage(contents.head, "Feld ist schon belegt!", title = "Falsche Eingabe", messageType = Dialog.Message.Error)
 
-    def valueToWriteDown: String = controller.diceCup.result(y).toString
+    def valueToWriteDown: Int = controller.diceCup.result(y)

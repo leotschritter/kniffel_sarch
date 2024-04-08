@@ -1,39 +1,38 @@
 package de.htwg.sa.kniffel
 package model.fileIOComponent.fileIOJsonImpl
 
-import model.dicecupComponent.dicecupBaseImpl.DiceCup
-import model.fieldComponent.fieldBaseImpl.{Field, Matrix}
-import model.gameComponent.gameBaseImpl.{Game, Player}
-
-import scala.io.{BufferedSource, Source}
-import model.fileIOComponent.IFileIO
-import model.dicecupComponent.IDiceCup
-import model.fieldComponent.IField
-import model.fieldComponent.IMatrix
-import model.gameComponent.IGame
+import de.htwg.sa.kniffel.model.dicecupComponent.IDiceCup
+import de.htwg.sa.kniffel.model.dicecupComponent.dicecupBaseImpl.DiceCup
+import de.htwg.sa.kniffel.model.fieldComponent.fieldBaseImpl.{Field, Matrix}
+import de.htwg.sa.kniffel.model.fieldComponent.{IField, IMatrix}
+import de.htwg.sa.kniffel.model.fileIOComponent.IFileIO
+import de.htwg.sa.kniffel.model.gameComponent.IGame
+import de.htwg.sa.kniffel.model.gameComponent.gameBaseImpl.{Game, Player}
 import play.api.libs.json.*
 
 import scala.annotation.tailrec
+import scala.io.{BufferedSource, Source}
+import scala.util.Try
 
 
 class FileIO extends IFileIO {
 
   override def saveGame(game: IGame): Unit = {
-    import java.io._
+    import java.io.*
     val pw = new PrintWriter(new File("game.json"))
     pw.write(Json.prettyPrint(gameToJson(game)))
     pw.close()
   }
 
   override def saveField(field: IField, matrix: IMatrix): Unit = {
-    import java.io._
+    import java.io.*
     val pw = new PrintWriter(new File("field.json"))
     pw.write(Json.prettyPrint(fieldToJson(field, matrix)))
     pw.close()
   }
 
   override def saveDiceCup(diceCup: IDiceCup): Unit = {
-    import java.io._
+    import java.io.*
     val pw = new PrintWriter(new File("dicecup.json"))
     pw.write(Json.prettyPrint(diceCupToJson(diceCup)))
     pw.close()
@@ -76,20 +75,20 @@ class FileIO extends IFileIO {
     val numberOfPlayers: Int = (json \ "field" \ "numberOfPlayers").get.toString.toInt
 
     @tailrec
-    def updateMatrix(vector: Vector[Vector[String]], index: Int): Vector[Vector[String]] = {
+    def updateMatrix(vector: Vector[Vector[Option[Int]]], index: Int): Vector[Vector[Option[Int]]] = {
       if (index >= 19 * numberOfPlayers)
         vector
       else {
         val row = (json \\ "row")(index).as[Int]
         val col = (json \\ "col")(index).as[Int]
-        val cell = (json \\ "cell")(index).as[String]
+        val cell: Option[Int] = Try((json \\ "cell")(index).as[String].toInt).toOption
         val updatedRow = vector(row).updated(col, cell)
         updateMatrix(vector.updated(row, updatedRow), index + 1)
       }
     }
 
-    val initialMatrix: Vector[Vector[String]] = Vector.tabulate(19, numberOfPlayers) { (cols, row_s) => "" }
-    val matrixVector: Vector[Vector[String]] = updateMatrix(initialMatrix, 0)
+    val initialMatrix: Vector[Vector[Option[Int]]] = Vector.tabulate(19, numberOfPlayers) { (cols, row_s) => None }
+    val matrixVector: Vector[Vector[Option[Int]]] = updateMatrix(initialMatrix, 0)
 
     val field: IField = Field(Matrix(matrixVector))
     field
@@ -108,20 +107,27 @@ class FileIO extends IFileIO {
     diceCup
   }
 
+  import play.api.libs.json.*
+
   private def gameToJson(game: IGame): JsObject = {
-    def playersToJson(playerTuples: List[(Int, String)]): JsArray = {
+    @tailrec
+    def playersToJson(playerTuples: List[(Int, String)], acc: JsArray = Json.arr()): JsArray = {
       playerTuples match {
-        case Nil => Json.arr()
+        case Nil => acc
         case (id, name) :: tail =>
-          Json.arr(Json.obj("id" -> JsNumber(id), "name" -> name)) ++ playersToJson(tail)
+          val playerJson = Json.obj("id" -> JsNumber(id), "name" -> name)
+          playersToJson(tail, acc :+ playerJson)
       }
     }
 
-    def nestedListToString(nestedList: List[List[Int]]): String = {
+    @tailrec
+    def nestedListToString(nestedList: List[List[Int]], acc: String = ""): String = {
       nestedList match {
-        case Nil => ""
+        case Nil => acc
         case innerList :: remainingLists =>
-          innerList.mkString(",") + (if (remainingLists.nonEmpty) ";" else "") + nestedListToString(remainingLists)
+          val innerString = innerList.mkString(",")
+          val separator = if (remainingLists.nonEmpty) ";" else ""
+          nestedListToString(remainingLists, acc + innerString + separator)
       }
     }
 
@@ -146,7 +152,7 @@ class FileIO extends IFileIO {
               Json.obj(
                 "row" -> row,
                 "col" -> col,
-                "cell" -> Json.toJson(matrix.cell(col, row))
+                "cell" -> Json.toJson(matrix.cell(col, row).map(cell => cell.toString).getOrElse(""))
               )
               )
             )
@@ -168,12 +174,13 @@ class FileIO extends IFileIO {
   def nestedListGame(values: String): List[List[Int]] = {
     val valueList: List[String] = values.split(";").toList
 
-    def convertStringListToIntList(index: Int): List[List[Int]] = {
+    @tailrec
+    def convertStringListToIntList(index: Int, acc: List[List[Int]] = Nil): List[List[Int]] = {
       if (index >= valueList.length)
-        Nil
+        acc.reverse
       else {
         val intList = valueList(index).split(",").map(_.toInt).toList
-        intList :: convertStringListToIntList(index + 1)
+        convertStringListToIntList(index + 1, intList :: acc)
       }
     }
 

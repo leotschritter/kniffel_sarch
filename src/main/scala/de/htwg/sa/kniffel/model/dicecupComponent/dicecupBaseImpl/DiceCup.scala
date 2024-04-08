@@ -1,18 +1,22 @@
 package de.htwg.sa.kniffel
 package model.dicecupComponent.dicecupBaseImpl
 
-import model.dicecupComponent.*
+import de.htwg.sa.kniffel.model.dicecupComponent.*
 
 import scala.collection.immutable.ListMap
 import scala.util.Random
 
-case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends IDiceCup :
+case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends IDiceCup:
   def this() = this(List.fill(0)(0), List.fill(5)(Random.between(1, 7)), 2)
 
-  def dice(): DiceCup = DiceCup(locked, List.fill(5 - locked.size)(Random.between(1, 7)), remDices - 1)
+  def dice(): Option[DiceCup] =
+    if (remDices >= 0)
+      Some(DiceCup(locked, List.fill(5 - locked.size)(Random.between(1, 7)), remDices - 1))
+    else
+      None
 
   def remainingDices: Int = remDices
-  
+
   def dropListEntriesFromList(entriesToDelete: List[Int])(shortenedList: List[Int])(n: Int = 0): List[Int] = {
     if (entriesToDelete.size != n)
       dropListEntriesFromList(entriesToDelete)(shortenedList.take(shortenedList.lastIndexOf(entriesToDelete.apply(n)))
@@ -24,6 +28,7 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
   def nextRound(): DiceCup = DiceCup(List.fill(0)(0), List.fill(0)(0), 2)
 
   private def subsetOf(inOrOut: List[Int])(existingList: List[Int]): Boolean = inOrOut.forall(existingList.contains(_))
+
   def putDicesIn(sortIn: List[Int]): DiceCup = {
     if (subsetOf(sortIn)(locked))
       DiceCup(dropListEntriesFromList(sortIn)(locked)(), inCup ++ sortIn, remDices)

@@ -1,16 +1,14 @@
 package de.htwg.sa.kniffel
 package aview
 
-import controller.IController
-import aview.UI
-import model.Move
+import de.htwg.sa.kniffel.controller.IController
+import de.htwg.sa.kniffel.model.Move
+import de.htwg.sa.kniffel.util.{Event, Observer}
 
-import scala.util.{Failure, Success, Try}
 import scala.io.StdIn.readLine
-import util.{Event, Observer}
-import Config.given
+import scala.util.{Failure, Success, Try}
 
-class TUI(using controller: IController) extends UI(controller) with Observer :
+class TUI(using controller: IController) extends UI(controller) with Observer:
   controller.add(this)
   var continue = true
 
@@ -34,23 +32,27 @@ class TUI(using controller: IController) extends UI(controller) with Observer :
 
 
   def analyseInput(input: String): Option[Move] =
-    val list = input.split("\\s").toList
-    list.head match
+    val textInputAsList = input.split("\\s").toList
+    textInputAsList.head match
       case "q" => None
-      case "po" => diceCupPutOut(list.tail.map(_.toInt)); None
-      case "pi" => diceCupPutIn(list.tail.map(_.toInt)); None
+      case "po" => diceCupPutOut(textInputAsList.tail.map(_.toInt)); None
+      case "pi" => diceCupPutIn(textInputAsList.tail.map(_.toInt)); None
       case "d" => controller.doAndPublish(controller.dice()); None
       case "u" => controller.undo(); None
       case "r" => controller.redo(); None
       case "s" => controller.save(); None
       case "l" => controller.load(); None
       case "wd" =>
-        validInput(list) match {
-          case Success(f) => val posAndDesc = list.tail.head
+        validInput(textInputAsList) match {
+          case Success(f) => val posAndDesc = textInputAsList.tail.head
             controller.diceCup.indexOfField.get(posAndDesc)
               .match {
-                case Some(index) => if (controller.field.matrix.isEmpty(controller.game.playerID, index))
-                  Some(Move(controller.diceCup.result(index).toString, controller.game.playerID, index)) else None
+                case Some(index) =>
+                  if (controller.field.matrix.isEmpty(controller.game.playerID, index))
+                    Some(Move(controller.diceCup.result(index), controller.game.playerID, index))
+                  else
+                    println("Da steht schon was!")
+                    None
                 case None => println("Falsche Eingabe!"); None
               }
           case Failure(v) => println("Falsche Eingabe"); None
@@ -59,6 +61,6 @@ class TUI(using controller: IController) extends UI(controller) with Observer :
         println("Falsche Eingabe!"); None
 
   def validInput(list: List[String]): Try[String] = Try(list.tail.head)
-  
+
   def getController: IController = controller
          

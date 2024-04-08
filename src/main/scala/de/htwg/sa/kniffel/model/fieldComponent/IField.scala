@@ -2,9 +2,9 @@ package de.htwg.sa.kniffel
 package model.fieldComponent
 
 trait IField {
-  def putMulti(valueList: List[String], putInValue: String, x: Int, y: Int): IField
+  def putMulti(valueList: List[Int], putInValue: Option[Int], x: Int, y: Int): IField
 
-  def undoMove(valueList: List[String], x: Int, y: Int): IField
+  def undoMove(valueList: List[Int], x: Int, y: Int): IField
 
   def numberOfPlayers: Int
 
@@ -12,7 +12,7 @@ trait IField {
 }
 
 trait IMatrix {
-  def cell(col: Int, row: Int): String
+  def cell(col: Int, row: Int): Option[Int]
 
   def isEmpty(col: Int, row: Int): Boolean
 }

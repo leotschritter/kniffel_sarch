@@ -1,16 +1,13 @@
 package de.htwg.sa.kniffel
 package controller.controllerComponent
 
-import controller.controllerBaseImpl.Controller
-import model.Move
-import model.dicecupComponent.IDiceCup
-import model.dicecupComponent.dicecupBaseImpl.DiceCup
-import model.fieldComponent.fieldBaseImpl.Field
-import model.gameComponent.gameBaseImpl.{Game, Player}
-import util.{Event, Observer}
-import Config.given
-
-
+import de.htwg.sa.kniffel.Config.given
+import de.htwg.sa.kniffel.controller.controllerBaseImpl.Controller
+import de.htwg.sa.kniffel.model.Move
+import de.htwg.sa.kniffel.model.dicecupComponent.IDiceCup
+import de.htwg.sa.kniffel.model.dicecupComponent.dicecupBaseImpl.DiceCup
+import de.htwg.sa.kniffel.model.gameComponent.gameBaseImpl.{Game, Player}
+import de.htwg.sa.kniffel.util.{Event, Observer}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -80,16 +77,16 @@ class ControllerSpec extends AnyWordSpec {
     }
     "when undo/redo/put/save/load is called" should {
       "put" in {
-        controller.put(Move("11", 0, 0))
-        controller.field.matrix.cell(0, 0) should be("11")
+        controller.put(Move(11, 0, 0))
+        controller.field.matrix.cell(0, 0).get should be(11)
       }
       "undo" in {
         controller.undo()
-        controller.field.matrix.cell(0, 0) should be("")
+        controller.field.matrix.cell(0, 0) should be(None)
       }
       "redo" in {
         controller.redo()
-        controller.field.matrix.cell(0, 0) should be("11")
+        controller.field.matrix.cell(0, 0).get should be(11)
       }
       "save and loaded" in {
         controller.diceCup = DiceCup(List(), List(1, 2, 3, 4, 5), 2)

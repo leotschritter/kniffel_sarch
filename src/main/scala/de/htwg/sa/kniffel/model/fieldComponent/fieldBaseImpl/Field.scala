@@ -1,13 +1,13 @@
 package de.htwg.sa.kniffel
 package model.fieldComponent.fieldBaseImpl
 
-import model.fieldComponent.IField
+import de.htwg.sa.kniffel.model.fieldComponent.IField
 
 import scala.annotation.tailrec
 
 
-case class Field(matrix: Matrix[String]) extends IField:
-  def this(numberOfPlayers: Int) = this(new Matrix[String](numberOfPlayers))
+case class Field(matrix: Matrix[Option[Int]]) extends IField:
+  def this(numberOfPlayers: Int) = this(new Matrix[Option[Int]](numberOfPlayers))
 
   private val defaultPlayers: Int = matrix.rows.flatten.length / 19
 
@@ -19,7 +19,7 @@ case class Field(matrix: Matrix[String]) extends IField:
     def generateBars(strings: List[String], acc: String): String = strings match
       case Nil => acc
       case head :: tail => generateBars(tail, acc + "|" + head.padTo(cellWidth, ' '))
-    
+
     "|" + desc.padTo(cellWidth, ' ') + generateBars(v, "") + "|" + '\n'
 
   def bar(cellWidth: Int = 3, numberOfPlayers: Int = defaultPlayers): String = (("+" + "-" * cellWidth)
@@ -45,6 +45,8 @@ case class Field(matrix: Matrix[String]) extends IField:
           numberOfPlayers,
           first_column.apply(index),
           matrix.rows.toList.flatten.slice(index * numberOfPlayers, (index + 1) * numberOfPlayers)
+            map (cell => cell.map(cellV => cellV.toString).getOrElse(""))
+          
         )
         val rowString = bar(cellWidth) + rowCells
         buildMeshString(index + 1, acc :+ rowString)
@@ -55,13 +57,13 @@ case class Field(matrix: Matrix[String]) extends IField:
     (headerString ++ buildMeshString(0, List.empty) :+ bar(cellWidth)).mkString("")
 
 
-  def undoMove(valueList: List[String], x: Int, y: Int): Field = putMulti(valueList, "", x, y)
+  def undoMove(valueList: List[Int], x: Int, y: Int): Field = putMulti(valueList, None, x, y)
 
-  def putMulti(valueList: List[String], putInValue: String, x: Int, y: Int): Field = {
+  def putMulti(valueList: List[Int], putInValue: Option[Int], x: Int, y: Int): Field = {
     val indexList: List[Int] = List(6, 7, 8, 16, 17, 18)
-    this.copy(matrix.fill(x, indexList.head, valueList.head).fill(x, indexList(1), valueList(1))
-      .fill(x, indexList(2), valueList(2)).fill(x, indexList(3), valueList(3))
-      .fill(x, indexList(4), valueList(4)).fill(x, indexList.last, valueList.last).fill(x, y, putInValue))
+    this.copy(matrix.fill(x, indexList.head, Some(valueList.head)).fill(x, indexList(1), Some(valueList(1)))
+      .fill(x, indexList(2), Some(valueList(2))).fill(x, indexList(3), Some(valueList(3)))
+      .fill(x, indexList(4), Some(valueList(4))).fill(x, indexList.last, Some(valueList.last)).fill(x, y, putInValue))
   }
 
   def numberOfPlayers: Int = defaultPlayers

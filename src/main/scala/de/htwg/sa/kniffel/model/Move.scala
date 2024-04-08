@@ -1,4 +1,4 @@
 package de.htwg.sa.kniffel
 package model
 
-case class Move(value: String, x: Int, y: Int)
+case class Move(value: Int, x: Int, y: Int)
