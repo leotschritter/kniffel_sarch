@@ -23,7 +23,7 @@ class DiceCupSpec extends AnyWordSpec {
     "dices are thrown" should {
       val diceCup: DiceCup = new DiceCup()
       "contain two lists with all dices" in {
-        val thrownDiceCup: DiceCup = diceCup.dice()
+        val thrownDiceCup: DiceCup = diceCup.dice().get
         thrownDiceCup.inCup.size + thrownDiceCup.locked.size should be(5)
         thrownDiceCup.inCup.foreach {
           s =>
@@ -55,12 +55,9 @@ class DiceCupSpec extends AnyWordSpec {
         putIn.locked.size should be (2)
       }
       "after three and four dices the remaining Dices should be the same" in {
-        val diceCupAfterThree: DiceCup = new DiceCup().dice().dice().dice()
-        val diceCupAfterFour: DiceCup = diceCupAfterThree.dice()
+        val diceCupAfterThree: Option[DiceCup] = new DiceCup().dice().get.dice().get.dice().get.dice()
 
-        diceCupAfterFour.remDices should be(diceCupAfterThree.remDices)
-        diceCupAfterFour.inCup should be(diceCupAfterThree.inCup)
-        diceCupAfterFour.locked should be(diceCupAfterThree.locked)
+        diceCupAfterThree should be(None)
 
       }
     }

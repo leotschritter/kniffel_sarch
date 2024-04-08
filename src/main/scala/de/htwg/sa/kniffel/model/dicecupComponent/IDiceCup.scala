@@ -18,7 +18,7 @@ trait IDiceCup {
 
   def putDicesOut(list: List[Int]): IDiceCup
 
-  def dice(): IDiceCup
+  def dice(): Option[IDiceCup]
 
   def indexOfField: ListMap[String, Int]
 }

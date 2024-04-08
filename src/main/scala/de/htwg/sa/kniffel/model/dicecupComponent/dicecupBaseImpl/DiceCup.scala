@@ -9,11 +9,11 @@ import scala.util.Random
 case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends IDiceCup:
   def this() = this(List.fill(0)(0), List.fill(5)(Random.between(1, 7)), 2)
 
-  def dice(): DiceCup =
+  def dice(): Option[DiceCup] =
     if (remDices >= 0)
-      DiceCup(locked, List.fill(5 - locked.size)(Random.between(1, 7)), remDices - 1)
+      Some(DiceCup(locked, List.fill(5 - locked.size)(Random.between(1, 7)), remDices - 1))
     else
-      this
+      None
 
   def remainingDices: Int = remDices
 

@@ -61,7 +61,7 @@ class Controller(using var field: IField, var diceCup: IDiceCup, var game: IGame
     diceCup = doThis
     notifyObservers(Event.Move)
 
-  def dice(): IDiceCup = diceCup.dice()
+  def dice(): IDiceCup = diceCup.dice().getOrElse(diceCup)
 
   def nextRound(): IDiceCup = diceCup.nextRound()
   

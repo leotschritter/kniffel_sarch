@@ -14,7 +14,7 @@ class FileIOJsonSpec extends AnyWordSpec {
     val game = Option(Game(players, players.head, players.length * 13, List.fill(players.length, 6)(0)))
     val field = new Field(4)
     val matrix = new Matrix(4)
-    val diceCup1 = new DiceCup().dice()
+    val diceCup1 = new DiceCup().dice().get
     val diceCup2 = DiceCup(List.fill(5)(2), List(), 2)
 
     val fileio:FileIO = new FileIO()
