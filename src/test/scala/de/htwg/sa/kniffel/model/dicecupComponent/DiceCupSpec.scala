@@ -54,7 +54,7 @@ class DiceCupSpec extends AnyWordSpec {
         putIn.inCup.size should be (3)
         putIn.locked.size should be (2)
       }
-      "after three and four dices the remaining Dices" in {
+      "after three and four dices the remaining Dices should be the same" in {
         val diceCupAfterThree: DiceCup = new DiceCup().dice().dice().dice()
         val diceCupAfterFour: DiceCup = diceCupAfterThree.dice()
 

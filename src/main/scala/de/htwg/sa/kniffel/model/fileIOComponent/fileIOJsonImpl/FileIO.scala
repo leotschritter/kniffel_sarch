@@ -3,8 +3,8 @@ package model.fileIOComponent.fileIOJsonImpl
 
 import de.htwg.sa.kniffel.model.dicecupComponent.IDiceCup
 import de.htwg.sa.kniffel.model.dicecupComponent.dicecupBaseImpl.DiceCup
-import de.htwg.sa.kniffel.model.fieldComponent.{IField, IMatrix}
 import de.htwg.sa.kniffel.model.fieldComponent.fieldBaseImpl.{Field, Matrix}
+import de.htwg.sa.kniffel.model.fieldComponent.{IField, IMatrix}
 import de.htwg.sa.kniffel.model.fileIOComponent.IFileIO
 import de.htwg.sa.kniffel.model.gameComponent.IGame
 import de.htwg.sa.kniffel.model.gameComponent.gameBaseImpl.{Game, Player}
@@ -12,6 +12,7 @@ import play.api.libs.json.*
 
 import scala.annotation.tailrec
 import scala.io.{BufferedSource, Source}
+import scala.util.Try
 
 
 class FileIO extends IFileIO {
@@ -74,20 +75,20 @@ class FileIO extends IFileIO {
     val numberOfPlayers: Int = (json \ "field" \ "numberOfPlayers").get.toString.toInt
 
     @tailrec
-    def updateMatrix(vector: Vector[Vector[String]], index: Int): Vector[Vector[String]] = {
+    def updateMatrix(vector: Vector[Vector[Option[Int]]], index: Int): Vector[Vector[Option[Int]]] = {
       if (index >= 19 * numberOfPlayers)
         vector
       else {
         val row = (json \\ "row")(index).as[Int]
         val col = (json \\ "col")(index).as[Int]
-        val cell = (json \\ "cell")(index).as[String]
+        val cell: Option[Int] = Try((json \\ "cell")(index).as[String].toInt).toOption
         val updatedRow = vector(row).updated(col, cell)
         updateMatrix(vector.updated(row, updatedRow), index + 1)
       }
     }
 
-    val initialMatrix: Vector[Vector[String]] = Vector.tabulate(19, numberOfPlayers) { (cols, row_s) => "" }
-    val matrixVector: Vector[Vector[String]] = updateMatrix(initialMatrix, 0)
+    val initialMatrix: Vector[Vector[Option[Int]]] = Vector.tabulate(19, numberOfPlayers) { (cols, row_s) => None }
+    val matrixVector: Vector[Vector[Option[Int]]] = updateMatrix(initialMatrix, 0)
 
     val field: IField = Field(Matrix(matrixVector))
     field
@@ -151,7 +152,7 @@ class FileIO extends IFileIO {
               Json.obj(
                 "row" -> row,
                 "col" -> col,
-                "cell" -> Json.toJson(matrix.cell(col, row))
+                "cell" -> Json.toJson(matrix.cell(col, row).map(cell => cell.toString).getOrElse(""))
               )
               )
             )

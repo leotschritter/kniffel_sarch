@@ -9,6 +9,7 @@ import de.htwg.sa.kniffel.model.fileIOComponent.IFileIO
 import de.htwg.sa.kniffel.model.gameComponent.IGame
 import de.htwg.sa.kniffel.model.gameComponent.gameBaseImpl.{Game, Player}
 
+import scala.util.Try
 import scala.xml.{Elem, NodeSeq, PrettyPrinter}
 
 // @formatter:off
@@ -77,12 +78,16 @@ class FileIO extends IFileIO {
     val file: Elem = scala.xml.XML.loadFile("field.xml")
     val numberOfPlayers: Int = (file \\ "field" \ "@numberOfPlayers").text.trim.toInt
     val cellNodes: NodeSeq = file \\ "cell"
-    val cells: Map[(Int, Int), String] =
+    val cells: Map[(Int, Int), Option[Int]] =
       cellNodes.map { cell =>
-        ((cell \ "@row").text.trim.toInt, (cell \ "@col").text.trim.toInt) ->
-          cell.text.trim
+        val row = (cell \ "@row").text.trim.toInt
+        val col = (cell \ "@col").text.trim.toInt
+        val cellValue = cell.text.trim
+        val cellOption = Try(cellValue.toInt).toOption
+        (row, col) -> cellOption
       }.toMap
-    val nestedVector: Vector[Vector[String]] =
+
+    val nestedVector: Vector[Vector[Option[Int]]] =
       (0 until 19).map { rows =>
         (0 until numberOfPlayers).map { cols =>
           cells((rows, cols))
@@ -95,7 +100,7 @@ class FileIO extends IFileIO {
     <field numberOfPlayers={field.numberOfPlayers.toString}>
       {(0 until field.numberOfPlayers).flatMap { col =>
       (0 until 19).map { row =>
-        <cell row={row.toString} col={col.toString}>{matrix.cell(col, row)}</cell>
+        <cell row={row.toString} col={col.toString}>{matrix.cell(col, row).map(cell => cell.toString).getOrElse("")}</cell>
       }
     }}</field>
   }

@@ -50,7 +50,7 @@ class TUI(using controller: IController) extends UI(controller) with Observer :
             controller.diceCup.indexOfField.get(posAndDesc)
               .match {
                 case Some(index) => if (controller.field.matrix.isEmpty(controller.game.playerID, index))
-                  Some(Move(controller.diceCup.result(index).toString, controller.game.playerID, index)) else None
+                  Some(Move(controller.diceCup.result(index), controller.game.playerID, index)) else None
                 case None => println("Falsche Eingabe!"); None
               }
           case Failure(v) => println("Falsche Eingabe"); None
