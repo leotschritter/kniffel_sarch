@@ -20,7 +20,7 @@ class UndoManagerSpec extends AnyWordSpec {
     var field = new Field(4)
 
     "have a do, undo and redo" in {
-      var r = undoManager.doStep(game.get, field, SetCommand(Move("12", 0, 0)))
+      var r = undoManager.doStep(game.get, field, SetCommand(Move(12, 0, 0)))
       var iGame:IGame = Option(r._1).get
       var iField:IField = r._2
       iGame.playerName should be ("Player1")

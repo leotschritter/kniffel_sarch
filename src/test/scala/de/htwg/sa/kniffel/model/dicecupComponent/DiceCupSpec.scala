@@ -1,9 +1,9 @@
 package de.htwg.sa.kniffel
 package model.dicecupComponent
 
-import model.dicecupComponent.dicecupBaseImpl.DiceCup
-import org.scalatest.wordspec.AnyWordSpec
+import de.htwg.sa.kniffel.model.dicecupComponent.dicecupBaseImpl.DiceCup
 import org.scalatest.matchers.should.Matchers.*
+import org.scalatest.wordspec.AnyWordSpec
 
 class DiceCupSpec extends AnyWordSpec {
   "Dice Cup" when {
@@ -23,7 +23,7 @@ class DiceCupSpec extends AnyWordSpec {
     "dices are thrown" should {
       val diceCup: DiceCup = new DiceCup()
       "contain two lists with all dices" in {
-        val thrownDiceCup: DiceCup = diceCup.dice()
+        val thrownDiceCup: DiceCup = diceCup.dice().get
         thrownDiceCup.inCup.size + thrownDiceCup.locked.size should be(5)
         thrownDiceCup.inCup.foreach {
           s =>
@@ -53,6 +53,12 @@ class DiceCupSpec extends AnyWordSpec {
         val putIn: DiceCup = sortOut.putDicesIn(List(77, 435, 22))
         putIn.inCup.size should be (3)
         putIn.locked.size should be (2)
+      }
+      "after three and four dices the remaining Dices should be the same" in {
+        val diceCupAfterThree: Option[DiceCup] = new DiceCup().dice().get.dice().get.dice().get.dice()
+
+        diceCupAfterThree should be(None)
+
       }
     }
     "list Entries are dropped from another list" should {

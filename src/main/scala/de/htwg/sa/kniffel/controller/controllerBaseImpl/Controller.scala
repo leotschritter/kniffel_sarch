@@ -40,7 +40,10 @@ class Controller(using var field: IField, var diceCup: IDiceCup, var game: IGame
   def quit(): Unit = notifyObservers(Event.Quit)
 
   def next(): Unit =
-    game = game.next().get
+    game.next().match {
+      case Some(g) => game = g
+      case None =>
+    }
 
   // doAndPublish for putOut and putIn
   def doAndPublish(doThis: List[Int] => IDiceCup, list: List[Int]): Unit =
@@ -58,7 +61,7 @@ class Controller(using var field: IField, var diceCup: IDiceCup, var game: IGame
     diceCup = doThis
     notifyObservers(Event.Move)
 
-  def dice(): IDiceCup = diceCup.dice()
+  def dice(): IDiceCup = diceCup.dice().getOrElse(diceCup)
 
   def nextRound(): IDiceCup = diceCup.nextRound()
   

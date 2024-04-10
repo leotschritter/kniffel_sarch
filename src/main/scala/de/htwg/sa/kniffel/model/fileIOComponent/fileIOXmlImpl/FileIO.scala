@@ -9,8 +9,10 @@ import de.htwg.sa.kniffel.model.fileIOComponent.IFileIO
 import de.htwg.sa.kniffel.model.gameComponent.IGame
 import de.htwg.sa.kniffel.model.gameComponent.gameBaseImpl.{Game, Player}
 
+import scala.util.Try
 import scala.xml.{Elem, NodeSeq, PrettyPrinter}
 
+// @formatter:off
 class FileIO extends IFileIO {
 
   override def saveDiceCup(diceCup: IDiceCup): Unit = {
@@ -76,12 +78,15 @@ class FileIO extends IFileIO {
     val file: Elem = scala.xml.XML.loadFile("field.xml")
     val numberOfPlayers: Int = (file \\ "field" \ "@numberOfPlayers").text.trim.toInt
     val cellNodes: NodeSeq = file \\ "cell"
-    val cells: Map[(Int, Int), String] =
+    val cells: Map[(Int, Int), Option[Int]] =
       cellNodes.map { cell =>
-        ((cell \ "@row").text.trim.toInt, (cell \ "@col").text.trim.toInt) ->
-          cell.text.trim
+        val row = (cell \ "@row").text.trim.toInt
+        val col = (cell \ "@col").text.trim.toInt
+        val cellOption = Try(cell.text.trim.toInt).toOption
+        (row, col) -> cellOption
       }.toMap
-    val nestedVector: Vector[Vector[String]] =
+
+    val nestedVector: Vector[Vector[Option[Int]]] =
       (0 until 19).map { rows =>
         (0 until numberOfPlayers).map { cols =>
           cells((rows, cols))
@@ -94,29 +99,18 @@ class FileIO extends IFileIO {
     <field numberOfPlayers={field.numberOfPlayers.toString}>
       {(0 until field.numberOfPlayers).flatMap { col =>
       (0 until 19).map { row =>
-        <cell row={row.toString} col={col.toString}>
-          {matrix.cell(col, row)}
-        </cell>
+        <cell row={row.toString} col={col.toString}>{matrix.cell(col, row).map(cell => cell.toString).getOrElse("")}</cell>
       }
-    }}
-    </field>
+    }}</field>
   }
 
   private def diceCupToXml(diceCup: IDiceCup): Elem = {
-    val lockedDiceElements = diceCup.locked.map(dice => <dice>
-      {dice}
-    </dice>)
-    val inCupDiceElements = diceCup.inCup.map(dice => <dice>
-      {dice}
-    </dice>)
+    val lockedDiceElements = diceCup.locked.map(dice => <dice>{dice}</dice>)
+    val inCupDiceElements = diceCup.inCup.map(dice => <dice>{dice}</dice>)
 
     <dicecup remainingDices={diceCup.remainingDices.toString}>
-      <locked quantity={lockedDiceElements.length.toString}>
-        {lockedDiceElements}
-      </locked>
-      <incup quantity={inCupDiceElements.length.toString}>
-        {inCupDiceElements}
-      </incup>
+      <locked quantity={lockedDiceElements.length.toString}>{lockedDiceElements}</locked>
+      <incup quantity={inCupDiceElements.length.toString}>{inCupDiceElements}</incup>
     </dicecup>
   }
 
@@ -124,28 +118,16 @@ class FileIO extends IFileIO {
     val playerElements = game.playerTuples.indices.map { col =>
       val player = game.playerTuples(col)
       <player playerid={player._1.toString} playername={player._2}>
-        <total>
-          {game.resultNestedList(col).head}
-        </total>
-        <bonus>
-          {game.resultNestedList(col)(1)}
-        </bonus>
-        <total_of_upper_section>
-          {game.resultNestedList(col)(2)}
-        </total_of_upper_section>
-        <total_of_lower_section>
-          {game.resultNestedList(col)(3)}
-        </total_of_lower_section>
-        <grand_total>
-          {game.resultNestedList(col).last}
-        </grand_total>
+        <total>{game.resultNestedList(col).head}</total>
+        <bonus>{game.resultNestedList(col)(1)}</bonus>
+        <total_of_upper_section>{game.resultNestedList(col)(2)}</total_of_upper_section>
+        <total_of_lower_section>{game.resultNestedList(col)(3)}</total_of_lower_section>
+        <grand_total>{game.resultNestedList(col).last}</grand_total>
       </player>
     }
 
     <game remainingMoves={game.remainingMoves.toString} currentPlayerID={game.playerID.toString} currentPlayerName={game.playerName}>
-      <scores>
-        {playerElements}
-      </scores>
+      <scores>{playerElements}</scores>
     </game>
   }
 }
