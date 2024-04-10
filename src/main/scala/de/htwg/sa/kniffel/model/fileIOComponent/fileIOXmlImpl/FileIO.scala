@@ -82,8 +82,7 @@ class FileIO extends IFileIO {
       cellNodes.map { cell =>
         val row = (cell \ "@row").text.trim.toInt
         val col = (cell \ "@col").text.trim.toInt
-        val cellValue = cell.text.trim
-        val cellOption = Try(cellValue.toInt).toOption
+        val cellOption = Try(cell.text.trim.toInt).toOption
         (row, col) -> cellOption
       }.toMap
 
