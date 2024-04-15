@@ -1,9 +1,9 @@
 package de.htwg.sa.kniffel
 package controller.controllerBaseImpl
 
+import de.htwg.sa.field.IField
+import de.htwg.sa.game.IGame
 import model.Move
-import model.fieldComponent.IField
-import model.gameComponent.IGame
 import util.Command
 
 class SetCommand(move: Move) extends Command[IGame, IField]:

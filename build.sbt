@@ -3,6 +3,9 @@ import org.scoverage.coveralls.GitHubActions
 val scala3Version = "3.3.1"
 
 val dicecupVersion = "0.1.0-SNAPSHOT"
+val fieldVersion = "0.1.0-SNAPSHOT"
+val gameVersion = "0.1.0-SNAPSHOT"
+val fileIOVersion = "0.1.0-SNAPSHOT"
 
 lazy val dependencies = Seq(
   scalaVersion := scala3Version,
@@ -15,13 +18,12 @@ lazy val dependencies = Seq(
 )
 
 lazy val root = (project in file(""))
-  .dependsOn(dicecup)
-  .aggregate(dicecup)
+  .dependsOn(dicecup, fileIO, field, game)
+  .aggregate(dicecup, fileIO, field, game)
   .settings(
     name := "kniffel",
     version := "0.1.0-SNAPSHOT",
     dependencies
-
   )
 
 lazy val dicecup = (project in file("dicecup"))
@@ -30,6 +32,31 @@ lazy val dicecup = (project in file("dicecup"))
     version := dicecupVersion,
     dependencies
   )
+
+lazy val field = (project in file("field"))
+  .settings(
+    name := "field",
+    version := fieldVersion,
+    dependencies
+  )
+
+lazy val game = (project in file("game"))
+  .settings(
+    name := "game",
+    version := gameVersion,
+    dependencies
+  )
+
+lazy val fileIO = (project in file("fileIO"))
+  .dependsOn(dicecup, field, game)
+  .aggregate(dicecup, field, game)
+  .settings(
+    name := "fileIO",
+    version := fileIOVersion,
+    dependencies
+  )
+
+
 
 import org.scoverage.coveralls.Imports.CoverallsKeys.*
 

@@ -2,10 +2,9 @@ package de.htwg.sa.kniffel
 package model.fileIOComponent
 
 import de.htwg.sa.dicecup.dicecupBaseImpl.DiceCup
-import model.fieldComponent.fieldBaseImpl.Field
-import model.fileIOComponent.fileIOXmlImpl.FileIO
-import model.gameComponent.gameBaseImpl.{Game, Player}
-import model.fieldComponent.IField
+import de.htwg.sa.field.fieldBaseImpl.Field
+import de.htwg.sa.fileio.fileIOXmlImpl.FileIO
+import de.htwg.sa.game.gameBaseImpl.{Game, Player}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 

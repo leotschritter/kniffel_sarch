@@ -2,8 +2,8 @@ package de.htwg.sa.kniffel
 package aview
 
 import controller.controllerBaseImpl.Controller
-import model.fieldComponent.fieldBaseImpl.Field
-import model.gameComponent.gameBaseImpl.Game
+import de.htwg.sa.field.fieldBaseImpl.Field
+import de.htwg.sa.game.gameBaseImpl.Game
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers.*
 import model.Move
