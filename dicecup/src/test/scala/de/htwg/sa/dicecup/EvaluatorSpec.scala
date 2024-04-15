@@ -1,8 +1,7 @@
-package de.htwg.sa.kniffel
-package model.dicecupComponent
+package de.htwg.sa.dicecup
 
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers.*
+import org.scalatest.wordspec.AnyWordSpec
 
 class EvaluatorSpec extends AnyWordSpec {
   val kniffelEvaluator = new Evaluator(EvaluateStrategy.kniffel)
@@ -12,10 +11,10 @@ class EvaluatorSpec extends AnyWordSpec {
   val bigStreetEvaluator = new Evaluator(EvaluateStrategy.bigStreet)
   val smallStreetEvaluator = new Evaluator(EvaluateStrategy.smallStreet)
   val sumEvaluator = new Evaluator(EvaluateStrategy.sumChance)
-  "An Evaluator" when {
+  "An de.htwg.sa.dicecup.Evaluator" when {
     "created" should {
       val list: List[Int] = List(1, 2, 3, 4, 5)
-      "have the belonging Evaluator" in {
+      "have the belonging de.htwg.sa.dicecup.Evaluator" in {
         kniffelEvaluator.result(list) should be(new Evaluator(EvaluateStrategy.kniffel).result(list))
         threeOfAKindEvaluator.result(list) should be(new Evaluator(EvaluateStrategy.threeOfAKind).result(list))
         fourOfAKindEvaluator.result(list) should be(new Evaluator(EvaluateStrategy.fourOfAKind).result(list))

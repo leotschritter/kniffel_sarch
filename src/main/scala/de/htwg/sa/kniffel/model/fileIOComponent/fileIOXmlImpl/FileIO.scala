@@ -1,8 +1,8 @@
 package de.htwg.sa.kniffel
 package model.fileIOComponent.fileIOXmlImpl
 
-import de.htwg.sa.kniffel.model.dicecupComponent.IDiceCup
-import de.htwg.sa.kniffel.model.dicecupComponent.dicecupBaseImpl.DiceCup
+import de.htwg.sa.dicecup.IDiceCup
+import de.htwg.sa.dicecup.dicecupBaseImpl.DiceCup
 import de.htwg.sa.kniffel.model.fieldComponent.fieldBaseImpl.{Field, Matrix}
 import de.htwg.sa.kniffel.model.fieldComponent.{IField, IMatrix}
 import de.htwg.sa.kniffel.model.fileIOComponent.IFileIO

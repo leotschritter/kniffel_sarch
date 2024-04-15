@@ -2,13 +2,13 @@ package de.htwg.sa.kniffel
 package aview
 
 import controller.controllerBaseImpl.Controller
-import model.dicecupComponent.dicecupBaseImpl.DiceCup
 import model.fieldComponent.fieldBaseImpl.Field
 import model.gameComponent.gameBaseImpl.Game
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers.*
 import model.Move
 import Config.given
+import de.htwg.sa.dicecup.dicecupBaseImpl.DiceCup
 
 
 import scala.util.{Failure, Success, Try}

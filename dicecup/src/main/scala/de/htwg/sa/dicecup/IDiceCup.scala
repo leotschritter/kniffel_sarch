@@ -1,5 +1,4 @@
-package de.htwg.sa.kniffel
-package model.dicecupComponent
+package de.htwg.sa.dicecup
 
 import scala.collection.immutable.ListMap
 

@@ -1,7 +1,5 @@
-package de.htwg.sa.kniffel
-package model.dicecupComponent
+package de.htwg.sa.dicecup.dicecupBaseImpl
 
-import de.htwg.sa.kniffel.model.dicecupComponent.dicecupBaseImpl.DiceCup
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 

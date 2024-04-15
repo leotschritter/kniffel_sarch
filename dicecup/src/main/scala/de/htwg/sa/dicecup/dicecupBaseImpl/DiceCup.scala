@@ -1,7 +1,6 @@
-package de.htwg.sa.kniffel
-package model.dicecupComponent.dicecupBaseImpl
+package de.htwg.sa.dicecup.dicecupBaseImpl
 
-import de.htwg.sa.kniffel.model.dicecupComponent.*
+import de.htwg.sa.dicecup.{EvaluateStrategy, Evaluator, IDiceCup}
 
 import scala.collection.immutable.ListMap
 import scala.util.Random
@@ -65,6 +64,6 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
 
   override def toString: String = "Im Becher: " + inCup.mkString(" ")
     + "\nRausgenommen: " + locked.mkString(" ")
-    + "\nVerbleibende Würfe: " + (remDices + 1)
+    + "\nVerbleibende Würfeimport de.htwg.sa.dicecup.dicecupBaseImpl.DiceCup: " + (remDices + 1)
     + "\nBitte wählen Sie aus: " + indexOfField.keys.mkString(" ")
     + "\n"

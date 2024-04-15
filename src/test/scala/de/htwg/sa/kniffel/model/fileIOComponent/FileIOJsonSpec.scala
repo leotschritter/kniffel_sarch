@@ -1,7 +1,7 @@
 package de.htwg.sa.kniffel
 package model.fileIOComponent
 
-import model.dicecupComponent.dicecupBaseImpl.DiceCup
+import de.htwg.sa.dicecup.dicecupBaseImpl.DiceCup
 import model.fieldComponent.fieldBaseImpl.{Field, Matrix}
 import model.gameComponent.gameBaseImpl.{Game, Player}
 import model.fileIOComponent.fileIOJsonImpl.FileIO

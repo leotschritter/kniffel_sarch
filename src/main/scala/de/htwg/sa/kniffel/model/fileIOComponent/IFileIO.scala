@@ -1,7 +1,7 @@
 package de.htwg.sa.kniffel
 package model.fileIOComponent
 
-import model.dicecupComponent.IDiceCup
+import de.htwg.sa.dicecup.IDiceCup
 import model.fieldComponent.{IField, IMatrix}
 import model.gameComponent.IGame
 

@@ -1,8 +1,7 @@
-package de.htwg.sa.kniffel
-package model.dicecupComponent
+package de.htwg.sa.dicecup
 
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers.*
+import org.scalatest.wordspec.AnyWordSpec
 
 class EvaluateStrategySpec extends AnyWordSpec {
   "EvaluateStrategy" when {

@@ -2,12 +2,12 @@ package de.htwg.sa.kniffel
 
 import controller.IController
 import controller.controllerBaseImpl.Controller
+import de.htwg.sa.dicecup.IDiceCup
+import de.htwg.sa.dicecup.dicecupBaseImpl.DiceCup
 import model.fileIOComponent.IFileIO
 import model.fileIOComponent.fileIOXmlImpl.FileIO
 import model.gameComponent.IGame
 import model.gameComponent.gameBaseImpl.Game
-import model.dicecupComponent.IDiceCup
-import model.dicecupComponent.dicecupBaseImpl.DiceCup
 import model.fieldComponent.{IField, IMatrix}
 import model.fieldComponent.fieldBaseImpl.{Field, Matrix}
 

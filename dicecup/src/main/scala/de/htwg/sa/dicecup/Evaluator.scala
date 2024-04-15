@@ -1,5 +1,5 @@
-package de.htwg.sa.kniffel
-package model.dicecupComponent
+package de.htwg.sa.dicecup
+
 
 class Evaluator (strategy: EvaluateStrategy.Type[Int]){
   def result(data: List[Int]): Int = {
