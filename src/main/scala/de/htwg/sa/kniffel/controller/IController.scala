@@ -1,9 +1,9 @@
 package de.htwg.sa.kniffel
 package controller
 
-import de.htwg.sa.dicecup.IDiceCup
-import de.htwg.sa.field.IField
-import de.htwg.sa.game.IGame
+import de.htwg.sa.kniffel.dicecup.IDiceCup
+import de.htwg.sa.kniffel.field.IField
+import de.htwg.sa.kniffel.game.IGame
 import util.Observable
 import model.Move
 

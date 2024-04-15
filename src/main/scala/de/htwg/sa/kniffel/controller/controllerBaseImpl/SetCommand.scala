@@ -1,8 +1,8 @@
 package de.htwg.sa.kniffel
 package controller.controllerBaseImpl
 
-import de.htwg.sa.field.IField
-import de.htwg.sa.game.IGame
+import de.htwg.sa.kniffel.field.IField
+import de.htwg.sa.kniffel.game.IGame
 import model.Move
 import util.Command
 
@@ -13,7 +13,7 @@ class SetCommand(move: Move) extends Command[IGame, IField]:
     (g, field.putMulti(g.resultNestedList(move.x), Some(move.value), move.x, move.y))
 
   override def redoStep(game: IGame, field: IField): (IGame, IField) =
-    game.sum(move.value.toInt, move.y).next().map(g =>
+    game.sum(move.value, move.y).next().map(g =>
     (g, field.putMulti(g.resultNestedList(move.x), Some(move.value), move.x, move.y)))
       .getOrElse(game, field)
     /*game.sum(move.value.toInt, move.y).next()
@@ -23,7 +23,7 @@ class SetCommand(move: Move) extends Command[IGame, IField]:
       }*/
 
   override def undoStep(game: IGame, field: IField): (IGame, IField) =
-    val g = game.undoMove(move.value.toInt, move.y)
+    val g = game.undoMove(move.value, move.y)
     (g, field.undoMove(g.resultNestedList(move.x), move.x, move.y))
 
   override def noStep(game: IGame, field: IField): (IGame, IField) =
