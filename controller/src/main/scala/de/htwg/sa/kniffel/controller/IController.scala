@@ -1,11 +1,10 @@
-package de.htwg.sa
+package de.htwg.sa.kniffel
 package controller
 
 import de.htwg.sa.kniffel.dicecup.IDiceCup
 import de.htwg.sa.kniffel.field.IField
 import de.htwg.sa.kniffel.game.IGame
-import de.htwg.sa.util.Observable
-import model.Move
+import de.htwg.sa.kniffel.util.{Move, Observable}
 
 trait IController extends Observable {
   def undo(): Unit

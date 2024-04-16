@@ -1,9 +1,8 @@
-package de.htwg.sa
+package de.htwg.sa.kniffel
 package controller.controllerBaseImpl
 
 import controller.IController
-import model.Move
-import de.htwg.sa.util.{Event, Observable, UndoManager}
+import de.htwg.sa.kniffel.util.{Event, Observable, UndoManager, Move}
 import com.google.inject.Inject
 import de.htwg.sa.kniffel.dicecup.IDiceCup
 import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup

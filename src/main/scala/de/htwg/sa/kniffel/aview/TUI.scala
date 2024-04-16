@@ -1,8 +1,8 @@
 package de.htwg.sa.kniffel.aview
 
-import de.htwg.sa.controller.IController
-import de.htwg.sa.model.Move
-import de.htwg.sa.util.{Event, Observer}
+import de.htwg.sa.kniffel.controller.IController
+import de.htwg.sa.kniffel.util.Move
+import de.htwg.sa.kniffel.util.{Event, Observer}
 
 import scala.io.StdIn.readLine
 import scala.util.{Failure, Success, Try}
@@ -10,6 +10,8 @@ import scala.util.{Failure, Success, Try}
 import com.google.inject.Inject
 
 class TUI @Inject()(controller: IController) extends Observer:
+  controller.add(this)
+
   private var continue = true
 
   def run(): Unit =
@@ -67,7 +69,7 @@ class TUI @Inject()(controller: IController) extends Observer:
   def writeDown(move: Move): Unit = {
     controller.put(move)
     controller.next()
-    controller.nextRound()
+    controller.doAndPublish(controller.nextRound())
   }
 
   def diceCupPutIn(pi: List[Int]): Unit = controller.doAndPublish(controller.putIn, pi)

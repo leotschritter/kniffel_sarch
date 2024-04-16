@@ -1,4 +1,4 @@
-package de.htwg.sa.util
+package de.htwg.sa.kniffel.util
 
 trait Observer:
   def update(e: Event): Unit

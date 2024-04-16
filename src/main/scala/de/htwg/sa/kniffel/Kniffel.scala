@@ -2,7 +2,7 @@ package de.htwg.sa.kniffel
 
 import com.google.inject.{Guice, Injector}
 import aview.{GUI, TUI}
-import de.htwg.sa.controller.IController
+import de.htwg.sa.kniffel.controller.IController
 
 object Kniffel {
 

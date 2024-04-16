@@ -1,9 +1,8 @@
-package de.htwg.sa
+package de.htwg.sa.kniffel
 package util
 
+import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.matchers.should.Matchers._
-import util.Event
 
 class ObserverSpec extends AnyWordSpec {
   "An observable" when {

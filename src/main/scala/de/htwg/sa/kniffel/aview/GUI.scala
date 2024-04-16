@@ -1,32 +1,29 @@
 package de.htwg.sa.kniffel
 package aview
 
-import de.htwg.sa.controller.IController
-import de.htwg.sa.model.Move
-
-import scala.swing.{Label, *}
-import scala.swing.event.*
-import scala.swing.ListView.*
-import de.htwg.sa.util.Event
-import de.htwg.sa.util.Observer
 import com.google.inject.Inject
+import de.htwg.sa.kniffel.controller.IController
+import de.htwg.sa.kniffel.util.{Event, Move, Observer}
 
 import java.awt.Toolkit
-import javax.swing.{ImageIcon, SpringLayout}
-import javax.swing.border.Border
+import javax.swing.ImageIcon
+import scala.swing.*
+import scala.swing.ListView.*
+import scala.swing.event.*
 
-class GUI @Inject()(controller: IController) extends Frame:
+class GUI @Inject()(controller: IController) extends Frame with Observer:
+  controller.add(this)
 
   def writeDown(move: Move): Unit = {
     controller.put(move)
     controller.next()
-    controller.nextRound()
+    controller.doAndPublish(controller.nextRound())
   }
 
   def diceCupPutIn(pi: List[Int]): Unit = controller.doAndPublish(controller.putIn, pi)
 
   def diceCupPutOut(po: List[Int]): Unit = controller.doAndPublish(controller.putOut, po)
-  
+
   title = "Kniffel"
   iconImage = toolkit.getImage("src/main/resources/6.png")
   val tk: Toolkit = Toolkit.getDefaultToolkit

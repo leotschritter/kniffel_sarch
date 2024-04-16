@@ -1,21 +1,23 @@
 package de.htwg.sa.kniffel
 package aview
 
-import de.htwg.sa.field.fieldBaseImpl.Field
-import de.htwg.sa.game.gameBaseImpl.Game
+import com.google.inject.{Guice, Injector}
+import de.htwg.sa.kniffel.controller.IController
+import de.htwg.sa.kniffel.field.fieldBaseImpl.Field
+import de.htwg.sa.kniffel.game.gameBaseImpl.Game
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.matchers.should.Matchers.*
-import model.Move
-import Config.given
-import de.htwg.sa.dicecup.dicecupBaseImpl.DiceCup
-
+import org.scalatest.matchers.should.Matchers.{be, *}
+import util.Move
+import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
 
 import scala.util.{Failure, Success, Try}
 
 class TUISpec extends AnyWordSpec {
+  private val injector: Injector = Guice.createInjector(new KniffelModule)
+  val controller: IController = injector.getInstance(classOf[IController])
+  private val tui = injector.getInstance(classOf[TUI])
+  
   "The TUI" should {
-    val tui = TUI()
-
 
     "recognize the input wd 22  as an invalid Input" in {
       tui.analyseInput("wd 22") should be(None)
@@ -44,6 +46,29 @@ class TUISpec extends AnyWordSpec {
       result.isSuccess should be(false)
       val result2 = tui.validInput(List("wd", "1"))
       result2.isSuccess should be(true)
+    }
+    "dices are put in or out" should {
+      "put out or in" in {
+        tui.diceCupPutOut(List())
+        tui.getController.diceCup.locked should be(List())
+        tui.diceCupPutIn(List())
+        tui.getController.diceCup.locked should be(List())
+      }
+    }
+    "the player writes down a number" should {
+      tui.writeDown(Move(2, 0, 0))
+      "set the number into the field and trigger a new round" in {
+        tui.getController.diceCup.locked should be(List())
+        tui.getController.diceCup.inCup should be(List())
+        tui.getController.field.matrix.cell(0, 0).get should be(2)
+        tui.getController.field.matrix.cell(0, 6).get should be(2)
+        tui.getController.field.matrix.cell(0, 7).get should be(0)
+        tui.getController.field.matrix.cell(0, 8).get should be(2)
+        tui.getController.field.matrix.cell(0, 16).get should be(0)
+        tui.getController.field.matrix.cell(0, 17).get should be(2)
+        tui.getController.field.matrix.cell(0, 18).get should be(2)
+        tui.getController.game.playerID should be(1)
+      }
     }
   }
 }

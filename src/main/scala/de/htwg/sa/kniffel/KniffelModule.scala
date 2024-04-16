@@ -1,8 +1,8 @@
 package de.htwg.sa.kniffel
 
 import com.google.inject.AbstractModule
-import de.htwg.sa.controller.IController
-import de.htwg.sa.controller.controllerBaseImpl.Controller
+import de.htwg.sa.kniffel.controller.IController
+import de.htwg.sa.kniffel.controller.controllerBaseImpl.Controller
 import de.htwg.sa.kniffel.dicecup.IDiceCup
 import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
 import de.htwg.sa.kniffel.field.{IField, IMatrix}

@@ -1,10 +1,9 @@
-package de.htwg.sa.controller.controllerComponent
+package de.htwg.sa.kniffel.controller.controllerBaseImpl
 
-import de.htwg.sa.dicecup.dicecupBaseImpl.DiceCup
-import de.htwg.sa.kniffel.Config.given
-import de.htwg.sa.kniffel.model.Move
-import de.htwg.sa.kniffel.model.gameComponent.gameBaseImpl.{Game, Player}
-import de.htwg.sa.kniffel.util.{Event, Observer}
+import de.htwg.sa.kniffel.dicecup.IDiceCup
+import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
+import de.htwg.sa.kniffel.game.gameBaseImpl.{Game, Player}
+import de.htwg.sa.kniffel.util.{Event, Move, Observer}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 
