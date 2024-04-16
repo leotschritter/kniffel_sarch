@@ -5,14 +5,14 @@ import controller.IController
 import model.Move
 import de.htwg.sa.util.{Event, Observable, UndoManager}
 import com.google.inject.Inject
-import de.htwg.sa.dicecup.IDiceCup
-import de.htwg.sa.dicecup.dicecupBaseImpl.DiceCup
-import de.htwg.sa.field.IField
-import de.htwg.sa.field.fieldBaseImpl.{Field, Matrix}
-import de.htwg.sa.fileio.IFileIO
-import de.htwg.sa.fileio.fileIOJsonImpl.FileIO
-import de.htwg.sa.game.IGame
-import de.htwg.sa.game.gameBaseImpl.Game
+import de.htwg.sa.kniffel.dicecup.IDiceCup
+import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
+import de.htwg.sa.kniffel.field.IField
+import de.htwg.sa.kniffel.field.fieldBaseImpl.{Field, Matrix}
+import de.htwg.sa.kniffel.fileio.IFileIO
+import de.htwg.sa.kniffel.fileio.fileIOJsonImpl.FileIO
+import de.htwg.sa.kniffel.game.IGame
+import de.htwg.sa.kniffel.game.gameBaseImpl.Game
 
 class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: IGame, var file: IFileIO) extends IController :
   def this() = {

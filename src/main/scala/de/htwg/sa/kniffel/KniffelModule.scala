@@ -3,14 +3,14 @@ package de.htwg.sa.kniffel
 import com.google.inject.AbstractModule
 import de.htwg.sa.controller.IController
 import de.htwg.sa.controller.controllerBaseImpl.Controller
-import de.htwg.sa.dicecup.IDiceCup
-import de.htwg.sa.dicecup.dicecupBaseImpl.DiceCup
-import de.htwg.sa.field.{IField, IMatrix}
-import de.htwg.sa.field.fieldBaseImpl.{Field, Matrix}
-import de.htwg.sa.fileio.IFileIO
-import de.htwg.sa.fileio.fileIOJsonImpl.FileIO
-import de.htwg.sa.game.IGame
-import de.htwg.sa.game.gameBaseImpl.Game
+import de.htwg.sa.kniffel.dicecup.IDiceCup
+import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
+import de.htwg.sa.kniffel.field.{IField, IMatrix}
+import de.htwg.sa.kniffel.field.fieldBaseImpl.{Field, Matrix}
+import de.htwg.sa.kniffel.fileio.IFileIO
+import de.htwg.sa.kniffel.fileio.fileIOJsonImpl.FileIO
+import de.htwg.sa.kniffel.game.IGame
+import de.htwg.sa.kniffel.game.gameBaseImpl.Game
 import net.codingwell.scalaguice.ScalaModule
 
 class KniffelModule extends AbstractModule with ScalaModule {
