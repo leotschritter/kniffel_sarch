@@ -1,5 +1,4 @@
-package de.htwg.sa.kniffel
-package aview
+package de.htwg.sa.kniffel.gui
 
 import com.google.inject.Inject
 import de.htwg.sa.kniffel.controller.IController
@@ -14,15 +13,15 @@ import scala.swing.event.*
 class GUI @Inject()(controller: IController) extends Frame with Observer:
   controller.add(this)
 
-  def writeDown(move: Move): Unit = {
+  private def writeDown(move: Move): Unit = {
     controller.put(move)
     controller.next()
     controller.doAndPublish(controller.nextRound())
   }
 
-  def diceCupPutIn(pi: List[Int]): Unit = controller.doAndPublish(controller.putIn, pi)
+  private def diceCupPutIn(pi: List[Int]): Unit = controller.doAndPublish(controller.putIn, pi)
 
-  def diceCupPutOut(po: List[Int]): Unit = controller.doAndPublish(controller.putOut, po)
+  private def diceCupPutOut(po: List[Int]): Unit = controller.doAndPublish(controller.putOut, po)
 
   title = "Kniffel"
   iconImage = toolkit.getImage("src/main/resources/6.png")

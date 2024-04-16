@@ -1,13 +1,11 @@
-package de.htwg.sa.kniffel.aview
+package de.htwg.sa.kniffel.tui
 
+import com.google.inject.Inject
 import de.htwg.sa.kniffel.controller.IController
-import de.htwg.sa.kniffel.util.Move
-import de.htwg.sa.kniffel.util.{Event, Observer}
+import de.htwg.sa.kniffel.util.{Event, Move, Observer}
 
 import scala.io.StdIn.readLine
 import scala.util.{Failure, Success, Try}
-
-import com.google.inject.Inject
 
 class TUI @Inject()(controller: IController) extends Observer:
   controller.add(this)

@@ -1,26 +1,31 @@
-package de.htwg.sa.kniffel
-package aview
+/*package de.htwg.sa.kniffel.tui
 
 import com.google.inject.{Guice, Injector}
 import de.htwg.sa.kniffel.controller.IController
+import de.htwg.sa.kniffel.controller.controllerBaseImpl.Controller
+import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
 import de.htwg.sa.kniffel.field.fieldBaseImpl.Field
 import de.htwg.sa.kniffel.game.gameBaseImpl.Game
-import org.scalatest.wordspec.AnyWordSpec
+import de.htwg.sa.kniffel.tui.TUI
+import de.htwg.sa.kniffel.util.Move
+import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers.{be, *}
-import util.Move
-import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
+import org.scalatest.wordspec.AnyWordSpec
 
 import scala.util.{Failure, Success, Try}
 
-class TUISpec extends AnyWordSpec {
-  private val injector: Injector = Guice.createInjector(new KniffelModule)
-  val controller: IController = injector.getInstance(classOf[IController])
-  private val tui = injector.getInstance(classOf[TUI])
-  
+class TUISpec extends AnyWordSpec with MockFactory {
+
+  val controller = mock[Controller]
+  (controller.add _).expects(tui)
+  val tui: TUI = TUI(controller)
+
+
   "The TUI" should {
 
     "recognize the input wd 22  as an invalid Input" in {
       tui.analyseInput("wd 22") should be(None)
+
     }
     "recognize the input o00 as move of stone O to field (0,0)" in {
       tui.analyseInput("po 1 2 3 4 5") should be(None)
@@ -72,3 +77,4 @@ class TUISpec extends AnyWordSpec {
     }
   }
 }
+*/

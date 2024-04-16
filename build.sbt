@@ -7,6 +7,8 @@ val fieldVersion = "0.1.0-SNAPSHOT"
 val gameVersion = "0.1.0-SNAPSHOT"
 val fileIOVersion = "0.1.0-SNAPSHOT"
 val controllerVersion = "0.1.0-SNAPSHOT"
+val guiVersion = "0.1.0-SNAPSHOT"
+val tuiVersion = "0.1.0-SNAPSHOT"
 
 lazy val dependencies = Seq(
   scalaVersion := scala3Version,
@@ -17,12 +19,13 @@ lazy val dependencies = Seq(
   libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "2.2.0",
   libraryDependencies += ("com.typesafe.play" %% "play-json" % "2.10.4"),
   libraryDependencies += "com.google.inject" % "guice" % "7.0.0",
-  libraryDependencies += "net.codingwell" %% "scala-guice" % "7.0.0"
+  libraryDependencies += "net.codingwell" %% "scala-guice" % "7.0.0",
+  libraryDependencies += "org.scalamock" %% "scalamock" % "6.0.0" % Test
 )
 
 lazy val root = (project in file(""))
-  .dependsOn(dicecup, fileIO, field, game, controller)
-  .aggregate(dicecup, fileIO, field, game, controller)
+  .dependsOn(dicecup, fileIO, field, game, controller, gui, tui)
+  .aggregate(dicecup, fileIO, field, game, controller, gui, tui)
   .settings(
     name := "kniffel",
     version := "0.1.0-SNAPSHOT",
@@ -65,6 +68,24 @@ lazy val controller = (project in file("controller"))
   .settings(
     name := "controller",
     version := controllerVersion,
+    dependencies
+  )
+
+lazy val gui = (project in file("gui"))
+  .dependsOn(controller)
+  .aggregate(controller)
+  .settings(
+    name := "gui",
+    version := guiVersion,
+    dependencies
+  )
+
+lazy val tui = (project in file("tui"))
+  .dependsOn(controller)
+  .aggregate(controller)
+  .settings(
+    name := "tui",
+    version := tuiVersion,
     dependencies
   )
 
