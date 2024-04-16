@@ -1,7 +1,5 @@
-package de.htwg.sa.kniffel
-package controller.controllerComponent
+package de.htwg.sa.controller.controllerComponent
 
-import de.htwg.sa.kniffel.controller.controllerBaseImpl.SetCommand
 import de.htwg.sa.kniffel.model.Move
 import de.htwg.sa.kniffel.model.fieldComponent.IField
 import de.htwg.sa.kniffel.model.fieldComponent.fieldBaseImpl.Field

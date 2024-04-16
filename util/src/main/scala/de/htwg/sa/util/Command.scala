@@ -1,4 +1,4 @@
-package de.htwg.sa.kniffel.util
+package de.htwg.sa.util
 
 trait Command[T, U]:
   def noStep(game: T, field: U): (T, U)

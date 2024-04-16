@@ -1,4 +1,4 @@
-package de.htwg.sa.kniffel
+package de.htwg.sa
 package util
 
 import org.scalatest.wordspec.AnyWordSpec

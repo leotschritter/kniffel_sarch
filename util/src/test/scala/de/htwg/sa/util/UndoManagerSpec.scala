@@ -1,11 +1,10 @@
-package de.htwg.sa.kniffel
+package de.htwg.sa
 package util
 
-import controller.controllerBaseImpl.SetCommand
 import util.UndoManager
 import de.htwg.sa.field.fieldBaseImpl.Field
 import de.htwg.sa.game.gameBaseImpl.{Game, Player}
-import model.Move
+import de.htwg.sa.model.Move
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers.*
 

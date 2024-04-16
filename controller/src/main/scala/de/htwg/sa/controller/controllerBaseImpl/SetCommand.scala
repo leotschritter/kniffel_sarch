@@ -1,4 +1,4 @@
-package de.htwg.sa.kniffel
+package de.htwg.sa
 package controller.controllerBaseImpl
 
 import de.htwg.sa.field.IField

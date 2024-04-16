@@ -1,18 +1,18 @@
-package de.htwg.sa.kniffel
-package aview
+package de.htwg.sa.kniffel.aview
 
-import de.htwg.sa.kniffel.controller.IController
-import de.htwg.sa.kniffel.model.Move
-import de.htwg.sa.kniffel.util.{Event, Observer}
+import de.htwg.sa.controller.IController
+import de.htwg.sa.model.Move
+import de.htwg.sa.util.{Event, Observer}
 
 import scala.io.StdIn.readLine
 import scala.util.{Failure, Success, Try}
 
-class TUI(using controller: IController) extends UI(controller) with Observer:
-  controller.add(this)
-  var continue = true
+import com.google.inject.Inject
 
-  override def run(): Unit =
+class TUI @Inject()(controller: IController) extends Observer:
+  private var continue = true
+
+  def run(): Unit =
     println(controller.field.toString)
     inputLoop()
 
@@ -63,4 +63,14 @@ class TUI(using controller: IController) extends UI(controller) with Observer:
   def validInput(list: List[String]): Try[String] = Try(list.tail.head)
 
   def getController: IController = controller
+
+  def writeDown(move: Move): Unit = {
+    controller.put(move)
+    controller.next()
+    controller.nextRound()
+  }
+
+  def diceCupPutIn(pi: List[Int]): Unit = controller.doAndPublish(controller.putIn, pi)
+
+  def diceCupPutOut(po: List[Int]): Unit = controller.doAndPublish(controller.putOut, po)
          

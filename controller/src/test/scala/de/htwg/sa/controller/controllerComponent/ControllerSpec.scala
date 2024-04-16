@@ -1,9 +1,7 @@
-package de.htwg.sa.kniffel
-package controller.controllerComponent
+package de.htwg.sa.controller.controllerComponent
 
 import de.htwg.sa.dicecup.dicecupBaseImpl.DiceCup
 import de.htwg.sa.kniffel.Config.given
-import de.htwg.sa.kniffel.controller.controllerBaseImpl.Controller
 import de.htwg.sa.kniffel.model.Move
 import de.htwg.sa.kniffel.model.gameComponent.gameBaseImpl.{Game, Player}
 import de.htwg.sa.kniffel.util.{Event, Observer}

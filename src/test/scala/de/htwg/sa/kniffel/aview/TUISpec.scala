@@ -1,7 +1,6 @@
 package de.htwg.sa.kniffel
 package aview
 
-import controller.controllerBaseImpl.Controller
 import de.htwg.sa.field.fieldBaseImpl.Field
 import de.htwg.sa.game.gameBaseImpl.Game
 import org.scalatest.wordspec.AnyWordSpec
