@@ -3,10 +3,10 @@ package controller.controllerComponent
 
 import de.htwg.sa.kniffel.Config.given
 import de.htwg.sa.kniffel.controller.controllerBaseImpl.Controller
+import de.htwg.sa.kniffel.dicecup.IDiceCup
+import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
+import de.htwg.sa.kniffel.game.gameBaseImpl.{Game, Player}
 import de.htwg.sa.kniffel.model.Move
-import de.htwg.sa.kniffel.model.dicecupComponent.IDiceCup
-import de.htwg.sa.kniffel.model.dicecupComponent.dicecupBaseImpl.DiceCup
-import de.htwg.sa.kniffel.model.gameComponent.gameBaseImpl.{Game, Player}
 import de.htwg.sa.kniffel.util.{Event, Observer}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec

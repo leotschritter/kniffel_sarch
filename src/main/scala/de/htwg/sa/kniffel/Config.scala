@@ -2,14 +2,14 @@ package de.htwg.sa.kniffel
 
 import controller.IController
 import controller.controllerBaseImpl.Controller
-import model.fileIOComponent.IFileIO
-import model.fileIOComponent.fileIOXmlImpl.FileIO
-import model.gameComponent.IGame
-import model.gameComponent.gameBaseImpl.Game
-import model.dicecupComponent.IDiceCup
-import model.dicecupComponent.dicecupBaseImpl.DiceCup
-import model.fieldComponent.{IField, IMatrix}
-import model.fieldComponent.fieldBaseImpl.{Field, Matrix}
+import de.htwg.sa.kniffel.field.IField
+import de.htwg.sa.kniffel.fileio.fileIOXmlImpl.FileIO
+import de.htwg.sa.kniffel.field.fieldBaseImpl.{Field, Matrix}
+import de.htwg.sa.kniffel.fileio.IFileIO
+import de.htwg.sa.kniffel.dicecup.IDiceCup
+import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
+import de.htwg.sa.kniffel.game.IGame
+import de.htwg.sa.kniffel.game.gameBaseImpl.Game
 
 object Config {
   val numberOfPLayers = 2

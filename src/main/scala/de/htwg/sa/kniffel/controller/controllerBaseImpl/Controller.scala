@@ -3,12 +3,12 @@ package controller.controllerBaseImpl
 
 import controller.IController
 import model.Move
-import model.dicecupComponent.IDiceCup
-import model.fieldComponent.IField
-import model.gameComponent.IGame
 import util.{Event, Observable, UndoManager}
 import Config.given
-import model.fileIOComponent.IFileIO
+import de.htwg.sa.kniffel.dicecup.IDiceCup
+import de.htwg.sa.kniffel.field.IField
+import de.htwg.sa.kniffel.fileio.IFileIO
+import de.htwg.sa.kniffel.game.IGame
 
 class Controller(using var field: IField, var diceCup: IDiceCup, var game: IGame, var file: IFileIO) extends IController :
 

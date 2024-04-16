@@ -1,10 +1,10 @@
 package de.htwg.sa.kniffel
 package controller
 
-import model.fieldComponent.IField
-import model.gameComponent.IGame
+import de.htwg.sa.kniffel.dicecup.IDiceCup
+import de.htwg.sa.kniffel.field.IField
+import de.htwg.sa.kniffel.game.IGame
 import util.Observable
-import model.dicecupComponent.IDiceCup
 import model.Move
 
 trait IController extends Observable {
