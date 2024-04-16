@@ -10,7 +10,7 @@ import scala.util.{Failure, Success, Try}
 class TUI @Inject()(controller: IController) extends Observer:
   controller.add(this)
 
-  private var continue = true
+  var continue = true
 
   def run(): Unit =
     println(controller.field.toString)

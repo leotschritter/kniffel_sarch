@@ -2,7 +2,7 @@ package de.htwg.sa.kniffel.tui
 
 import de.htwg.sa.kniffel.controller.IController
 import de.htwg.sa.kniffel.controller.controllerBaseImpl.Controller
-import de.htwg.sa.kniffel.util.Move
+import de.htwg.sa.kniffel.util.{Event, Move}
 import org.scalatest.matchers.should.Matchers.{be, *}
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -65,6 +65,18 @@ class TUISpec extends AnyWordSpec {
         tui.getController.field.matrix.cell(0, 18).get should be(2)
         tui.getController.game.playerID should be(1)
       }
+      "not be able to write down into the same field twice" in {
+        val move: Option[Move] = tui.analyseInput("wd 1")
+        move should not be (None)
+        tui.writeDown(move.get)
+        val move2: Move = tui.analyseInput("wd 1").getOrElse(Move(1, 0, 0))
+        tui.writeDown(move2)
+        tui.analyseInput("wd 1") should be(None)
+      }
+    }
+    "set the continue variable to false on quit" in {
+      tui.update(Event.Quit)
+      tui.continue should be (false)
     }
   }
 }
