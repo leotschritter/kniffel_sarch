@@ -1,6 +1,6 @@
 import org.scoverage.coveralls.GitHubActions
 
-val scala3Version = "3.3.1"
+val scala3Version = "3.3.3"
 
 val dicecupVersion = "0.1.0-SNAPSHOT"
 val fieldVersion = "0.1.0-SNAPSHOT"
