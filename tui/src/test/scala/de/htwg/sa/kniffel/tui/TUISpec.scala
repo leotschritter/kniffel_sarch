@@ -1,27 +1,18 @@
-/*package de.htwg.sa.kniffel.tui
+package de.htwg.sa.kniffel.tui
 
-import com.google.inject.{Guice, Injector}
 import de.htwg.sa.kniffel.controller.IController
 import de.htwg.sa.kniffel.controller.controllerBaseImpl.Controller
-import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
-import de.htwg.sa.kniffel.field.fieldBaseImpl.Field
-import de.htwg.sa.kniffel.game.gameBaseImpl.Game
-import de.htwg.sa.kniffel.tui.TUI
 import de.htwg.sa.kniffel.util.Move
-import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers.{be, *}
 import org.scalatest.wordspec.AnyWordSpec
 
-import scala.util.{Failure, Success, Try}
 
-class TUISpec extends AnyWordSpec with MockFactory {
+class TUISpec extends AnyWordSpec {
 
-  val controller = mock[Controller]
-  (controller.add _).expects(tui)
+  val controller: IController = Controller()
   val tui: TUI = TUI(controller)
-
-
   "The TUI" should {
+
 
     "recognize the input wd 22  as an invalid Input" in {
       tui.analyseInput("wd 22") should be(None)
@@ -77,4 +68,3 @@ class TUISpec extends AnyWordSpec with MockFactory {
     }
   }
 }
-*/

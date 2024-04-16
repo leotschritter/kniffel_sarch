@@ -19,8 +19,7 @@ lazy val dependencies = Seq(
   libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "2.3.0",
   libraryDependencies += ("com.typesafe.play" %% "play-json" % "2.10.4"),
   libraryDependencies += "com.google.inject" % "guice" % "7.0.0",
-  libraryDependencies += "net.codingwell" %% "scala-guice" % "7.0.0",
-  libraryDependencies += "org.scalamock" %% "scalamock" % "6.0.0" % Test
+  libraryDependencies += "net.codingwell" %% "scala-guice" % "7.0.0"
 )
 
 lazy val root = (project in file(""))
