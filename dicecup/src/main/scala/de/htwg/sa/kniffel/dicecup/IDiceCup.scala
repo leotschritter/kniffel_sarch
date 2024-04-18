@@ -1,5 +1,7 @@
 package de.htwg.sa.kniffel.dicecup
 
+import play.api.libs.json.JsObject
+
 import scala.collection.immutable.ListMap
 
 trait IDiceCup {
@@ -20,4 +22,6 @@ trait IDiceCup {
   def dice(): Option[IDiceCup]
 
   def indexOfField: ListMap[String, Int]
+  
+  def toJson: JsObject
 }

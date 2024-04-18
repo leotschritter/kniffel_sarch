@@ -1,5 +1,7 @@
 package de.htwg.sa.kniffel.field
 
+import play.api.libs.json.JsObject
+
 trait IField {
   def putMulti(valueList: List[Int], putInValue: Option[Int], x: Int, y: Int): IField
 
@@ -8,6 +10,8 @@ trait IField {
   def numberOfPlayers: Int
 
   def matrix: IMatrix
+
+  def toJson: JsObject
 }
 
 trait IMatrix {

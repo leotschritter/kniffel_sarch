@@ -5,6 +5,7 @@ import de.htwg.sa.kniffel.dicecup.IDiceCup
 import de.htwg.sa.kniffel.field.IField
 import de.htwg.sa.kniffel.game.IGame
 import de.htwg.sa.kniffel.util.{Move, Observable}
+import play.api.libs.json.JsObject
 
 trait IController extends Observable {
   def undo(): Unit
@@ -40,4 +41,6 @@ trait IController extends Observable {
   def save(): Unit
 
   def load(): Unit
+
+  def toJson: JsObject
 }

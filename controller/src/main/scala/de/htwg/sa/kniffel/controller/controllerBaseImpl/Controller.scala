@@ -2,7 +2,7 @@ package de.htwg.sa.kniffel
 package controller.controllerBaseImpl
 
 import controller.IController
-import de.htwg.sa.kniffel.util.{Event, Observable, UndoManager, Move}
+import de.htwg.sa.kniffel.util.{Event, Move, Observable, UndoManager}
 import com.google.inject.Inject
 import de.htwg.sa.kniffel.dicecup.IDiceCup
 import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
@@ -12,6 +12,7 @@ import de.htwg.sa.kniffel.fileio.IFileIO
 import de.htwg.sa.kniffel.fileio.fileIOJsonImpl.FileIO
 import de.htwg.sa.kniffel.game.IGame
 import de.htwg.sa.kniffel.game.gameBaseImpl.Game
+import play.api.libs.json.{JsObject, Json}
 
 class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: IGame, var file: IFileIO) extends IController :
   def this() = {
@@ -86,3 +87,11 @@ class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: I
   }
 
   override def toString: String = field.toString
+
+  override def toJson: JsObject = {
+    Json.obj(
+      "controller" ->
+        this.diceCup.toJson
+          .deepMerge(this.field.toJson)
+          .deepMerge(this.game.toJson))
+  }

@@ -1,6 +1,7 @@
 package de.htwg.sa.kniffel.game.gameBaseImpl
 
 import de.htwg.sa.kniffel.game.IGame
+import play.api.libs.json.{JsNumber, JsObject, Json}
 
 import scala.annotation.tailrec
 
@@ -71,3 +72,23 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
       case Nil => acc.reverse
       case player :: rest => playerTuplesHelper(rest, (player.playerID, player.playerName) :: acc)
     playerTuplesHelper(playersList, Nil)
+
+  override def toJson: JsObject = {
+    Json.obj(
+      "game" -> Json.obj(
+        "nestedList" -> this.nestedList.map(_.mkString(",")).mkString(";"),
+        "remainingMoves" -> JsNumber(this.remainingMoves),
+        "currentPlayerID" -> JsNumber(this.playerID),
+        "currentPlayerName" -> this.playerName,
+        "players" -> Json.toJson(
+          Seq(for {
+            x <- this.playerTuples
+          } yield {
+            Json.obj(
+              "id" -> JsNumber(x._1),
+              "name" -> x._2)
+          })
+        )
+      )
+    )
+  }

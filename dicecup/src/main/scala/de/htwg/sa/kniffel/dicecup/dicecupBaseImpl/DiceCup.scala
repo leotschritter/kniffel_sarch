@@ -1,6 +1,7 @@
 package de.htwg.sa.kniffel.dicecup.dicecupBaseImpl
 
 import de.htwg.sa.kniffel.dicecup.{EvaluateStrategy, Evaluator, IDiceCup}
+import play.api.libs.json.{JsNumber, JsObject, Json}
 
 import scala.collection.immutable.ListMap
 import scala.util.Random
@@ -67,3 +68,13 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
     + "\nVerbleibende Würfe: " + (remDices + 1)
     + "\nBitte wählen Sie aus: " + indexOfField.keys.mkString(" ")
     + "\n"
+
+  override def toJson: JsObject = {
+    Json.obj(
+      "dicecup" -> Json.obj(
+        "stored" -> this.locked,
+        "incup" -> this.inCup,
+        "remainingDices" -> JsNumber(this.remainingDices)
+      )
+    )
+  }

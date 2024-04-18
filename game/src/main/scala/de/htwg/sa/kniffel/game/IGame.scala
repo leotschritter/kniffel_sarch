@@ -1,5 +1,7 @@
 package de.htwg.sa.kniffel.game
 
+import play.api.libs.json.JsObject
+
 trait IGame {
   def next(): Option[IGame]
 
@@ -20,4 +22,6 @@ trait IGame {
   def remainingMoves: Int
 
   def playerTuples: List[(Int, String)]
+
+  def toJson: JsObject
 }

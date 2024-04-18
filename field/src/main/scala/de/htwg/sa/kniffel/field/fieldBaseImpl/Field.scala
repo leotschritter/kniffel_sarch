@@ -3,6 +3,7 @@ package de.htwg.sa.kniffel.field.fieldBaseImpl
 
 
 import de.htwg.sa.kniffel.field.IField
+import play.api.libs.json.{JsNumber, JsObject, Json}
 
 import scala.annotation.tailrec
 
@@ -70,3 +71,12 @@ case class Field(matrix: Matrix[Option[Int]]) extends IField:
   def numberOfPlayers: Int = defaultPlayers
 
   override def toString: String = mesh()
+
+  override def toJson: JsObject = {
+    Json.obj(
+      "field" -> Json.obj(
+        "numberOfPlayers" -> JsNumber(this.numberOfPlayers),
+        "rows" -> this.matrix.rows
+      )
+    )
+  }
