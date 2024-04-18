@@ -2,6 +2,8 @@ package de.htwg.sa.kniffel.game.gameBaseImpl
 
 import de.htwg.sa.kniffel.game.IGame
 import play.api.libs.json.{JsNumber, JsObject, Json}
+import akka.http.scaladsl.server.Directives.*
+import akka.http.scaladsl.server.Route
 
 import scala.annotation.tailrec
 
@@ -92,3 +94,73 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
       )
     )
   }
+
+  override val gameRoute: Route =
+    concat(
+      get {
+        concat(
+          path("playerID") {
+            complete(Json.obj(
+              "playerID" -> JsNumber(this.playerID)
+            ).toString)
+          },
+          path("playerName") {
+            complete(Json.obj(
+              "playerName" -> this.playerName
+            ).toString)
+          },
+          path("playerName" / IntNumber) { (x: Int) =>
+            complete(Json.obj(
+              "playerName" -> this.playerName(x)
+            ).toString)
+          },
+          path("nestedList") {
+            complete(Json.obj(
+              "nestedList" -> this.nestedList.map(_.mkString(",")).mkString(";")
+            ).toString)
+          },
+          path("remainingMoves") {
+            complete(Json.obj(
+              "remainingMoves" -> JsNumber(this.remainingMoves)
+            ).toString)
+          },
+          path("players") {
+            complete(Json.obj(
+              "players" -> Json.toJson(
+                Seq(for {
+                  x <- this.playerTuples
+                } yield {
+                  Json.obj(
+                    "id" -> JsNumber(x._1),
+                    "name" -> x._2)
+                })
+              )
+            ).toString)
+          },
+          path("") {
+            sys.error("No such GET route")
+          }
+        )
+      },
+      post {
+        concat(
+          path("next") {
+            complete(this.next()
+              .match {
+                case Some(game) => game.toJson.toString
+                case None => "{}"
+              }
+            )
+          },
+          path("undoMove" / IntNumber / IntNumber) { (value: Int, y: Int) =>
+            complete(this.undoMove(value, y).toJson.toString)
+          },
+          path("sum" / IntNumber / IntNumber) { (value: Int, y: Int) =>
+            complete(this.sum(value, y).toJson.toString)
+          },
+          path("") {
+            sys.error("No such POST route")
+          }
+        )
+      }
+    )

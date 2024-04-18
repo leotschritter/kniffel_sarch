@@ -1,5 +1,6 @@
 package de.htwg.sa.kniffel.game
 
+import akka.http.scaladsl.server.Route
 import play.api.libs.json.JsObject
 
 trait IGame {
@@ -24,4 +25,6 @@ trait IGame {
   def playerTuples: List[(Int, String)]
 
   def toJson: JsObject
+  
+  val gameRoute: Route
 }

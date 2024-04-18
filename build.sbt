@@ -9,6 +9,7 @@ val fileIOVersion = "0.1.0-SNAPSHOT"
 val controllerVersion = "0.1.0-SNAPSHOT"
 val guiVersion = "0.1.0-SNAPSHOT"
 val tuiVersion = "0.1.0-SNAPSHOT"
+val restVersion = "0.1.0-SNAPSHOT"
 
 lazy val dependencies = Seq(
   scalaVersion := scala3Version,
@@ -19,12 +20,19 @@ lazy val dependencies = Seq(
   libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "2.3.0",
   libraryDependencies += ("com.typesafe.play" %% "play-json" % "2.10.4"),
   libraryDependencies += "com.google.inject" % "guice" % "7.0.0",
-  libraryDependencies += "net.codingwell" %% "scala-guice" % "7.0.0"
+  libraryDependencies += "net.codingwell" %% "scala-guice" % "7.0.0",
+  libraryDependencies += "com.typesafe.akka" %% "akka-actor-typed" % "2.8.5",
+  libraryDependencies += "com.typesafe.akka" %% "akka-http" % "10.5.3",
+  libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.8.5",
+  libraryDependencies += "org.apache.cassandra" % "cassandra-all" % "4.1.4" excludeAll(
+    ExclusionRule(organization = "org.slf4j", name = "slf4j-log4j12"),
+    ExclusionRule(organization = "log4j", name = "log4j")
+  )
 )
 
 lazy val root = (project in file(""))
-  .dependsOn(dicecup, fileIO, field, game, controller, gui, tui)
-  .aggregate(dicecup, fileIO, field, game, controller, gui, tui)
+  .dependsOn(dicecup, fileIO, field, game, controller, gui, tui, rest)
+  .aggregate(dicecup, fileIO, field, game, controller, gui, tui, rest)
   .settings(
     name := "kniffel",
     version := "0.1.0-SNAPSHOT",
@@ -85,6 +93,15 @@ lazy val tui = (project in file("tui"))
   .settings(
     name := "tui",
     version := tuiVersion,
+    dependencies
+  )
+
+lazy val rest = (project in file("rest"))
+  .dependsOn(controller, dicecup, field, game)
+  .aggregate(controller, dicecup, field, game)
+  .settings(
+    name := "rest",
+    version := restVersion,
     dependencies
   )
 
