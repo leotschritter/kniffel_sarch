@@ -1,7 +1,7 @@
 package de.htwg.sa.kniffel.game.gameBaseImpl
 
 import de.htwg.sa.kniffel.game.IGame
-import play.api.libs.json.{JsNumber, JsObject, Json}
+import play.api.libs.json.{JsArray, JsNumber, JsObject, JsValue, Json}
 import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.Route
 
@@ -82,14 +82,13 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
         "remainingMoves" -> JsNumber(this.remainingMoves),
         "currentPlayerID" -> JsNumber(this.playerID),
         "currentPlayerName" -> this.playerName,
-        "players" -> Json.toJson(
-          Seq(for {
-            x <- this.playerTuples
-          } yield {
+        "players" -> JsArray(
+          this.playerTuples.map { playerTuple =>
             Json.obj(
-              "id" -> JsNumber(x._1),
-              "name" -> x._2)
-          })
+              "id" -> JsNumber(playerTuple._1),
+              "name" -> playerTuple._2
+            )
+          }
         )
       )
     )
@@ -164,3 +163,24 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
         )
       }
     )
+
+  override def jsonStringToGame(game: String): IGame = {
+    val json: JsValue = Json.parse(game)
+    val currPlayer: Player = Player((json \ "game" \ "currentPlayerID").get.toString.toInt, (json \ "game" \ "currentPlayerName").as[String])
+    val remMoves: Int = (json \ "game" \ "remainingMoves").get.toString.toInt
+
+    val jsonPlayers: JsArray = (json \ "game" \ "players").as[JsArray]
+    val players: List[Player] = jsonPlayers.value.map { player =>
+      Player(
+        (player \ "id").as[Int],
+        (player \ "name").as[String]
+      )
+    }.toList
+
+    val jsonNestedList: String = (json \ "game" \ "nestedList").as[String]
+    val resNestedList: List[List[Int]] = jsonNestedList.split(";").map { (stringList: String) =>
+      stringList.split(",").map(_.toInt).toList
+    }.toList
+
+    Game(players, currPlayer, remMoves, resNestedList)
+  }

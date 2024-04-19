@@ -27,4 +27,6 @@ trait IGame {
   def toJson: JsObject
   
   val gameRoute: Route
+  
+  def jsonStringToGame(game: String): IGame
 }
