@@ -27,4 +27,6 @@ trait IDiceCup {
   def toJson: JsObject
 
   val diceCupRoute: Route
+
+  def jsonStringToDiceCup(diceCup: String): IDiceCup
 }

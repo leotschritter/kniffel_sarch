@@ -1,9 +1,9 @@
 package de.htwg.sa.kniffel.dicecup.dicecupBaseImpl
 
-import akka.http.scaladsl.server.{PathMatcher, PathMatcher1, Route}
 import akka.http.scaladsl.server.Directives.*
+import akka.http.scaladsl.server.{PathMatcher, PathMatcher1, Route}
 import de.htwg.sa.kniffel.dicecup.{EvaluateStrategy, Evaluator, IDiceCup}
-import play.api.libs.json.{JsNumber, JsObject, Json}
+import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 
 import scala.collection.immutable.ListMap
 import scala.util.Random
@@ -136,3 +136,13 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
         )
       }
     )
+
+  override def jsonStringToDiceCup(diceCup: String): IDiceCup = {
+    val json: JsValue = Json.parse(diceCup)
+    val diceCupJson: JsValue = (json \ "dicecup").get
+    val storedList: List[Int] = (diceCupJson \ "stored").get.as[List[Int]]
+    val inCupList: List[Int] = (diceCupJson \ "incup").get.as[List[Int]]
+    val remDice: Int = (diceCupJson \ "remainingDices").get.toString.toInt
+
+    DiceCup(storedList, inCupList, remDice)
+  }
