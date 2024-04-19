@@ -1,5 +1,6 @@
 package de.htwg.sa.kniffel.field
 
+import akka.http.scaladsl.server.Route
 import play.api.libs.json.JsObject
 
 trait IField {
@@ -12,10 +13,14 @@ trait IField {
   def matrix: IMatrix
 
   def toJson: JsObject
+
+  val fieldRoute: Route
 }
 
 trait IMatrix {
   def cell(col: Int, row: Int): Option[Int]
 
   def isEmpty(col: Int, row: Int): Boolean
+
+  val matrixRoute: Route
 }

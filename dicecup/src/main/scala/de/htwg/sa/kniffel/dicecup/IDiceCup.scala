@@ -1,5 +1,6 @@
 package de.htwg.sa.kniffel.dicecup
 
+import akka.http.scaladsl.server.Route
 import play.api.libs.json.JsObject
 
 import scala.collection.immutable.ListMap
@@ -22,6 +23,8 @@ trait IDiceCup {
   def dice(): Option[IDiceCup]
 
   def indexOfField: ListMap[String, Int]
-  
+
   def toJson: JsObject
+
+  val diceCupRoute: Route
 }

@@ -1,5 +1,7 @@
 package de.htwg.sa.kniffel.dicecup.dicecupBaseImpl
 
+import akka.http.scaladsl.server.{PathMatcher, PathMatcher1, Route}
+import akka.http.scaladsl.server.Directives.*
 import de.htwg.sa.kniffel.dicecup.{EvaluateStrategy, Evaluator, IDiceCup}
 import play.api.libs.json.{JsNumber, JsObject, Json}
 
@@ -78,3 +80,59 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
       )
     )
   }
+
+  private val IntList: PathMatcher1[List[Int]] = PathMatcher("""list=\d+(?:,\d+)*""".r).flatMap { str =>
+    val ints = str.split("=").tail.mkString(",").split(",").map(_.toInt)
+    Some(ints.toList)
+  }
+
+  override val diceCupRoute: Route =
+    concat(
+      get {
+        concat(
+          path("inCup") {
+            complete(Json.obj("inCup" -> this.inCup).toString)
+          },
+          path("locked") {
+            complete(Json.obj("locked" -> this.locked).toString)
+          },
+          path("remainingDices") {
+            complete(Json.obj("remainingDices" -> JsNumber(this.remainingDices)).toString)
+          },
+          path("result" / IntNumber) { (index: Int) =>
+            complete(Json.obj("result" -> JsNumber(this.result(index))).toString)
+          },
+          path("indexOfField") {
+            complete(Json.obj("indexOfField" -> this.indexOfField).toString)
+          },
+          path("") {
+            sys.error("No such GET route")
+          }
+        )
+      },
+      post {
+        concat(
+          path("nextRound") {
+            complete(this.nextRound().toJson.toString)
+          },
+          // example: putOut/list=1,2,3
+          path("putOut" / IntList) { (list: List[Int]) =>
+            complete(this.putDicesOut(list).toJson.toString)
+          },
+          path("putIn" / IntList) { (list: List[Int]) =>
+            complete(this.putDicesIn(list).toJson.toString)
+          },
+          path("dice") {
+            complete(
+              this.dice().match {
+                case Some(diceCup) => diceCup.toJson.toString
+                case None => "{}"
+              }
+            )
+          },
+          path("") {
+            sys.error("No such POST route")
+          }
+        )
+      }
+    )

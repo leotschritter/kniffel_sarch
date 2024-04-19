@@ -24,6 +24,15 @@ case class Rest(controller: IController) extends Observer {
       pathPrefix("game") {
         this.controller.game.gameRoute
       },
+      pathPrefix("diceCup") {
+        this.controller.diceCup.diceCupRoute
+      },
+      pathPrefix("field") {
+        concat(
+          this.controller.field.fieldRoute,
+          this.controller.field.matrix.matrixRoute
+        )
+      }
     )
   )
 }

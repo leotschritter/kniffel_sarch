@@ -99,7 +99,7 @@ class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: I
     this
   }
 
-  val IntList: PathMatcher1[List[Int]] = PathMatcher("""list=\d+(?:,\d+)*""".r).flatMap { str =>
+  private val IntList: PathMatcher1[List[Int]] = PathMatcher("""list=\d+(?:,\d+)*""".r).flatMap { str =>
     val ints = str.split("=").tail.mkString(",").split(",").map(_.toInt)
     Some(ints.toList)
   }

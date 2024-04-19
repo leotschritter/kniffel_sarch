@@ -1,7 +1,6 @@
 package de.htwg.sa.kniffel.field.fieldBaseImpl
 
 
-
 import de.htwg.sa.kniffel.field.IField
 import play.api.libs.json.{JsNumber, JsObject, Json}
 
@@ -80,3 +79,46 @@ case class Field(matrix: Matrix[Option[Int]]) extends IField:
       )
     )
   }
+
+  import akka.http.scaladsl.server.{PathMatcher, PathMatcher1, Route}
+
+  override val fieldRoute: Route =
+    import akka.http.scaladsl.server.Directives.*
+    val IntList: PathMatcher1[List[Int]] = PathMatcher("""list=\d+(?:,\d+)*""".r).flatMap { str =>
+      val ints = str.split("=").tail.mkString(",").split(",").map(_.toInt)
+      Some(ints.toList)
+    }
+    concat(
+      get {
+        concat(
+          path("numberOfPlayers") {
+            complete(Json.obj("numberOfPlayers" -> JsNumber(this.numberOfPlayers)).toString)
+          },
+          path("matrix") {
+            complete(Json.obj("rows" -> this.matrix.rows).toString)
+          },
+          path("") {
+            sys.error("No such GET route")
+          }
+        )
+      },
+      post {
+        concat(
+          // example: putMulti/list=1,0,1,0,1,1/1/0/0
+          // curl -X POST http://localhost:8080/field/putMulti/list=1,0,1,0,1,1/1/0/0
+          path("putMulti" / IntList / IntNumber / IntNumber / IntNumber) {
+            (valueList: List[Int], putInValue: Int, x: Int, y: Int) =>
+              complete(this.putMulti(valueList, Some(putInValue), x, y).toJson.toString)
+          },
+          // example: undoMove/list=1,0,1,0,1,1/0/0
+          // curl -X POST http://localhost:8080/field/undoMove/list=1,0,1,0,1,1/0/0
+          path("undoMove" / IntList / IntNumber / IntNumber) {
+            (valueList: List[Int], x: Int, y: Int) =>
+              complete(this.undoMove(valueList, x, y).toJson.toString)
+          },
+          path("") {
+            sys.error("No such POST route")
+          }
+        )
+      }
+    )
