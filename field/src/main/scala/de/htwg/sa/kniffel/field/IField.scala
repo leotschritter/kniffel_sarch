@@ -14,6 +14,8 @@ trait IField {
 
   def toJson: JsObject
 
+  def jsonStringToField(field: String): IField
+
   val fieldRoute: Route
 }
 

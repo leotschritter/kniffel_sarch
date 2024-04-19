@@ -2,7 +2,7 @@ package de.htwg.sa.kniffel.field.fieldBaseImpl
 
 
 import de.htwg.sa.kniffel.field.IField
-import play.api.libs.json.{JsNumber, JsObject, Json}
+import play.api.libs.json.*
 
 import scala.annotation.tailrec
 
@@ -122,3 +122,18 @@ case class Field(matrix: Matrix[Option[Int]]) extends IField:
         )
       }
     )
+
+  def jsonStringToField(field: String): IField = {
+    val json: JsValue = Json.parse(field)
+    val jsonRows: JsArray = (json \ "field" \ "rows").get.as[JsArray]
+
+    val rows: Vector[Vector[Option[Int]]] = jsonRows.value.map { row =>
+      row.as[JsArray].value.map {
+        case JsNull => None
+        case JsNumber(value) => Some(value.toInt)
+        case _ => None
+      }.toVector
+    }.toVector
+
+    Field(Matrix(rows))
+  }
