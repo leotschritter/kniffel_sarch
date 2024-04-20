@@ -94,6 +94,10 @@ case class Field(matrix: Matrix[Option[Int]]) extends IField:
           pathSingleSlash {
             complete(new Field(2).toJson.toString)
           },
+          path("new" / IntNumber) {
+            (numberOfPlayers: Int) =>
+              complete(new Field(numberOfPlayers).toJson.toString)
+          },
           path("") {
             sys.error("No such GET route")
           }

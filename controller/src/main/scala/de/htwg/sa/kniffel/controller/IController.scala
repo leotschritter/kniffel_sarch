@@ -3,7 +3,6 @@ package controller
 
 import akka.http.scaladsl.server.Route
 import de.htwg.sa.kniffel.dicecup.IDiceCup
-import de.htwg.sa.kniffel.game.IGame
 import de.htwg.sa.kniffel.util.{Move, Observable}
 import play.api.libs.json.JsObject
 
@@ -36,7 +35,7 @@ trait IController extends Observable {
 
   def diceCup: IDiceCup
 
-  def game: IGame
+  def game: String
 
   def save(): IController
 

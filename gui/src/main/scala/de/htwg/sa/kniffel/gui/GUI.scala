@@ -120,7 +120,7 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
       border = Swing.LineBorder(new Color(0, 0, 0))
     }).toList
 
-  def xIndex: Int = controller.game.playerID
+  def xIndex: Int = (Json.parse(sendRequest("game/playerID", controller.game)) \ "playerID").as[Int]
 
   def isEmpty(y: Int): Boolean = checkIfEmpty(y)
 
@@ -169,7 +169,7 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
         background = new Color(255, 255, 255)
         border = Swing.MatteBorder(1, 0, 0, 0, new Color(0, 0, 0))
         contents += new Label {
-          text = controller.game.playerName + " ist an der Reihe."
+          text = getPlayerName + " ist an der Reihe."
           font = right_font
         }
 
@@ -328,7 +328,7 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
   class CenterCellPanel(numberOfPlayers: Int = 2) extends GridPanel(20, numberOfPlayers) :
     background = new Color(255, 255, 255)
     for (x <- 0 until numberOfPlayers) yield contents += new Label {
-      text = controller.game.playerName(x)
+      text = getPlayerName(x)
       font = field_font
       opaque = true
       foreground = new Color(255, 255, 255)
@@ -396,4 +396,12 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
         controller.field
       )
     ) \ "isEmpty").as[Boolean]
+  }
+
+  private def getPlayerName: String = {
+    (Json.parse(sendRequest("game/playerName", controller.game)) \ "playerName").as[String]
+  }
+
+  private def getPlayerName(x: Int): String = {
+    (Json.parse(sendRequest(s"game/playerName/$x", controller.game)) \ "playerName").as[String]
   }

@@ -1,7 +1,7 @@
 package de.htwg.sa.kniffel.game.gameBaseImpl
 
 import de.htwg.sa.kniffel.game.IGame
-import play.api.libs.json.{JsArray, JsNumber, JsObject, JsValue, Json}
+import play.api.libs.json.{JsArray, JsNull, JsNumber, JsObject, JsValue, Json}
 import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.Route
 
@@ -98,43 +98,12 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
     concat(
       get {
         concat(
-          path("playerID") {
-            complete(Json.obj(
-              "playerID" -> JsNumber(this.playerID)
-            ).toString)
+          pathSingleSlash {
+            complete(new Game(2).toJson.toString)
           },
-          path("playerName") {
-            complete(Json.obj(
-              "playerName" -> this.playerName
-            ).toString)
-          },
-          path("playerName" / IntNumber) { (x: Int) =>
-            complete(Json.obj(
-              "playerName" -> this.playerName(x)
-            ).toString)
-          },
-          path("nestedList") {
-            complete(Json.obj(
-              "nestedList" -> this.nestedList.map(_.mkString(",")).mkString(";")
-            ).toString)
-          },
-          path("remainingMoves") {
-            complete(Json.obj(
-              "remainingMoves" -> JsNumber(this.remainingMoves)
-            ).toString)
-          },
-          path("players") {
-            complete(Json.obj(
-              "players" -> Json.toJson(
-                Seq(for {
-                  x <- this.playerTuples
-                } yield {
-                  Json.obj(
-                    "id" -> JsNumber(x._1),
-                    "name" -> x._2)
-                })
-              )
-            ).toString)
+          path("new" / IntNumber) {
+            (numberOfPlayers: Int) =>
+              complete(new Game(numberOfPlayers).toJson.toString)
           },
           path("") {
             sys.error("No such GET route")
@@ -144,18 +113,77 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
       post {
         concat(
           path("next") {
-            complete(this.next()
-              .match {
-                case Some(game) => game.toJson.toString
-                case None => "{}"
+            entity(as[String]) { requestBody =>
+              complete(jsonStringToGame(requestBody).next()
+                .match {
+                  case Some(game) => game.toJson.toString
+                  case None => Json.obj("game" -> JsNull).toString
+                }
+              )
+            }
+          },
+          path("undoMove" / IntNumber / IntNumber) {
+            (value: Int, y: Int) =>
+              entity(as[String]) { requestBody =>
+                complete(jsonStringToGame(requestBody).undoMove(value, y).toJson.toString)
               }
-            )
           },
-          path("undoMove" / IntNumber / IntNumber) { (value: Int, y: Int) =>
-            complete(this.undoMove(value, y).toJson.toString)
+          path("sum" / IntNumber / IntNumber) {
+            (value: Int, y: Int) =>
+              entity(as[String]) { requestBody =>
+                complete(jsonStringToGame(requestBody).sum(value, y).toJson.toString)
+              }
           },
-          path("sum" / IntNumber / IntNumber) { (value: Int, y: Int) =>
-            complete(this.sum(value, y).toJson.toString)
+          path("playerID") {
+            entity(as[String]) { requestBody =>
+              complete(Json.obj(
+                "playerID" -> JsNumber(jsonStringToGame(requestBody).playerID)
+              ).toString)
+            }
+          },
+          path("playerName") {
+            entity(as[String]) { requestBody =>
+              complete(Json.obj(
+                "playerName" -> jsonStringToGame(requestBody).playerName
+              ).toString)
+            }
+          },
+          path("playerName" / IntNumber) {
+            (x: Int) =>
+              entity(as[String]) { requestBody =>
+                complete(Json.obj(
+                  "playerName" -> jsonStringToGame(requestBody).playerName(x)
+                ).toString)
+              }
+          },
+          path("nestedList") {
+            entity(as[String]) { requestBody =>
+              complete(Json.obj(
+                "nestedList" -> jsonStringToGame(requestBody).nestedList.map(_.mkString(",")).mkString(";")
+              ).toString)
+            }
+          },
+          path("remainingMoves") {
+            entity(as[String]) { requestBody =>
+              complete(Json.obj(
+                "remainingMoves" -> JsNumber(jsonStringToGame(requestBody).remainingMoves)
+              ).toString)
+            }
+          },
+          path("players") {
+            entity(as[String]) { requestBody =>
+              complete(Json.obj(
+                "players" -> Json.toJson(
+                  Seq(for {
+                    x <- jsonStringToGame(requestBody).playerTuples
+                  } yield {
+                    Json.obj(
+                      "id" -> JsNumber(x._1),
+                      "name" -> x._2)
+                  })
+                )
+              ).toString)
+            }
           },
           path("") {
             sys.error("No such POST route")

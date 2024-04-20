@@ -9,18 +9,20 @@ import de.htwg.sa.kniffel.dicecup.IDiceCup
 import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
 import de.htwg.sa.kniffel.fileio.IFileIO
 import de.htwg.sa.kniffel.fileio.fileIOJsonImpl.FileIO
-import de.htwg.sa.kniffel.game.IGame
-import de.htwg.sa.kniffel.game.gameBaseImpl.Game
+import de.htwg.sa.kniffel.util.HttpUtil.sendRequest
 import de.htwg.sa.kniffel.util.{Event, Move, Observable, UndoManager}
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json
+import play.api.libs.json.{JsNull, JsObject, JsValue, Json}
 
-class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: IGame, var file: IFileIO) extends IController :
+class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: String, var file: IFileIO) extends IController :
   def this() = {
     this("{\"field\":{\"numberOfPlayers\":2,\"rows\":[[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]]}}",
-      new DiceCup(), new Game(2), new FileIO())
+      new DiceCup(),
+      "{\"game\":{\"nestedList\":\"0,0,0,0,0,0;0,0,0,0,0,0\",\"remainingMoves\":26,\"currentPlayerID\":0,\"currentPlayerName\":\"Player 1\",\"players\":[{\"id\":0,\"name\":\"Player 1\"},{\"id\":1,\"name\":\"Player 2\"}]}}",
+      new FileIO())
   }
 
-  val undoManager = new UndoManager[IGame, String]
+  val undoManager = new UndoManager[String, String]
 
   def undo(): IController = {
     // TODO
@@ -58,10 +60,7 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: I
   }
 
   def next(): IController =
-    game.next().match {
-      case Some(g) => game = g
-      case None =>
-    }
+    game = getNextGame
     this
 
   // doAndPublish for putOut and putIn
@@ -87,7 +86,8 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: I
   def nextRound(): IDiceCup = diceCup.nextRound()
   
   def save(): IController = {
-    file.saveGame(game)
+    // TODO
+    // file.saveGame(game)
     // file.saveField(field, field.matrix)
     file.saveDiceCup(diceCup)
     notifyObservers(Event.Save)
@@ -95,8 +95,9 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: I
   }
 
   def load(): IController = {
+    // TODO
     // field = file.loadField
-    game = file.loadGame
+    // game = file.loadGame
     diceCup = file.loadDiceCup
     notifyObservers(Event.Load)
     this
@@ -115,7 +116,7 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: I
       "controller" ->
         this.diceCup.toJson
           .deepMerge(Json.parse(this.field).as[JsObject])
-          .deepMerge(this.game.toJson))
+          .deepMerge(Json.parse(this.game).as[JsObject]))
   }
 
   override val controllerRoute: Route =
@@ -126,7 +127,7 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: I
             complete(field)
           },
           path("game") {
-            complete(game.toJson.toString)
+            complete(game)
           },
           path("diceCup") {
             complete(diceCup.toJson.toString)
@@ -178,3 +179,12 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: I
         )
       }
     )
+
+  private def getNextGame: String = {
+    val nextGameString = sendRequest("game/next", this.game)
+    val nextGameJson = Json.parse(nextGameString)
+    (nextGameJson \ "game").as[JsValue].match {
+      case JsNull => JsNull.toString
+      case _ => nextGameString
+    }
+  }

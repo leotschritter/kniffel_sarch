@@ -23,7 +23,7 @@ class TUI @Inject()(controller: IController) extends Observer:
     e match {
       case Event.Quit => continue = false
       case Event.Save => continue
-      case _ => println(sendRequest("field/mesh", controller.field) + "\n" + controller.diceCup.toString + controller.game.playerName + " ist an der Reihe.")
+      case _ => println(sendRequest("field/mesh", controller.field) + "\n" + controller.diceCup.toString + getPlayerName + " ist an der Reihe.")
     }
 
 
@@ -52,7 +52,7 @@ class TUI @Inject()(controller: IController) extends Observer:
               .match {
                 case Some(index) =>
                   if (checkIfEmpty(index))
-                    Some(Move(controller.diceCup.result(index), controller.game.playerID, index))
+                    Some(Move(controller.diceCup.result(index), getPlayerID, index))
                   else
                     println("Da steht schon was!")
                     None
@@ -80,8 +80,16 @@ class TUI @Inject()(controller: IController) extends Observer:
   private def checkIfEmpty(index: Int): Boolean = {
     (Json.parse(
       sendRequest(
-        "field/isEmpty/" + controller.game.playerID + "/" + index,
+        s"field/isEmpty/$getPlayerID/$index",
         controller.field
       )
     ) \ "isEmpty").as[Boolean]
+  }
+
+  private def getPlayerName: String = {
+    (Json.parse(sendRequest("game/playerName", controller.game)) \ "playerName").as[String]
+  }
+
+  private def getPlayerID: Int = {
+    (Json.parse(sendRequest("game/playerID", controller.game)) \ "playerID").as[Int]
   }
