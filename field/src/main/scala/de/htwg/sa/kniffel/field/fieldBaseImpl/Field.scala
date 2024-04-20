@@ -91,11 +91,8 @@ case class Field(matrix: Matrix[Option[Int]]) extends IField:
     concat(
       get {
         concat(
-          path("numberOfPlayers") {
-            complete(Json.obj("numberOfPlayers" -> JsNumber(this.numberOfPlayers)).toString)
-          },
-          path("matrix") {
-            complete(Json.obj("rows" -> this.matrix.rows).toString)
+          pathSingleSlash {
+            complete(new Field(2).toJson.toString)
           },
           path("") {
             sys.error("No such GET route")
@@ -104,17 +101,49 @@ case class Field(matrix: Matrix[Option[Int]]) extends IField:
       },
       post {
         concat(
-          // example: putMulti/list=1,0,1,0,1,1/1/0/0
-          // curl -X POST http://localhost:8080/field/putMulti/list=1,0,1,0,1,1/1/0/0
+          // example: putMulti/list=1,0,1,0,1,1/1/0/0 (also with field as Json String in request body)
           path("putMulti" / IntList / IntNumber / IntNumber / IntNumber) {
             (valueList: List[Int], putInValue: Int, x: Int, y: Int) =>
-              complete(this.putMulti(valueList, Some(putInValue), x, y).toJson.toString)
+              entity(as[String]) { requestBody =>
+                complete(jsonStringToField(requestBody).putMulti(valueList, Some(putInValue), x, y).toJson.toString)
+              }
           },
-          // example: undoMove/list=1,0,1,0,1,1/0/0
-          // curl -X POST http://localhost:8080/field/undoMove/list=1,0,1,0,1,1/0/0
+          // example: undoMove/list=1,0,1,0,1,1/0/0 (also with field as Json String in request body)
           path("undoMove" / IntList / IntNumber / IntNumber) {
             (valueList: List[Int], x: Int, y: Int) =>
-              complete(this.undoMove(valueList, x, y).toJson.toString)
+              entity(as[String]) { requestBody =>
+                complete(jsonStringToField(requestBody).undoMove(valueList, x, y).toJson.toString)
+              }
+          },
+          path("cell" / IntNumber / IntNumber) { (col: Int, row: Int) =>
+            entity(as[String]) { requestBody =>
+              complete(
+                jsonStringToField(requestBody).matrix.cell(col, row).match {
+                  case Some(value) => Json.obj("value" -> JsNumber(value)).toString
+                  case None => Json.obj("value" -> JsNull).toString
+                }
+              )
+            }
+          },
+          path("numberOfPlayers") {
+            entity(as[String]) { requestBody =>
+              complete(Json.obj("numberOfPlayers" -> JsNumber(jsonStringToField(requestBody).numberOfPlayers)).toString)
+            }
+          },
+          path("isEmpty" / IntNumber / IntNumber) {
+            (col: Int, row: Int) =>
+              entity(as[String]) { requestBody =>
+                complete(
+                  Json.obj(
+                    "isEmpty" -> JsBoolean(jsonStringToField(requestBody).matrix.isEmpty(col, row))
+                  ).toString
+                )
+              }
+          },
+          path("mesh") {
+            entity(as[String]) { requestBody =>
+              complete(jsonStringToField(requestBody).toString)
+            }
           },
           path("") {
             sys.error("No such POST route")

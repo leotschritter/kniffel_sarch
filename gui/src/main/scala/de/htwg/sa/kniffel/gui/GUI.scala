@@ -3,6 +3,7 @@ package de.htwg.sa.kniffel.gui
 import com.google.inject.Inject
 import de.htwg.sa.kniffel.controller.IController
 import de.htwg.sa.kniffel.util.{Event, Move, Observer}
+import play.api.libs.json.{JsNumber, JsValue, Json}
 
 import java.awt.Toolkit
 import javax.swing.ImageIcon
@@ -102,12 +103,12 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
   centerOnScreen()
   open()
 
-  def field(numberOfPlayers: Int = controller.field.numberOfPlayers): List[Label] =
+  def field(numberOfPlayers: Int = getNumberOfPlayers): List[Label] =
     (for {
       i <- 0 until 19
       j <- 0 until numberOfPlayers
     } yield new Label {
-      text = controller.field.matrix.cell(j, i).map(cell => cell.toString).getOrElse("")
+      text = getCell(j, i)
       font = field_font
       opaque = true
       if (j == xIndex)
@@ -120,7 +121,7 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
 
   def xIndex: Int = controller.game.playerID
 
-  def isEmpty(y: Int): Boolean = controller.field.matrix.isEmpty(xIndex, y)
+  def isEmpty(y: Int): Boolean = checkIfEmpty(y)
 
   def disableList: List[Int] = (for {y <- 0 until 19 if !isEmpty(y)} yield y).toList
 
@@ -322,7 +323,8 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
         }
     }
 
-  class CenterCellPanel(numberOfPlayers: Int = controller.field.numberOfPlayers) extends GridPanel(20, numberOfPlayers) :
+  // TODO numberOfPlayer should be get by calling getNumberOfPlayers → that leads to errors atm
+  class CenterCellPanel(numberOfPlayers: Int = 2) extends GridPanel(20, numberOfPlayers) :
     background = new Color(255, 255, 255)
     for (x <- 0 until numberOfPlayers) yield contents += new Label {
       text = controller.game.playerName(x)
@@ -363,3 +365,34 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
     // def errorMessage(): Unit = Dialog.showMessage(contents.head, "Feld ist schon belegt!", title = "Falsche Eingabe", messageType = Dialog.Message.Error)
 
     def valueToWriteDown: Int = controller.diceCup.result(y)
+
+
+  private def getNumberOfPlayers: Int = {
+    (Json.parse(
+      controller.sendRequest(
+        "field/numberOfPlayers",
+        controller.field
+      )
+    ) \ "numberOfPlayers").toString.toInt
+  }
+
+  private def getCell(col: Int, row: Int): String = {
+    (Json.parse(
+      controller.sendRequest(
+        s"field/cell/$col/$row",
+        controller.field
+      )
+    ) \ "value").as[JsValue].match {
+      case JsNumber(value) => value.toString
+      case _ => ""
+    }
+  }
+
+  private def checkIfEmpty(index: Int): Boolean = {
+    (Json.parse(
+      controller.sendRequest(
+        s"field/isEmpty/$xIndex/$index",
+        controller.field
+      )
+    ) \ "isEmpty").as[Boolean]
+  }

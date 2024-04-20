@@ -23,6 +23,4 @@ trait IMatrix {
   def cell(col: Int, row: Int): Option[Int]
 
   def isEmpty(col: Int, row: Int): Boolean
-
-  val matrixRoute: Route
 }

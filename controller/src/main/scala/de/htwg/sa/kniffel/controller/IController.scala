@@ -3,7 +3,6 @@ package controller
 
 import akka.http.scaladsl.server.Route
 import de.htwg.sa.kniffel.dicecup.IDiceCup
-import de.htwg.sa.kniffel.field.IField
 import de.htwg.sa.kniffel.game.IGame
 import de.htwg.sa.kniffel.util.{Move, Observable}
 import play.api.libs.json.JsObject
@@ -33,7 +32,7 @@ trait IController extends Observable {
 
   def toString: String
 
-  def field: IField
+  def field: String
 
   def diceCup: IDiceCup
 
@@ -46,4 +45,6 @@ trait IController extends Observable {
   def toJson: JsObject
 
   val controllerRoute: Route
+
+  def sendRequest(route: String, requestBody: String): String
 }

@@ -13,23 +13,3 @@ case class Matrix[T](rows: Vector[Vector[Option[Int]]]) extends IMatrix :
   def fill(col: Int, row: Int, value: Option[Int]): Matrix[T] = copy(rows.updated(row, rows(row).updated(col, value)))
 
   def isEmpty(col: Int, row: Int): Boolean = cell(col, row).isEmpty
-
-  override val matrixRoute: Route =
-    get {
-      concat(
-        path("cell" / IntNumber / IntNumber) { (col: Int, row: Int) =>
-          complete(
-            cell(col, row).match {
-              case Some(value) => Json.obj("value" -> JsNumber(value)).toString
-              case None => "{}"
-            }
-          )
-        },
-        path("isEmpty" / IntNumber / IntNumber) { (col: Int, row: Int) =>
-          complete(Json.obj("isEmpty" -> JsBoolean(this.isEmpty(col, row))).toString)
-        },
-        path("") {
-          sys.error("No such GET route")
-        }
-      )
-    }

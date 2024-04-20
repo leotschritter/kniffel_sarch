@@ -3,27 +3,31 @@ package controller.controllerBaseImpl
 
 import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.{PathMatcher, PathMatcher1, Route}
-import controller.IController
-import de.htwg.sa.kniffel.util.{Event, Move, Observable, UndoManager}
 import com.google.inject.Inject
+import de.htwg.sa.kniffel.controller.IController
 import de.htwg.sa.kniffel.dicecup.IDiceCup
 import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
-import de.htwg.sa.kniffel.field.IField
-import de.htwg.sa.kniffel.field.fieldBaseImpl.{Field, Matrix}
 import de.htwg.sa.kniffel.fileio.IFileIO
 import de.htwg.sa.kniffel.fileio.fileIOJsonImpl.FileIO
 import de.htwg.sa.kniffel.game.IGame
 import de.htwg.sa.kniffel.game.gameBaseImpl.Game
+import de.htwg.sa.kniffel.util.{Event, Move, Observable, UndoManager}
 import play.api.libs.json.{JsObject, Json}
 
-class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: IGame, var file: IFileIO) extends IController :
+import java.io.{BufferedReader, InputStreamReader, OutputStreamWriter}
+import java.net.{HttpURLConnection, URL}
+
+class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: IGame, var file: IFileIO) extends IController :
   def this() = {
-    this(Field(new Matrix[Option[Int]](2)), new DiceCup(), new Game(2), new FileIO())
+    this("{\"field\":{\"numberOfPlayers\":2,\"rows\":[[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]]}}",
+      new DiceCup(), new Game(2), new FileIO())
   }
 
-  val undoManager = new UndoManager[IGame, IField]
+  val undoManager = new UndoManager[IGame, String]
 
   def undo(): IController = {
+    // TODO
+    // diceCup = sendRequest("diceCup/nextRound", diceCup)
     diceCup = diceCup.nextRound()
     val r = undoManager.undoStep(game, field)
     game = r._1
@@ -33,6 +37,8 @@ class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: I
   }
 
   def redo(): IController = {
+    // TODO
+    // diceCup = sendRequest("diceCup/nextRound", diceCup)
     diceCup = diceCup.nextRound()
     val r = undoManager.redoStep(game, field)
     game = r._1
@@ -85,14 +91,14 @@ class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: I
   
   def save(): IController = {
     file.saveGame(game)
-    file.saveField(field, field.matrix)
+    // file.saveField(field, field.matrix)
     file.saveDiceCup(diceCup)
     notifyObservers(Event.Save)
     this
   }
 
   def load(): IController = {
-    field = file.loadField
+    // field = file.loadField
     game = file.loadGame
     diceCup = file.loadDiceCup
     notifyObservers(Event.Load)
@@ -105,13 +111,13 @@ class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: I
   }
 
 
-  override def toString: String = field.toString
+  override def toString: String = field
 
   override def toJson: JsObject = {
     Json.obj(
       "controller" ->
         this.diceCup.toJson
-          .deepMerge(this.field.toJson)
+          .deepMerge(Json.parse(this.field).as[JsObject])
           .deepMerge(this.game.toJson))
   }
 
@@ -120,7 +126,7 @@ class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: I
       get {
         concat(
           path("field") {
-            complete(field.toJson.toString)
+            complete(field)
           },
           path("game") {
             complete(game.toJson.toString)
@@ -175,3 +181,30 @@ class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: I
         )
       }
     )
+
+  override def sendRequest(route: String, requestBody: String = ""): String = {
+    val baseURL = "http://localhost:8080/"
+    val url = new URL(baseURL + route)
+    val connection = url.openConnection().asInstanceOf[HttpURLConnection]
+    connection.setRequestMethod("POST")
+    connection.setDoOutput(true)
+    connection.setRequestProperty("Content-Type", "application/json")
+
+    val outputStreamWriter = new OutputStreamWriter(connection.getOutputStream, "UTF-8")
+    outputStreamWriter.write(requestBody)
+    outputStreamWriter.close()
+
+    if (connection.getResponseCode == HttpURLConnection.HTTP_OK) {
+      val streamReader = new InputStreamReader(connection.getInputStream)
+      val reader = new BufferedReader(streamReader)
+      val lines = Iterator.continually(reader.readLine()).takeWhile(_ != null)
+      val response = lines.mkString("\n")
+
+      reader.close()
+      streamReader.close()
+
+      response
+    } else {
+      throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode)
+    }
+  }

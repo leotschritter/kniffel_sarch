@@ -3,6 +3,7 @@ package de.htwg.sa.kniffel.tui
 import com.google.inject.Inject
 import de.htwg.sa.kniffel.controller.IController
 import de.htwg.sa.kniffel.util.{Event, Move, Observer}
+import play.api.libs.json.Json
 
 import scala.io.StdIn.readLine
 import scala.util.{Failure, Success, Try}
@@ -13,14 +14,15 @@ class TUI @Inject()(controller: IController) extends Observer:
   var continue = true
 
   def run(): Unit =
-    println(controller.field.toString)
+    // TODO add print mechanism after Rest Service is up
+    // println(controller.field.toString)
     inputLoop()
 
   def update(e: Event): Unit =
     e match {
       case Event.Quit => continue = false
       case Event.Save => continue
-      case _ => println(controller.field.toString + "\n" + controller.diceCup.toString + controller.game.playerName + " ist an der Reihe.")
+      case _ => println(controller.sendRequest("field/mesh", controller.field) + "\n" + controller.diceCup.toString + controller.game.playerName + " ist an der Reihe.")
     }
 
 
@@ -48,7 +50,7 @@ class TUI @Inject()(controller: IController) extends Observer:
             controller.diceCup.indexOfField.get(posAndDesc)
               .match {
                 case Some(index) =>
-                  if (controller.field.matrix.isEmpty(controller.game.playerID, index))
+                  if (checkIfEmpty(index))
                     Some(Move(controller.diceCup.result(index), controller.game.playerID, index))
                   else
                     println("Da steht schon was!")
@@ -73,4 +75,12 @@ class TUI @Inject()(controller: IController) extends Observer:
   def diceCupPutIn(pi: List[Int]): Unit = controller.doAndPublish(controller.putIn, pi)
 
   def diceCupPutOut(po: List[Int]): Unit = controller.doAndPublish(controller.putOut, po)
-         
+
+  private def checkIfEmpty(index: Int): Boolean = {
+    (Json.parse(
+      controller.sendRequest(
+        "field/isEmpty/" + controller.game.playerID + "/" + index,
+        controller.field
+      )
+    ) \ "isEmpty").as[Boolean]
+  }
