@@ -14,9 +14,6 @@ import de.htwg.sa.kniffel.game.gameBaseImpl.Game
 import de.htwg.sa.kniffel.util.{Event, Move, Observable, UndoManager}
 import play.api.libs.json.{JsObject, Json}
 
-import java.io.{BufferedReader, InputStreamReader, OutputStreamWriter}
-import java.net.{HttpURLConnection, URL}
-
 class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: IGame, var file: IFileIO) extends IController :
   def this() = {
     this("{\"field\":{\"numberOfPlayers\":2,\"rows\":[[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]]}}",
@@ -181,30 +178,3 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: I
         )
       }
     )
-
-  override def sendRequest(route: String, requestBody: String = ""): String = {
-    val baseURL = "http://localhost:8080/"
-    val url = new URL(baseURL + route)
-    val connection = url.openConnection().asInstanceOf[HttpURLConnection]
-    connection.setRequestMethod("POST")
-    connection.setDoOutput(true)
-    connection.setRequestProperty("Content-Type", "application/json")
-
-    val outputStreamWriter = new OutputStreamWriter(connection.getOutputStream, "UTF-8")
-    outputStreamWriter.write(requestBody)
-    outputStreamWriter.close()
-
-    if (connection.getResponseCode == HttpURLConnection.HTTP_OK) {
-      val streamReader = new InputStreamReader(connection.getInputStream)
-      val reader = new BufferedReader(streamReader)
-      val lines = Iterator.continually(reader.readLine()).takeWhile(_ != null)
-      val response = lines.mkString("\n")
-
-      reader.close()
-      streamReader.close()
-
-      response
-    } else {
-      throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode)
-    }
-  }

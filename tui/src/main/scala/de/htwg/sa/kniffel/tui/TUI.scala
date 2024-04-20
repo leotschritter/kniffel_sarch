@@ -2,6 +2,7 @@ package de.htwg.sa.kniffel.tui
 
 import com.google.inject.Inject
 import de.htwg.sa.kniffel.controller.IController
+import de.htwg.sa.kniffel.util.HttpUtil.sendRequest
 import de.htwg.sa.kniffel.util.{Event, Move, Observer}
 import play.api.libs.json.Json
 
@@ -22,7 +23,7 @@ class TUI @Inject()(controller: IController) extends Observer:
     e match {
       case Event.Quit => continue = false
       case Event.Save => continue
-      case _ => println(controller.sendRequest("field/mesh", controller.field) + "\n" + controller.diceCup.toString + controller.game.playerName + " ist an der Reihe.")
+      case _ => println(sendRequest("field/mesh", controller.field) + "\n" + controller.diceCup.toString + controller.game.playerName + " ist an der Reihe.")
     }
 
 
@@ -78,7 +79,7 @@ class TUI @Inject()(controller: IController) extends Observer:
 
   private def checkIfEmpty(index: Int): Boolean = {
     (Json.parse(
-      controller.sendRequest(
+      sendRequest(
         "field/isEmpty/" + controller.game.playerID + "/" + index,
         controller.field
       )

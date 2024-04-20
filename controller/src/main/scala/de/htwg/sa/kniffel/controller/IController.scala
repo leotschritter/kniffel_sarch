@@ -45,6 +45,4 @@ trait IController extends Observable {
   def toJson: JsObject
 
   val controllerRoute: Route
-
-  def sendRequest(route: String, requestBody: String): String
 }

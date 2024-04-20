@@ -3,6 +3,7 @@ package de.htwg.sa.kniffel.gui
 import com.google.inject.Inject
 import de.htwg.sa.kniffel.controller.IController
 import de.htwg.sa.kniffel.util.{Event, Move, Observer}
+import de.htwg.sa.kniffel.util.HttpUtil.sendRequest
 import play.api.libs.json.{JsNumber, JsValue, Json}
 
 import java.awt.Toolkit
@@ -369,7 +370,7 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
 
   private def getNumberOfPlayers: Int = {
     (Json.parse(
-      controller.sendRequest(
+      sendRequest(
         "field/numberOfPlayers",
         controller.field
       )
@@ -378,7 +379,7 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
 
   private def getCell(col: Int, row: Int): String = {
     (Json.parse(
-      controller.sendRequest(
+      sendRequest(
         s"field/cell/$col/$row",
         controller.field
       )
@@ -390,7 +391,7 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
 
   private def checkIfEmpty(index: Int): Boolean = {
     (Json.parse(
-      controller.sendRequest(
+      sendRequest(
         s"field/isEmpty/$xIndex/$index",
         controller.field
       )
