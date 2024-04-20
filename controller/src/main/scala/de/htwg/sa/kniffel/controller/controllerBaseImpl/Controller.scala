@@ -123,6 +123,9 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: S
     concat(
       get {
         concat(
+          pathSingleSlash {
+            complete(toJson.toString)
+          },
           path("field") {
             complete(field)
           },
@@ -187,4 +190,12 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: S
       case JsNull => JsNull.toString
       case _ => nextGameString
     }
+  }
+
+  private def jsonStringToController(controller: String): IController = {
+    val controllerJson = Json.parse(controller)
+    val f = Json.obj("field" -> (controllerJson \ "controller" \ "field").as[JsObject]).toString
+    // val dc = Json.obj("dicecup" -> (controllerJson \ "controller" \ "dicecup").as[JsObject]).toString
+    val g = Json.obj("game" -> (controllerJson \ "controller" \ "game").as[JsObject]).toString
+    new Controller(f, new DiceCup(), g, new FileIO())
   }
