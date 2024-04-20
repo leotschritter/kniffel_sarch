@@ -3,7 +3,7 @@ package de.htwg.sa.kniffel.dicecup.dicecupBaseImpl
 import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.{PathMatcher, PathMatcher1, Route}
 import de.htwg.sa.kniffel.dicecup.{EvaluateStrategy, Evaluator, IDiceCup}
-import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
+import play.api.libs.json.{JsNull, JsNumber, JsObject, JsValue, Json}
 
 import scala.collection.immutable.ListMap
 import scala.util.Random
@@ -90,17 +90,8 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
     concat(
       get {
         concat(
-          path("inCup") {
-            complete(Json.obj("inCup" -> this.inCup).toString)
-          },
-          path("locked") {
-            complete(Json.obj("locked" -> this.locked).toString)
-          },
-          path("remainingDices") {
-            complete(Json.obj("remainingDices" -> JsNumber(this.remainingDices)).toString)
-          },
-          path("result" / IntNumber) { (index: Int) =>
-            complete(Json.obj("result" -> JsNumber(this.result(index))).toString)
+          pathSingleSlash {
+            complete(toJson.toString)
           },
           path("indexOfField") {
             complete(Json.obj("indexOfField" -> this.indexOfField).toString)
@@ -112,23 +103,51 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
       },
       post {
         concat(
+          path("inCup") {
+            entity(as[String]) { requestBody =>
+              complete(Json.obj("inCup" -> jsonStringToDiceCup(requestBody).inCup).toString)
+            }
+          },
+          path("locked") {
+            entity(as[String]) { requestBody =>
+              complete(Json.obj("locked" -> jsonStringToDiceCup(requestBody).locked).toString)
+            }
+          },
+          path("remainingDices") {
+            entity(as[String]) { requestBody =>
+              complete(Json.obj("remainingDices" -> JsNumber(jsonStringToDiceCup(requestBody).remainingDices)).toString)
+            }
+          },
+          path("result" / IntNumber) { (index: Int) =>
+            entity(as[String]) { requestBody =>
+              complete(Json.obj("result" -> JsNumber(jsonStringToDiceCup(requestBody).result(index))).toString)
+            }
+          },
           path("nextRound") {
-            complete(this.nextRound().toJson.toString)
+            entity(as[String]) { requestBody =>
+              complete(jsonStringToDiceCup(requestBody).nextRound().toJson.toString)
+            }
           },
           // example: putOut/list=1,2,3
           path("putOut" / IntList) { (list: List[Int]) =>
-            complete(this.putDicesOut(list).toJson.toString)
+            entity(as[String]) { requestBody =>
+              complete(jsonStringToDiceCup(requestBody).putDicesOut(list).toJson.toString)
+            }
           },
           path("putIn" / IntList) { (list: List[Int]) =>
-            complete(this.putDicesIn(list).toJson.toString)
+            entity(as[String]) { requestBody =>
+              complete(jsonStringToDiceCup(requestBody).putDicesIn(list).toJson.toString)
+            }
           },
           path("dice") {
-            complete(
-              this.dice().match {
-                case Some(diceCup) => diceCup.toJson.toString
-                case None => "{}"
-              }
-            )
+            entity(as[String]) { requestBody =>
+              complete(
+                jsonStringToDiceCup(requestBody).dice().match {
+                  case Some(diceCup) => diceCup.toJson.toString
+                  case None => Json.obj("dicecup" -> JsNull).toString
+                }
+              )
+            }
           },
           path("") {
             sys.error("No such POST route")
