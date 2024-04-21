@@ -23,7 +23,7 @@ class TUI @Inject()(controller: IController) extends Observer:
     e match {
       case Event.Quit => continue = false
       case Event.Save => continue
-      case _ => println(sendRequest("field/mesh", controller.field) + "\n" + controller.diceCup.toString + getPlayerName + " ist an der Reihe.")
+      case _ => println(sendRequest("field/mesh", controller.field) + "\n" + sendRequest("diceCup/representation", controller.diceCup) + "\n" + getPlayerName + " ist an der Reihe.")
     }
 
 
@@ -48,11 +48,11 @@ class TUI @Inject()(controller: IController) extends Observer:
       case "wd" =>
         validInput(textInputAsList) match {
           case Success(f) => val posAndDesc = textInputAsList.tail.head
-            controller.diceCup.indexOfField.get(posAndDesc)
+            getIndexOfField(posAndDesc)
               .match {
                 case Some(index) =>
                   if (checkIfEmpty(index))
-                    Some(Move(controller.diceCup.result(index), getPlayerID, index))
+                    Some(Move(getResult(index), getPlayerID, index))
                   else
                     println("Da steht schon was!")
                     None
@@ -92,4 +92,16 @@ class TUI @Inject()(controller: IController) extends Observer:
 
   private def getPlayerID: Int = {
     (Json.parse(sendRequest("game/playerID", controller.game)) \ "playerID").as[Int]
+  }
+
+  private def getIndexOfField(posAndDesc: String): Option[Int] = {
+    try {
+      Some((Json.parse(sendRequest("diceCup/indexOfField")) \ "indexOfField" \ posAndDesc).as[Int])
+    } catch {
+      case e: Throwable => None
+    }
+  }
+
+  private def getResult(index: Int): Int = {
+    (Json.parse(sendRequest(s"diceCup/result/$index", controller.diceCup)) \ "result").as[Int]
   }

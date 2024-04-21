@@ -149,6 +149,11 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
               )
             }
           },
+          path("representation") {
+            entity(as[String]) { requestBody =>
+              complete(jsonStringToDiceCup(requestBody).toString)
+            }
+          },
           path("") {
             sys.error("No such POST route")
           }

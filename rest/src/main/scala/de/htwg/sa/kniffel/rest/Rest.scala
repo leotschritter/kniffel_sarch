@@ -7,6 +7,7 @@ import akka.http.scaladsl.server.Route
 import de.htwg.sa.kniffel.controller.IController
 import de.htwg.sa.kniffel.field.fieldBaseImpl.Field
 import de.htwg.sa.kniffel.game.gameBaseImpl.Game
+import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
 import de.htwg.sa.kniffel.util.{Event, Observer}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -19,6 +20,7 @@ case class Rest(controller: IController) extends Observer {
   implicit val executionContext: ExecutionContext = system.dispatcher
   val field = new Field(2)
   val game = new Game(2)
+  val diceCup = new DiceCup()
 
   val bindingFuture: Future[Http.ServerBinding] = Http().newServerAt("localhost", 8080).bind(
     concat(
@@ -29,7 +31,7 @@ case class Rest(controller: IController) extends Observer {
         this.game.gameRoute
       },
       pathPrefix("diceCup") {
-        this.controller.diceCup.diceCupRoute
+        this.diceCup.diceCupRoute
       },
       pathPrefix("field") {
         this.field.fieldRoute

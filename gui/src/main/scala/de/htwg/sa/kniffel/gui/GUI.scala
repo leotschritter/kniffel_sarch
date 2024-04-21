@@ -126,8 +126,8 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
 
   def disableList: List[Int] = (for {y <- 0 until 19 if !isEmpty(y)} yield y).toList
 
-  class RightPanel(state: stateOfDices, inCup: List[Int] = controller.diceCup.inCup,
-                   locked: List[Int] = controller.diceCup.locked, remaining_moves: Int = controller.diceCup.remainingDices) extends BoxPanel(Orientation.Vertical) :
+  class RightPanel(state: stateOfDices, inCup: List[Int] = getInCup,
+                   locked: List[Int] = getLocked, remaining_moves: Int = getRemainingDices) extends BoxPanel(Orientation.Vertical) :
     contents += new RightUpperPanel
     contents += new RightBottomPanel
     contents += new BorderPanel {
@@ -151,12 +151,12 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
       val lstViewLeft: ListView[ImageIcon] = new ListView[ImageIcon]() {
         selection.intervalMode = IntervalMode.MultiInterval
         if (state.==(stateOfDices.running))
-          listData = for (s <- controller.diceCup.inCup) yield intToImg(s)
+          listData = for (s <- getInCup) yield intToImg(s)
         preferredSize = new Dimension(100, 500)
       }
       val lstViewRight: ListView[ImageIcon] = new ListView[ImageIcon]() {
         selection.intervalMode = IntervalMode.MultiInterval
-        listData = for (s <- controller.diceCup.locked) yield intToImg(s)
+        listData = for (s <- getLocked) yield intToImg(s)
         preferredSize = new Dimension(100, 500)
       }
       add(new TopInnerPanel(), BorderPanel.Position.North)
@@ -365,7 +365,7 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
 
     // def errorMessage(): Unit = Dialog.showMessage(contents.head, "Feld ist schon belegt!", title = "Falsche Eingabe", messageType = Dialog.Message.Error)
 
-    def valueToWriteDown: Int = controller.diceCup.result(y)
+    private def valueToWriteDown: Int = getResult(y)
 
 
   private def getNumberOfPlayers: Int = {
@@ -404,4 +404,20 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
 
   private def getPlayerName(x: Int): String = {
     (Json.parse(sendRequest(s"game/playerName/$x", controller.game)) \ "playerName").as[String]
+  }
+
+  private def getInCup: List[Int] = {
+    (Json.parse(sendRequest("diceCup/inCup", controller.diceCup)) \ "inCup").as[List[Int]]
+  }
+
+  private def getLocked: List[Int] = {
+    (Json.parse(sendRequest("diceCup/locked", controller.diceCup)) \ "locked").as[List[Int]]
+  }
+
+  private def getRemainingDices: Int = {
+    (Json.parse(sendRequest("diceCup/remainingDices", controller.diceCup)) \ "remainingDices").as[Int]
+  }
+
+  private def getResult(index: Int): Int = {
+    (Json.parse(sendRequest(s"diceCup/result/$index", controller.diceCup)) \ "result").as[Int]
   }

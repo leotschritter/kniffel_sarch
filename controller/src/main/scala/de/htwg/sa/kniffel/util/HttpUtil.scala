@@ -8,13 +8,20 @@ object HttpUtil {
     val baseURL = "http://localhost:8080/"
     val url = new URL(baseURL + route)
     val connection = url.openConnection().asInstanceOf[HttpURLConnection]
-    connection.setRequestMethod("POST")
-    connection.setDoOutput(true)
-    connection.setRequestProperty("Content-Type", "application/json")
 
-    val outputStreamWriter = new OutputStreamWriter(connection.getOutputStream, "UTF-8")
-    outputStreamWriter.write(requestBody)
-    outputStreamWriter.close()
+    if (!requestBody.isBlank) {
+      connection.setRequestMethod("POST")
+      connection.setDoOutput(true)
+      connection.setRequestProperty("Content-Type", "application/json")
+
+      val outputStreamWriter = new OutputStreamWriter(connection.getOutputStream, "UTF-8")
+      outputStreamWriter.write(requestBody)
+      outputStreamWriter.close()
+    } else {
+      connection.setRequestMethod("GET")
+      connection.setDoOutput(true)
+      connection.setRequestProperty("Content-Type", "application/json")
+    }
 
     if (connection.getResponseCode == HttpURLConnection.HTTP_OK) {
       val streamReader = new InputStreamReader(connection.getInputStream)

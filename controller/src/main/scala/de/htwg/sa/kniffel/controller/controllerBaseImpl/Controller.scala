@@ -14,10 +14,10 @@ import de.htwg.sa.kniffel.util.{Event, Move, Observable, UndoManager}
 import play.api.libs.json
 import play.api.libs.json.{JsNull, JsObject, JsValue, Json}
 
-class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: String, var file: IFileIO) extends IController :
+class Controller @Inject()(var field: String, var diceCup: String, var game: String, var file: IFileIO) extends IController :
   def this() = {
     this("{\"field\":{\"numberOfPlayers\":2,\"rows\":[[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]]}}",
-      new DiceCup(),
+      "{\"dicecup\":{\"stored\":[],\"incup\":[],\"remainingDices\":2}}",
       "{\"game\":{\"nestedList\":\"0,0,0,0,0,0;0,0,0,0,0,0\",\"remainingMoves\":26,\"currentPlayerID\":0,\"currentPlayerName\":\"Player 1\",\"players\":[{\"id\":0,\"name\":\"Player 1\"},{\"id\":1,\"name\":\"Player 2\"}]}}",
       new FileIO())
   }
@@ -25,9 +25,7 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: S
   val undoManager = new UndoManager[String, String]
 
   def undo(): IController = {
-    // TODO
-    // diceCup = sendRequest("diceCup/nextRound", diceCup)
-    diceCup = diceCup.nextRound()
+    diceCup = nextRound()
     val r = undoManager.undoStep(game, field)
     game = r._1
     field = r._2
@@ -36,9 +34,7 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: S
   }
 
   def redo(): IController = {
-    // TODO
-    // diceCup = sendRequest("diceCup/nextRound", diceCup)
-    diceCup = diceCup.nextRound()
+    diceCup = nextRound()
     val r = undoManager.redoStep(game, field)
     game = r._1
     field = r._2
@@ -47,7 +43,7 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: S
   }
 
   def put(move: Move): IController = {
-    diceCup = diceCup.nextRound()
+    diceCup = nextRound()
     val r = undoManager.doStep(game, field, SetCommand(move))
     game = r._1
     field = r._2
@@ -64,32 +60,38 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: S
     this
 
   // doAndPublish for putOut and putIn
-  def doAndPublish(doThis: List[Int] => IDiceCup, list: List[Int]): IController =
+  def doAndPublish(doThis: List[Int] => String, list: List[Int]): IController =
     diceCup = doThis(list)
     notifyObservers(Event.Move)
     this
 
-  def putOut(list: List[Int]): IDiceCup =
-    diceCup.putDicesOut(list)
+  def putOut(list: List[Int]): String =
+    sendRequest(s"diceCup/putOut/list=${list.mkString(",")}", diceCup)
 
-  def putIn(list: List[Int]): IDiceCup =
-    diceCup.putDicesIn(list)
+  def putIn(list: List[Int]): String =
+    sendRequest(s"diceCup/putIn/list=${list.mkString(",")}", diceCup)
 
   // doAndPublish for nextRound() and dice()
-  def doAndPublish(doThis: => IDiceCup): IController =
+  def doAndPublish(doThis: => String): IController =
     diceCup = doThis
     notifyObservers(Event.Move)
     this
 
-  def dice(): IDiceCup = diceCup.dice().getOrElse(diceCup)
+  def dice(): String = {
+    val dc = sendRequest("diceCup/dice", diceCup)
+    (Json.parse(dc) \ "dicecup").as[JsValue].match {
+      case JsNull => diceCup
+      case _ => dc
+    }
+  }
 
-  def nextRound(): IDiceCup = diceCup.nextRound()
+  def nextRound(): String = sendRequest("diceCup/nextRound", diceCup)
   
   def save(): IController = {
     // TODO
     // file.saveGame(game)
     // file.saveField(field, field.matrix)
-    file.saveDiceCup(diceCup)
+    // file.saveDiceCup(diceCup)
     notifyObservers(Event.Save)
     this
   }
@@ -98,7 +100,7 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: S
     // TODO
     // field = file.loadField
     // game = file.loadGame
-    diceCup = file.loadDiceCup
+    // diceCup = file.loadDiceCup
     notifyObservers(Event.Load)
     this
   }
@@ -114,7 +116,7 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: S
   override def toJson: JsObject = {
     Json.obj(
       "controller" ->
-        this.diceCup.toJson
+        Json.parse(this.diceCup).as[JsObject]
           .deepMerge(Json.parse(this.field).as[JsObject])
           .deepMerge(Json.parse(this.game).as[JsObject]))
   }
@@ -133,7 +135,7 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: S
             complete(game)
           },
           path("diceCup") {
-            complete(diceCup.toJson.toString)
+            complete(diceCup)
           },
           path("") {
             sys.error("No such GET route")
@@ -159,16 +161,16 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: S
           },
           // example: putOut/list=1,2,3
           path("putOut" / IntList) { (list: List[Int]) =>
-            complete(putOut(list).toJson.toString)
+            complete(putOut(list))
           },
           path("putIn" / IntList) { (list: List[Int]) =>
-            complete(putIn(list).toJson.toString)
+            complete(putIn(list))
           },
           path("dice") {
-            complete(dice().toJson.toString)
+            complete(dice())
           },
           path("nextRound") {
-            complete(nextRound().toJson.toString)
+            complete(nextRound())
           },
           path("save") {
             complete(save().toJson.toString)
@@ -195,7 +197,7 @@ class Controller @Inject()(var field: String, var diceCup: IDiceCup, var game: S
   private def jsonStringToController(controller: String): IController = {
     val controllerJson = Json.parse(controller)
     val f = Json.obj("field" -> (controllerJson \ "controller" \ "field").as[JsObject]).toString
-    // val dc = Json.obj("dicecup" -> (controllerJson \ "controller" \ "dicecup").as[JsObject]).toString
+    val dc = Json.obj("dicecup" -> (controllerJson \ "controller" \ "dicecup").as[JsObject]).toString
     val g = Json.obj("game" -> (controllerJson \ "controller" \ "game").as[JsObject]).toString
-    new Controller(f, new DiceCup(), g, new FileIO())
+    new Controller(f, dc, g, new FileIO())
   }
