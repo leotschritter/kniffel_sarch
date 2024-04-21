@@ -70,8 +70,8 @@ lazy val fileIO = (project in file("fileIO"))
   )
 
 lazy val controller = (project in file("controller"))
-  .dependsOn(dicecup, fileIO)
-  .aggregate(dicecup, fileIO)
+  .dependsOn(fileIO)
+  .aggregate(fileIO)
   .settings(
     name := "controller",
     version := controllerVersion,
