@@ -1,29 +1,28 @@
 package de.htwg.sa.kniffel.gui
 
-import com.google.inject.Inject
-import de.htwg.sa.kniffel.controller.IController
-import de.htwg.sa.kniffel.util.{Event, Move, Observer}
-import de.htwg.sa.kniffel.util.HttpUtil.sendRequest
-import play.api.libs.json.{JsNumber, JsValue, Json}
+import akka.http.scaladsl.server.Directives.*
+import akka.http.scaladsl.server.Route
+import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 
 import java.awt.Toolkit
+import java.io.{BufferedReader, InputStreamReader, OutputStreamWriter}
+import java.net.{HttpURLConnection, URL}
 import javax.swing.ImageIcon
 import scala.swing.*
 import scala.swing.ListView.*
 import scala.swing.event.*
 
-class GUI @Inject()(controller: IController) extends Frame with Observer:
-  controller.add(this)
+class GUI extends Frame:
 
-  private def writeDown(move: Move): Unit = {
-    controller.put(move)
-    controller.next()
-    controller.doAndPublish(controller.nextRound())
+  private def writeDown(move: String): Unit = {
+    sendRequest("controller/put", "POST", move)
+    sendRequest("controller/next", "GET")
+    sendRequest("controller/doAndPublish/nextRound", "GET")
   }
 
-  private def diceCupPutIn(pi: List[Int]): Unit = controller.doAndPublish(controller.putIn, pi)
+  private def diceCupPutIn(pi: List[Int]): Unit = sendRequest(s"controller/doAndPublish/putIn/list=${pi.mkString(",")}", "GET")
 
-  private def diceCupPutOut(po: List[Int]): Unit = controller.doAndPublish(controller.putOut, po)
+  private def diceCupPutOut(po: List[Int]): Unit = sendRequest(s"controller/doAndPublish/putOut/list=${po.mkString(",")}", "GET")
 
   title = "Kniffel"
   iconImage = toolkit.getImage("src/main/resources/6.png")
@@ -61,9 +60,9 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
     case initial
     case running
 
-  def update(e: Event): Unit = e match
-    case Event.Quit => this.dispose()
-    case Event.Save => contents
+  def update(event: String): String = event match
+    case "quit" => this.dispose(); Json.obj("event" -> event).toString
+    case "save" => contents; Json.obj("event" -> event).toString
     case _ =>
       contents = new BorderPanel {
         add(new Label {
@@ -76,6 +75,7 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
       }
       size = new Dimension(xSize, ySize)
       repaint()
+      Json.obj("event" -> event).toString
 
   menuBar = new MenuBar {
     contents += new Menu("File") {
@@ -83,10 +83,10 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
         sys.exit(0)
       })
       contents += new MenuItem(Action("Load") {
-        controller.load()
+        sendRequest("controller/load", "GET")
       })
       contents += new MenuItem(Action("Save") {
-        controller.save()
+        sendRequest("controller/save", "GET")
       })
     }
   }
@@ -120,7 +120,10 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
       border = Swing.LineBorder(new Color(0, 0, 0))
     }).toList
 
-  def xIndex: Int = (Json.parse(sendRequest("game/playerID", controller.game)) \ "playerID").as[Int]
+  private def xIndex: Int = {
+    val g = sendRequest("controller/game", "GET")
+    (Json.parse(sendRequest("game/playerID", "POST", g)) \ "playerID").as[Int]
+  }
 
   def isEmpty(y: Int): Boolean = checkIfEmpty(y)
 
@@ -233,7 +236,7 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
           if (remaining_moves >= 0)
             reactions += {
               case MouseClicked(src, pt, mod, clicks, props) =>
-                controller.doAndPublish(controller.dice())
+                sendRequest("controller/doAndPublish/dice", "GET")
             }
           else
             enabled = false
@@ -324,8 +327,7 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
         }
     }
 
-  // TODO numberOfPlayer should be get by calling getNumberOfPlayers → that leads to errors atm
-  class CenterCellPanel(numberOfPlayers: Int = 2) extends GridPanel(20, numberOfPlayers) :
+  class CenterCellPanel(numberOfPlayers: Int = getNumberOfPlayers) extends GridPanel(20, numberOfPlayers) :
     background = new Color(255, 255, 255)
     for (x <- 0 until numberOfPlayers) yield contents += new Label {
       text = getPlayerName(x)
@@ -342,7 +344,7 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
     listenTo(mouse.clicks)
     reactions += {
       case MouseClicked(src, pt, mod, clicks, props)
-      => controller.undo(); update(Event.Move)
+      => sendRequest("controller/undo", "GET"); update("move")
     }
 
   class RedoButton() extends Button :
@@ -350,7 +352,7 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
     listenTo(mouse.clicks)
     reactions += {
       case MouseClicked(src, pt, mod, clicks, props)
-      => controller.redo(); update(Event.Move)
+      => sendRequest("controller/redo", "GET"); update("move")
     }
 
   class CellButton(value: String, y: Int, isDisabled: Boolean = true) extends Button(value) :
@@ -358,7 +360,7 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
       listenTo(mouse.clicks)
       reactions += {
         case MouseClicked(src, pt, mod, clicks, props)
-        => writeDown(Move(valueToWriteDown, xIndex, y)); update(Event.Move)
+        => writeDown(moveToJson(valueToWriteDown, xIndex, y).toString); update("move")
       }
     else
       enabled = false
@@ -372,16 +374,18 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
     (Json.parse(
       sendRequest(
         "field/numberOfPlayers",
-        controller.field
+        "POST",
+        sendRequest("controller/field", "GET")
       )
-    ) \ "numberOfPlayers").toString.toInt
+    ) \ "numberOfPlayers").as[Int]
   }
 
   private def getCell(col: Int, row: Int): String = {
     (Json.parse(
       sendRequest(
         s"field/cell/$col/$row",
-        controller.field
+        "POST",
+        sendRequest("controller/field", "GET")
       )
     ) \ "value").as[JsValue].match {
       case JsNumber(value) => value.toString
@@ -393,31 +397,96 @@ class GUI @Inject()(controller: IController) extends Frame with Observer:
     (Json.parse(
       sendRequest(
         s"field/isEmpty/$xIndex/$index",
-        controller.field
+        "POST",
+        sendRequest("controller/field", "GET")
       )
     ) \ "isEmpty").as[Boolean]
   }
 
   private def getPlayerName: String = {
-    (Json.parse(sendRequest("game/playerName", controller.game)) \ "playerName").as[String]
+    (Json.parse(sendRequest("game/playerName", "POST", sendRequest("controller/game", "GET"))) \ "playerName").as[String]
   }
 
   private def getPlayerName(x: Int): String = {
-    (Json.parse(sendRequest(s"game/playerName/$x", controller.game)) \ "playerName").as[String]
+    (Json.parse(sendRequest(s"game/playerName/$x", "POST", sendRequest("controller/game", "GET"))) \ "playerName").as[String]
   }
 
   private def getInCup: List[Int] = {
-    (Json.parse(sendRequest("diceCup/inCup", controller.diceCup)) \ "inCup").as[List[Int]]
+    (Json.parse(sendRequest("diceCup/inCup", "POST", sendRequest("controller/diceCup", "GET"))) \ "inCup").as[List[Int]]
   }
 
   private def getLocked: List[Int] = {
-    (Json.parse(sendRequest("diceCup/locked", controller.diceCup)) \ "locked").as[List[Int]]
+    (Json.parse(sendRequest("diceCup/locked", "POST", sendRequest("controller/diceCup", "GET"))) \ "locked").as[List[Int]]
   }
 
   private def getRemainingDices: Int = {
-    (Json.parse(sendRequest("diceCup/remainingDices", controller.diceCup)) \ "remainingDices").as[Int]
+    (Json.parse(sendRequest("diceCup/remainingDices", "POST", sendRequest("controller/diceCup", "GET"))) \ "remainingDices").as[Int]
   }
 
   private def getResult(index: Int): Int = {
-    (Json.parse(sendRequest(s"diceCup/result/$index", controller.diceCup)) \ "result").as[Int]
+    (Json.parse(sendRequest(s"diceCup/result/$index", "POST", sendRequest("controller/diceCup", "GET"))) \ "result").as[Int]
   }
+
+  private def moveToJson(value: Int, x: Int, y: Int): JsObject = {
+    Json.obj(
+      "move" -> Json.obj(
+        "value" -> JsNumber(value),
+        "x" -> JsNumber(x),
+        "y" -> JsNumber(y)
+      )
+    )
+  }
+
+  private def sendRequest(route: String, requestMethod: String, requestBody: String = ""): String = {
+    val baseURL = "http://localhost:8080/"
+    val url = new URL(baseURL + route)
+    val connection = url.openConnection().asInstanceOf[HttpURLConnection]
+
+    if (requestMethod.equals("POST")) {
+      connection.setRequestMethod("POST")
+      connection.setDoOutput(true)
+      connection.setRequestProperty("Content-Type", "application/json")
+
+      val outputStreamWriter = new OutputStreamWriter(connection.getOutputStream, "UTF-8")
+      outputStreamWriter.write(requestBody)
+      outputStreamWriter.close()
+    } else if (requestMethod.equals("GET")) {
+      connection.setRequestMethod("GET")
+      connection.setDoOutput(true)
+      connection.setRequestProperty("Content-Type", "application/json")
+    }
+
+    if (connection.getResponseCode == HttpURLConnection.HTTP_OK) {
+      val streamReader = new InputStreamReader(connection.getInputStream)
+      val reader = new BufferedReader(streamReader)
+      val lines = Iterator.continually(reader.readLine()).takeWhile(_ != null)
+      val response = lines.mkString("\n")
+
+      reader.close()
+      streamReader.close()
+
+      response
+    } else {
+      throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode)
+    }
+  }
+
+  val guiRoute: Route =
+    concat(
+      put {
+        concat(
+          path("quit") {
+            complete(update("quit"))
+          },
+          path("save") {
+            complete(update("save"))
+          },
+          path("load") {
+            complete(update("load"))
+          },
+          path("move") {
+            complete(update("move"))
+          },
+        )
+      }
+    )

@@ -5,18 +5,28 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.Route
 import de.htwg.sa.kniffel.controller.IController
+import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
 import de.htwg.sa.kniffel.field.fieldBaseImpl.Field
 import de.htwg.sa.kniffel.game.gameBaseImpl.Game
-import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
+import de.htwg.sa.kniffel.gui.GUI
+import de.htwg.sa.kniffel.util.Event.{Load, Move, Quit, Save}
+
+import java.net.{HttpURLConnection, URL}
+
 // import de.htwg.sa.kniffel.fileio.fileIOJsonImpl.FileIO
 import de.htwg.sa.kniffel.fileio.fileIOXmlImpl.FileIO
 import de.htwg.sa.kniffel.util.{Event, Observer}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 case class Rest(controller: IController) extends Observer {
   controller.add(this)
-  override def update(e: Event): Unit = println("update(e: Event) not implemented in Rest.scala")
+
+  override def update(e: Event): Unit = e match
+    case Quit => sendRequest("gui/quit")
+    case Save => sendRequest("gui/save")
+    case Load => sendRequest("gui/load")
+    case Move => sendRequest("gui/move")
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
@@ -25,7 +35,7 @@ case class Rest(controller: IController) extends Observer {
   val diceCup = new DiceCup()
   val fileIOJson = new FileIO
 
-  val bindingFuture: Future[Http.ServerBinding] = Http().newServerAt("localhost", 8080).bind(
+  Http().newServerAt("localhost", 8080).bind(
     concat(
       pathPrefix("controller") {
         this.controller.controllerRoute
@@ -44,4 +54,28 @@ case class Rest(controller: IController) extends Observer {
       }
     )
   )
+
+  // setup GUI and TUI Route
+  val gui = new GUI
+  Http().newServerAt("localhost", 80).bind(
+    concat(
+      pathPrefix("gui") {
+        this.gui.guiRoute
+      }
+    )
+  )
+
+  private def sendRequest(route: String): Unit = {
+    val baseURL = "http://localhost/"
+    val url = new URL(baseURL + route)
+    val connection = url.openConnection().asInstanceOf[HttpURLConnection]
+
+    connection.setRequestMethod("PUT")
+    connection.setDoOutput(true)
+    connection.setRequestProperty("Content-Type", "application/json")
+
+    if (connection.getResponseCode != HttpURLConnection.HTTP_OK) {
+      throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode)
+    }
+  }
 }

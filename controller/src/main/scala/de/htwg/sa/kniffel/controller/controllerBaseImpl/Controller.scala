@@ -130,6 +130,39 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
           path("diceCup") {
             complete(diceCup)
           },
+          path("load") {
+            complete(load().toJson.toString)
+          },
+          path("next") {
+            complete(next().toJson.toString)
+          },
+          pathPrefix("doAndPublish") {
+            concat(
+              path("nextRound") {
+                complete(doAndPublish(nextRound()).toJson.toString)
+              },
+              path("dice") {
+                complete(doAndPublish(dice()).toJson.toString)
+              },
+              path("putIn" / IntList) {
+                (pi: List[Int]) =>
+                  complete(doAndPublish(putIn(pi)).toJson.toString)
+              },
+              path("putOut" / IntList) {
+                (po: List[Int]) =>
+                  complete(doAndPublish(putOut(po)).toJson.toString)
+              }
+            )
+          },
+          path("save") {
+            complete(save().toJson.toString)
+          },
+          path("undo") {
+            complete(undo().toJson.toString)
+          },
+          path("redo") {
+            complete(redo().toJson.toString)
+          },
           path("") {
             sys.error("No such GET route")
           }
@@ -137,39 +170,16 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
       },
       post {
         concat(
-          path("undo") {
-            complete(undo().toJson.toString)
-          },
-          path("redo") {
-            complete(redo().toJson.toString)
-          },
-          path("put" / IntNumber / IntNumber / IntNumber) { (value: Int, x: Int, y: Int) =>
-            complete(put(Move(value, x, y)).toJson.toString)
+          path("put") {
+            entity(as[String]) { requestBody =>
+              complete(this.put(jsonStringToMove(requestBody)).toJson.toString)
+            }
           },
           path("quit") {
             complete(quit().toJson.toString)
           },
-          path("next") {
-            complete(next().toJson.toString)
-          },
-          // example: putOut/list=1,2,3
-          path("putOut" / IntList) { (list: List[Int]) =>
-            complete(putOut(list))
-          },
-          path("putIn" / IntList) { (list: List[Int]) =>
-            complete(putIn(list))
-          },
-          path("dice") {
-            complete(dice())
-          },
           path("nextRound") {
             complete(nextRound())
-          },
-          path("save") {
-            complete(save().toJson.toString)
-          },
-          path("load") {
-            complete(save().toJson.toString)
           },
           path("") {
             sys.error("No such POST route")
@@ -193,4 +203,12 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
     val dc = Json.obj("dicecup" -> (controllerJson \ "controller" \ "dicecup").as[JsObject]).toString
     val g = Json.obj("game" -> (controllerJson \ "controller" \ "game").as[JsObject]).toString
     new Controller(f, dc, g)
+  }
+
+  private def jsonStringToMove(move: String): Move = {
+    Move(
+      (Json.parse(move) \ "move" \ "value").as[Int],
+      (Json.parse(move) \ "move" \ "x").as[Int],
+      (Json.parse(move) \ "move" \ "y").as[Int]
+    )
   }

@@ -31,8 +31,8 @@ lazy val dependencies = Seq(
 )
 
 lazy val root = (project in file(""))
-  .dependsOn(dicecup, field, game, controller, gui, tui, rest)
-  .aggregate(dicecup, field, game, controller, gui, tui, rest)
+  .dependsOn(controller, tui, rest)
+  .aggregate(controller, tui, rest)
   .settings(
     name := "kniffel",
     version := "0.1.0-SNAPSHOT",
@@ -75,8 +75,6 @@ lazy val controller = (project in file("controller"))
   )
 
 lazy val gui = (project in file("gui"))
-  .dependsOn(controller)
-  .aggregate(controller)
   .settings(
     name := "gui",
     version := guiVersion,
@@ -93,8 +91,8 @@ lazy val tui = (project in file("tui"))
   )
 
 lazy val rest = (project in file("rest"))
-  .dependsOn(controller, dicecup, field, game, fileIO)
-  .aggregate(controller, dicecup, field, game, fileIO)
+  .dependsOn(controller, dicecup, field, game, fileIO, gui)
+  .aggregate(controller, dicecup, field, game, fileIO, gui)
   .settings(
     name := "rest",
     version := restVersion,
