@@ -1,0 +1,184 @@
+{
+	"info": {
+		"_postman_id": "6fce22dd-3e5c-46c3-bd76-c35a0b5e9b35",
+		"name": "SARCH-05-REST",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30511670"
+	},
+	"item": [
+		{
+			"name": "dice",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/controller/doAndPublish/dice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"controller",
+						"doAndPublish",
+						"dice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "load",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/controller/load",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"controller",
+						"load"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "putOut",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/controller/doAndPublish/putOut/list=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"controller",
+						"doAndPublish",
+						"putOut",
+						"list=1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "putIn",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/controller/doAndPublish/putIn/list=2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"controller",
+						"doAndPublish",
+						"putIn",
+						"list=2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "redo",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/controller/redo",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"controller",
+						"redo"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "save",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/controller/save",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"controller",
+						"save"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "undo",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/controller/undo",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"controller",
+						"undo"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "writeDown",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"move\": {\r\n        \"value\": 5,\r\n        \"x\": 1,\r\n        \"y\": 4\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/controller/put",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"controller",
+						"put"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -9,6 +9,7 @@ import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
 import de.htwg.sa.kniffel.field.fieldBaseImpl.Field
 import de.htwg.sa.kniffel.game.gameBaseImpl.Game
 import de.htwg.sa.kniffel.gui.GUI
+import de.htwg.sa.kniffel.tui.TUI
 import de.htwg.sa.kniffel.util.Event.{Load, Move, Quit, Save}
 
 import java.net.{HttpURLConnection, URL}
@@ -23,10 +24,10 @@ case class Rest(controller: IController) extends Observer {
   controller.add(this)
 
   override def update(e: Event): Unit = e match
-    case Quit => sendRequest("gui/quit")
-    case Save => sendRequest("gui/save")
-    case Load => sendRequest("gui/load")
-    case Move => sendRequest("gui/move")
+    case Quit => sendRequest("gui/quit"); sendRequest("tui/quit")
+    case Save => sendRequest("gui/save"); sendRequest("tui/save")
+    case Load => sendRequest("gui/load"); sendRequest("tui/load")
+    case Move => sendRequest("gui/move"); sendRequest("tui/move")
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
@@ -57,13 +58,18 @@ case class Rest(controller: IController) extends Observer {
 
   // setup GUI and TUI Route
   val gui = new GUI
+  val tui = new TUI
   Http().newServerAt("localhost", 80).bind(
     concat(
       pathPrefix("gui") {
         this.gui.guiRoute
+      },
+      pathPrefix("tui") {
+        this.tui.tuiRoute
       }
     )
   )
+  tui.run()
 
   private def sendRequest(route: String): Unit = {
     val baseURL = "http://localhost/"

@@ -19,46 +19,46 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
 
   val undoManager = new UndoManager[String, String]
 
-  def undo(): IController = {
+  def undo(): String = {
     diceCup = nextRound()
     val r = undoManager.undoStep(game, field)
     game = r._1
     field = r._2
     notifyObservers(Event.Move)
-    this
+    toString
   }
 
-  def redo(): IController = {
+  def redo(): String = {
     diceCup = nextRound()
     val r = undoManager.redoStep(game, field)
     game = r._1
     field = r._2
     notifyObservers(Event.Move)
-    this
+    toString
   }
 
-  def put(move: Move): IController = {
+  def put(move: Move): String = {
     diceCup = nextRound()
     val r = undoManager.doStep(game, field, SetCommand(move))
     game = r._1
     field = r._2
-    this
+    toString
   }
 
-  def quit(): IController = {
+  def quit(): String = {
     notifyObservers(Event.Quit)
-    this
+    toString
   }
 
-  def next(): IController =
+  def next(): String =
     game = getNextGame
-    this
+    toString
 
   // doAndPublish for putOut and putIn
-  def doAndPublish(doThis: List[Int] => String, list: List[Int]): IController =
+  def doAndPublish(doThis: List[Int] => String, list: List[Int]): String =
     diceCup = doThis(list)
     notifyObservers(Event.Move)
-    this
+    toString
 
   def putOut(list: List[Int]): String =
     sendRequest(s"diceCup/putOut/list=${list.mkString(",")}", diceCup)
@@ -67,10 +67,10 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
     sendRequest(s"diceCup/putIn/list=${list.mkString(",")}", diceCup)
 
   // doAndPublish for nextRound() and dice()
-  def doAndPublish(doThis: => String): IController =
+  def doAndPublish(doThis: => String): String =
     diceCup = doThis
     notifyObservers(Event.Move)
-    this
+    toString
 
   def dice(): String = {
     val dc = sendRequest("diceCup/dice", diceCup)
@@ -81,21 +81,21 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
   }
 
   def nextRound(): String = sendRequest("diceCup/nextRound", diceCup)
-  
-  def save(): IController = {
+
+  def save(): String = {
     sendRequest("io/saveField", field)
     sendRequest("io/saveGame", game)
     sendRequest("io/saveDiceCup", diceCup)
     notifyObservers(Event.Save)
-    this
+    toString
   }
 
-  def load(): IController = {
+  def load(): String = {
     field = sendRequest("io/loadField")
     game = sendRequest("io/loadGame")
     diceCup = sendRequest("io/loadDiceCup")
     notifyObservers(Event.Load)
-    this
+    toString
   }
 
   private val IntList: PathMatcher1[List[Int]] = PathMatcher("""list=\d+(?:,\d+)*""".r).flatMap { str =>
@@ -104,7 +104,8 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
   }
 
 
-  override def toString: String = field
+  override def toString: String =
+    s"${sendRequest("field/mesh", field)}\n${sendRequest("diceCup/representation", diceCup)}\n$getPlayerName ist an der Reihe."
 
   override def toJson: JsObject = {
     Json.obj(
@@ -119,7 +120,7 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
       get {
         concat(
           pathSingleSlash {
-            complete(toJson.toString)
+            complete(toString)
           },
           path("field") {
             complete(field)
@@ -131,37 +132,37 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
             complete(diceCup)
           },
           path("load") {
-            complete(load().toJson.toString)
+            complete(load())
           },
           path("next") {
-            complete(next().toJson.toString)
+            complete(next())
           },
           pathPrefix("doAndPublish") {
             concat(
               path("nextRound") {
-                complete(doAndPublish(nextRound()).toJson.toString)
+                complete(doAndPublish(nextRound()))
               },
               path("dice") {
-                complete(doAndPublish(dice()).toJson.toString)
+                complete(doAndPublish(dice()))
               },
               path("putIn" / IntList) {
                 (pi: List[Int]) =>
-                  complete(doAndPublish(putIn(pi)).toJson.toString)
+                  complete(doAndPublish(putIn(pi)))
               },
               path("putOut" / IntList) {
                 (po: List[Int]) =>
-                  complete(doAndPublish(putOut(po)).toJson.toString)
+                  complete(doAndPublish(putOut(po)))
               }
             )
           },
           path("save") {
-            complete(save().toJson.toString)
+            complete(save())
           },
           path("undo") {
-            complete(undo().toJson.toString)
+            complete(undo())
           },
           path("redo") {
-            complete(redo().toJson.toString)
+            complete(redo())
           },
           path("") {
             sys.error("No such GET route")
@@ -172,11 +173,11 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
         concat(
           path("put") {
             entity(as[String]) { requestBody =>
-              complete(this.put(jsonStringToMove(requestBody)).toJson.toString)
+              complete(this.put(jsonStringToMove(requestBody)))
             }
           },
           path("quit") {
-            complete(quit().toJson.toString)
+            complete(quit())
           },
           path("nextRound") {
             complete(nextRound())
@@ -212,3 +213,5 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
       (Json.parse(move) \ "move" \ "y").as[Int]
     )
   }
+
+  private def getPlayerName: String = (Json.parse(sendRequest("game/playerName", game)) \ "playerName").as[String]

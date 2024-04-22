@@ -6,23 +6,23 @@ import de.htwg.sa.kniffel.util.{Move, Observable}
 import play.api.libs.json.JsObject
 
 trait IController extends Observable {
-  def undo(): IController
+  def undo(): String
 
-  def redo(): IController
+  def redo(): String
 
-  def put(move: Move): IController
+  def put(move: Move): String
 
-  def quit(): IController
+  def quit(): String
 
-  def next(): IController
+  def next(): String
 
-  def doAndPublish(doThis: List[Int] => String, list: List[Int]): IController
+  def doAndPublish(doThis: List[Int] => String, list: List[Int]): String
 
   def putOut(list: List[Int]): String
 
   def putIn(list: List[Int]): String
 
-  def doAndPublish(doThis: => String): IController
+  def doAndPublish(doThis: => String): String
 
   def dice(): String
 
@@ -36,9 +36,9 @@ trait IController extends Observable {
 
   def game: String
 
-  def save(): IController
+  def save(): String
 
-  def load(): IController
+  def load(): String
 
   def toJson: JsObject
 

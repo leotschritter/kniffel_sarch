@@ -1,29 +1,26 @@
 package de.htwg.sa.kniffel.tui
 
-import com.google.inject.Inject
-import de.htwg.sa.kniffel.controller.IController
-import de.htwg.sa.kniffel.util.HttpUtil.sendRequest
-import de.htwg.sa.kniffel.util.{Event, Move, Observer}
-import play.api.libs.json.Json
+import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.Directives.*
+import play.api.libs.json.{JsNumber, JsObject, Json}
 
+import java.io.{BufferedReader, InputStreamReader, OutputStreamWriter}
+import java.net.{HttpURLConnection, URL}
 import scala.io.StdIn.readLine
 import scala.util.{Failure, Success, Try}
 
-class TUI @Inject()(controller: IController) extends Observer:
-  controller.add(this)
-
+class TUI:
   var continue = true
 
   def run(): Unit =
-    // TODO add print mechanism after Rest Service is up
-    // println(controller.field.toString)
+    println(sendRequest("field/mesh", sendRequest("controller/field")))
     inputLoop()
 
-  def update(e: Event): Unit =
-    e match {
-      case Event.Quit => continue = false
-      case Event.Save => continue
-      case _ => println(sendRequest("field/mesh", controller.field) + "\n" + sendRequest("diceCup/representation", controller.diceCup) + "\n" + getPlayerName + " ist an der Reihe.")
+  def update(event: String): String =
+    event match {
+      case "quit" => continue = false; Json.obj("event" -> event).toString
+      case "save" => continue; Json.obj("event" -> event).toString
+      case _ => println(sendRequest("controller/")); Json.obj("event" -> event).toString
     }
 
 
@@ -34,17 +31,17 @@ class TUI @Inject()(controller: IController) extends Observer:
     if continue then inputLoop()
 
 
-  def analyseInput(input: String): Option[Move] =
+  def analyseInput(input: String): Option[String] =
     val textInputAsList = input.split("\\s").toList
     textInputAsList.head match
       case "q" => None
       case "po" => diceCupPutOut(textInputAsList.tail.map(_.toInt)); None
       case "pi" => diceCupPutIn(textInputAsList.tail.map(_.toInt)); None
-      case "d" => controller.doAndPublish(controller.dice()); None
-      case "u" => controller.undo(); None
-      case "r" => controller.redo(); None
-      case "s" => controller.save(); None
-      case "l" => controller.load(); None
+      case "d" => sendRequest("controller/doAndPublish/dice"); None
+      case "u" => sendRequest("controller/undo"); None
+      case "r" => sendRequest("controller/redo"); None
+      case "s" => sendRequest("controller/save"); None
+      case "l" => sendRequest("controller/load"); None
       case "wd" =>
         validInput(textInputAsList) match {
           case Success(f) => val posAndDesc = textInputAsList.tail.head
@@ -52,7 +49,7 @@ class TUI @Inject()(controller: IController) extends Observer:
               .match {
                 case Some(index) =>
                   if (checkIfEmpty(index))
-                    Some(Move(getResult(index), getPlayerID, index))
+                    Some(moveToJson(getResult(index), getPlayerID, index).toString)
                   else
                     println("Da steht schon was!")
                     None
@@ -65,33 +62,31 @@ class TUI @Inject()(controller: IController) extends Observer:
 
   def validInput(list: List[String]): Try[String] = Try(list.tail.head)
 
-  def getController: IController = controller
-
-  def writeDown(move: Move): Unit = {
-    controller.put(move)
-    controller.next()
-    controller.doAndPublish(controller.nextRound())
+  def writeDown(move: String): Unit = {
+    sendRequest("controller/put", move)
+    sendRequest("controller/next")
+    sendRequest("controller/doAndPublish/nextRound")
   }
 
-  def diceCupPutIn(pi: List[Int]): Unit = controller.doAndPublish(controller.putIn, pi)
+  private def diceCupPutIn(pi: List[Int]): Unit = sendRequest(s"controller/doAndPublish/putIn/list=${pi.mkString(",")}")
 
-  def diceCupPutOut(po: List[Int]): Unit = controller.doAndPublish(controller.putOut, po)
+  private def diceCupPutOut(po: List[Int]): Unit = sendRequest(s"controller/doAndPublish/putOut/list=${po.mkString(",")}")
 
   private def checkIfEmpty(index: Int): Boolean = {
     (Json.parse(
       sendRequest(
         s"field/isEmpty/$getPlayerID/$index",
-        controller.field
+        sendRequest("controller/field")
       )
     ) \ "isEmpty").as[Boolean]
   }
 
   private def getPlayerName: String = {
-    (Json.parse(sendRequest("game/playerName", controller.game)) \ "playerName").as[String]
+    (Json.parse(sendRequest("game/playerName", sendRequest("controller/game"))) \ "playerName").as[String]
   }
 
   private def getPlayerID: Int = {
-    (Json.parse(sendRequest("game/playerID", controller.game)) \ "playerID").as[Int]
+    (Json.parse(sendRequest("game/playerID", sendRequest("controller/game"))) \ "playerID").as[Int]
   }
 
   private def getIndexOfField(posAndDesc: String): Option[Int] = {
@@ -103,5 +98,69 @@ class TUI @Inject()(controller: IController) extends Observer:
   }
 
   private def getResult(index: Int): Int = {
-    (Json.parse(sendRequest(s"diceCup/result/$index", controller.diceCup)) \ "result").as[Int]
+    (Json.parse(sendRequest(s"diceCup/result/$index", sendRequest("controller/diceCup"))) \ "result").as[Int]
   }
+
+  private def moveToJson(value: Int, x: Int, y: Int): JsObject = {
+    Json.obj(
+      "move" -> Json.obj(
+        "value" -> JsNumber(value),
+        "x" -> JsNumber(x),
+        "y" -> JsNumber(y)
+      )
+    )
+  }
+
+  private def sendRequest(route: String, requestBody: String = ""): String = {
+    val baseURL = "http://localhost:8080/"
+    val url = new URL(baseURL + route)
+    val connection = url.openConnection().asInstanceOf[HttpURLConnection]
+
+    if (!requestBody.isBlank) {
+      connection.setRequestMethod("POST")
+      connection.setDoOutput(true)
+      connection.setRequestProperty("Content-Type", "application/json")
+
+      val outputStreamWriter = new OutputStreamWriter(connection.getOutputStream, "UTF-8")
+      outputStreamWriter.write(requestBody)
+      outputStreamWriter.close()
+    } else {
+      connection.setRequestMethod("GET")
+      connection.setDoOutput(true)
+      connection.setRequestProperty("Content-Type", "application/json")
+    }
+
+    if (connection.getResponseCode == HttpURLConnection.HTTP_OK) {
+      val streamReader = new InputStreamReader(connection.getInputStream)
+      val reader = new BufferedReader(streamReader)
+      val lines = Iterator.continually(reader.readLine()).takeWhile(_ != null)
+      val response = lines.mkString("\n")
+
+      reader.close()
+      streamReader.close()
+
+      response
+    } else {
+      throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode)
+    }
+  }
+
+  val tuiRoute: Route =
+    concat(
+      put {
+        concat(
+          path("quit") {
+            complete(update("quit"))
+          },
+          path("save") {
+            complete(update("save"))
+          },
+          path("load") {
+            complete(update("load"))
+          },
+          path("move") {
+            complete(update("move"))
+          },
+        )
+      }
+    )
