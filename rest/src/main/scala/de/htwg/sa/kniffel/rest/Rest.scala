@@ -8,6 +8,8 @@ import de.htwg.sa.kniffel.controller.IController
 import de.htwg.sa.kniffel.field.fieldBaseImpl.Field
 import de.htwg.sa.kniffel.game.gameBaseImpl.Game
 import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
+// import de.htwg.sa.kniffel.fileio.fileIOJsonImpl.FileIO
+import de.htwg.sa.kniffel.fileio.fileIOXmlImpl.FileIO
 import de.htwg.sa.kniffel.util.{Event, Observer}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -21,6 +23,7 @@ case class Rest(controller: IController) extends Observer {
   val field = new Field(2)
   val game = new Game(2)
   val diceCup = new DiceCup()
+  val fileIOJson = new FileIO
 
   val bindingFuture: Future[Http.ServerBinding] = Http().newServerAt("localhost", 8080).bind(
     concat(
@@ -35,6 +38,9 @@ case class Rest(controller: IController) extends Observer {
       },
       pathPrefix("field") {
         this.field.fieldRoute
+      },
+      pathPrefix("io") {
+        this.fileIOJson.fileIORoute
       }
     )
   )

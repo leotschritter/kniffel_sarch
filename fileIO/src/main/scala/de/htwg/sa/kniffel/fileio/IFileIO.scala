@@ -1,20 +1,60 @@
 package de.htwg.sa.kniffel.fileio
 
-import de.htwg.sa.kniffel.field.{IField, IMatrix}
-import de.htwg.sa.kniffel.dicecup.IDiceCup
-import de.htwg.sa.kniffel.game.IGame
+import akka.http.scaladsl.server.Directives.*
+import akka.http.scaladsl.server.Route
 
 trait IFileIO {
-  def loadField: IField
+  def loadField: String
 
-  def loadGame: IGame
+  def loadGame: String
 
-  def loadDiceCup: IDiceCup
+  def loadDiceCup: String
 
-  def saveField(field: IField, matrix: IMatrix): Unit
+  def saveField(field: String): String
 
-  def saveGame(game: IGame): Unit
+  def saveGame(game: String): String
 
-  def saveDiceCup(diceCup: IDiceCup): Unit
+  def saveDiceCup(diceCup: String): String
 
+  val fileIORoute: Route =
+    concat(
+      get {
+        concat(
+          path("loadField") {
+            complete(loadField)
+          },
+          path("loadGame") {
+            complete(loadGame)
+          },
+          path("loadDiceCup") {
+            complete(loadDiceCup)
+          },
+          path("") {
+            sys.error("No such GET route")
+          }
+        )
+      },
+      post {
+        concat(
+          path("saveField") {
+            entity(as[String]) { requestBody =>
+              complete(saveField(requestBody))
+            }
+          },
+          path("saveGame") {
+            entity(as[String]) { requestBody =>
+              complete(saveGame(requestBody))
+            }
+          },
+          path("saveDiceCup") {
+            entity(as[String]) { requestBody =>
+              complete(saveDiceCup(requestBody))
+            }
+          },
+          path("") {
+            sys.error("No such POST route")
+          }
+        )
+      }
+    )
 }

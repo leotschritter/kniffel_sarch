@@ -5,21 +5,16 @@ import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.{PathMatcher, PathMatcher1, Route}
 import com.google.inject.Inject
 import de.htwg.sa.kniffel.controller.IController
-import de.htwg.sa.kniffel.dicecup.IDiceCup
-import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
-import de.htwg.sa.kniffel.fileio.IFileIO
-import de.htwg.sa.kniffel.fileio.fileIOJsonImpl.FileIO
 import de.htwg.sa.kniffel.util.HttpUtil.sendRequest
 import de.htwg.sa.kniffel.util.{Event, Move, Observable, UndoManager}
 import play.api.libs.json
 import play.api.libs.json.{JsNull, JsObject, JsValue, Json}
 
-class Controller @Inject()(var field: String, var diceCup: String, var game: String, var file: IFileIO) extends IController :
+class Controller @Inject()(var field: String, var diceCup: String, var game: String) extends IController :
   def this() = {
     this("{\"field\":{\"numberOfPlayers\":2,\"rows\":[[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]]}}",
       "{\"dicecup\":{\"stored\":[],\"incup\":[],\"remainingDices\":2}}",
-      "{\"game\":{\"nestedList\":\"0,0,0,0,0,0;0,0,0,0,0,0\",\"remainingMoves\":26,\"currentPlayerID\":0,\"currentPlayerName\":\"Player 1\",\"players\":[{\"id\":0,\"name\":\"Player 1\"},{\"id\":1,\"name\":\"Player 2\"}]}}",
-      new FileIO())
+      "{\"game\":{\"nestedList\":\"0,0,0,0,0,0;0,0,0,0,0,0\",\"remainingMoves\":26,\"currentPlayerID\":0,\"currentPlayerName\":\"Player 1\",\"players\":[{\"id\":0,\"name\":\"Player 1\"},{\"id\":1,\"name\":\"Player 2\"}]}}")
   }
 
   val undoManager = new UndoManager[String, String]
@@ -88,19 +83,17 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
   def nextRound(): String = sendRequest("diceCup/nextRound", diceCup)
   
   def save(): IController = {
-    // TODO
-    // file.saveGame(game)
-    // file.saveField(field, field.matrix)
-    // file.saveDiceCup(diceCup)
+    sendRequest("io/saveField", field)
+    sendRequest("io/saveGame", game)
+    sendRequest("io/saveDiceCup", diceCup)
     notifyObservers(Event.Save)
     this
   }
 
   def load(): IController = {
-    // TODO
-    // field = file.loadField
-    // game = file.loadGame
-    // diceCup = file.loadDiceCup
+    field = sendRequest("io/loadField")
+    game = sendRequest("io/loadGame")
+    diceCup = sendRequest("io/loadDiceCup")
     notifyObservers(Event.Load)
     this
   }
@@ -199,5 +192,5 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
     val f = Json.obj("field" -> (controllerJson \ "controller" \ "field").as[JsObject]).toString
     val dc = Json.obj("dicecup" -> (controllerJson \ "controller" \ "dicecup").as[JsObject]).toString
     val g = Json.obj("game" -> (controllerJson \ "controller" \ "game").as[JsObject]).toString
-    new Controller(f, dc, g, new FileIO())
+    new Controller(f, dc, g)
   }
