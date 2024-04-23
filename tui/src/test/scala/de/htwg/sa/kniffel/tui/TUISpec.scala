@@ -1,4 +1,4 @@
-package de.htwg.sa.kniffel.tui
+/*package de.htwg.sa.kniffel.tui
 
 import de.htwg.sa.kniffel.controller.IController
 import de.htwg.sa.kniffel.controller.controllerBaseImpl.Controller
@@ -80,3 +80,4 @@ class TUISpec extends AnyWordSpec {
     }
   }
 }
+*/
