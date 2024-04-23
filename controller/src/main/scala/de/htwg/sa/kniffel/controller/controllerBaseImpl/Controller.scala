@@ -42,7 +42,6 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
     val r = undoManager.doStep(game, field, SetCommand(move))
     game = r._1
     field = r._2
-    notifyObservers(Event.Move)
     toString
   }
 
@@ -172,7 +171,7 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
                 val currentPlayer = (Json.parse(sendRequest("game/playerID", game)) \ "playerID").as[Int]
                 val indexOfField = (Json.parse(sendRequest("diceCup/indexOfField")) \ "indexOfField" \ value).as[Int]
                 val result = (Json.parse(sendRequest(s"diceCup/result/$indexOfField", diceCup)) \ "result").as[Int]
-                complete(this.put(Move(result, currentPlayer, indexOfField)))
+                complete(writeDown(Move(result, currentPlayer, indexOfField)))
               } catch {
                 case e: Throwable => complete("Invalid Input!")
               }
@@ -228,3 +227,9 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
   }
 
   private def getPlayerName: String = (Json.parse(sendRequest("game/playerName", game)) \ "playerName").as[String]
+
+  private def writeDown(move: Move): String = {
+    put(move)
+    next()
+    doAndPublish(nextRound())
+  }
