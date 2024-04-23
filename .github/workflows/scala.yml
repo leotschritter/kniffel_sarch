@@ -42,7 +42,10 @@ jobs:
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-        run: sbt +clean +coverage +test +coverageReport
+
+        run: |
+          sbt run &
+          sbt +clean +coverage +test +coverageReport
       - name: Export Coverage
         run: sbt coverageAggregate coveralls
         env:
