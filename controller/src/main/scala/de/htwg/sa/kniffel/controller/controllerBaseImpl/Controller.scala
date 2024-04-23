@@ -183,7 +183,7 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
           }
         )
       },
-     /* post {
+      post {
         concat(
           path("put") {
             entity(as[String]) { requestBody =>
@@ -200,7 +200,7 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
             sys.error("No such POST route")
           }
         )
-      }*/
+      }
     )
 
   private def getNextGame: String = {

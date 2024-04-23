@@ -24,12 +24,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build Project and Run Tests
+      - name: Get into SBT interactive mode
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-        run: sbt +clean +coverage +test +coverageReport
+        run: sbt
+      - name: run tests on dicecup
+        run: dicecup / test
+      - name: create coverageReport
+        run: dicecup / coverageReport
+      - name: run coverageAggregate
+        run: dicecup / coverageAggregate
       - name: Export Coverage
-        run: sbt coverageAggregate coveralls
+        run: dicecup / coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
