@@ -42,6 +42,7 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
     val r = undoManager.doStep(game, field, SetCommand(move))
     game = r._1
     field = r._2
+    notifyObservers(Event.Move)
     toString
   }
 
@@ -103,6 +104,7 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
     Some(ints.toList)
   }
 
+  private val StringValue: PathMatcher1[String] = PathMatcher("""\w+""".r)
 
   override def toString: String =
     s"${sendRequest("field/mesh", field)}\n${sendRequest("diceCup/representation", diceCup)}\n$getPlayerName ist an der Reihe."
@@ -163,6 +165,17 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
           },
           path("redo") {
             complete(redo())
+          },
+          path("writeDown" / StringValue) {
+            (value: String) =>
+              try {
+                val currentPlayer = (Json.parse(sendRequest("game/playerID", game)) \ "playerID").as[Int]
+                val indexOfField = (Json.parse(sendRequest("diceCup/indexOfField")) \ "indexOfField" \ value).as[Int]
+                val result = (Json.parse(sendRequest(s"diceCup/result/$indexOfField", diceCup)) \ "result").as[Int]
+                complete(this.put(Move(result, currentPlayer, indexOfField)))
+              } catch {
+                case e: Throwable => complete("Invalid Input!")
+              }
           },
           path("") {
             sys.error("No such GET route")

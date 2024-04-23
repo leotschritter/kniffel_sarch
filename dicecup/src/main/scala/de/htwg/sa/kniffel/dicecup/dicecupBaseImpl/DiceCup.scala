@@ -49,6 +49,8 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
 
   def result(index: Int): Int =
     val list: List[Int] = mergeLists(inCup)(locked)
+    if (list.isEmpty)
+      return 0
     index match {
       case 0 | 1 | 2 | 3 | 4 | 5 => list.filter(_ == index + 1).sum
       case 9 => new Evaluator(EvaluateStrategy.threeOfAKind).result(list)

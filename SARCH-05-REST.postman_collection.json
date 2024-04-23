@@ -153,12 +153,15 @@
 		},
 		{
 			"name": "writeDown",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
 			"request": {
-				"method": "POST",
+				"method": "GET",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"move\": {\r\n        \"value\": 5,\r\n        \"x\": 1,\r\n        \"y\": 4\r\n    }\r\n}",
+					"raw": "",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -166,7 +169,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/controller/put",
+					"raw": "http://localhost:8080/controller/writeDown",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -174,7 +177,7 @@
 					"port": "8080",
 					"path": [
 						"controller",
-						"put"
+						"writeDown"
 					]
 				}
 			},
