@@ -205,7 +205,7 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
     val nextGameString = sendRequest("game/next", this.game)
     val nextGameJson = Json.parse(nextGameString)
     (nextGameJson \ "game").as[JsValue].match {
-      case JsNull => JsNull.toString
+      case JsNull => game
       case _ => nextGameString
     }
   }
