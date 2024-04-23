@@ -9,7 +9,7 @@ import scala.collection.immutable.ListMap
 import scala.util.Random
 
 case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends IDiceCup:
-  def this() = this(List.fill(0)(0), List.fill(5)(Random.between(1, 7)), 2)
+  def this() = this(List.fill(0)(0), List.fill(0)(0), 2)
 
   def dice(): Option[DiceCup] =
     if (remDices >= 0)
@@ -84,8 +84,7 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
   }
 
   private val IntList: PathMatcher1[List[Int]] = PathMatcher("""list=\d+(?:,\d+)*""".r).flatMap { str =>
-    val ints = str.split("=").tail.mkString(",").split(",").map(_.toInt)
-    Some(ints.toList)
+    Some(str.split("=").tail.mkString(",").split(",").map(_.toInt).toList)
   }
 
   override val diceCupRoute: Route =

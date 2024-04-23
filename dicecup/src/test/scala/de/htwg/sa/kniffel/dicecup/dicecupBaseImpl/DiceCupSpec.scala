@@ -3,11 +3,19 @@ package de.htwg.sa.kniffel.dicecup.dicecupBaseImpl
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 
+import scala.util.Random
+
 class DiceCupSpec extends AnyWordSpec {
   "Dice Cup" when {
     "created" should {
-      "have 5 Dices" in {
+      "have 0 Dices" in {
         val diceCup: DiceCup = new DiceCup()
+        diceCup.inCup.size should be(0)
+        diceCup.locked.size should be(0)
+        diceCup.remainingDices should be(2)
+      }
+      "have 5 Dices" in  {
+        val diceCup: DiceCup = new DiceCup(List.fill(0)(0), List.fill(5)(Random.between(1, 7)), 2)
         diceCup.inCup.size should be(5)
         diceCup.locked.size should be(0)
         diceCup.inCup.foreach {
@@ -15,7 +23,6 @@ class DiceCupSpec extends AnyWordSpec {
             s should be < 7
             s should be > 0
         }
-
       }
     }
     "dices are thrown" should {
@@ -31,7 +38,7 @@ class DiceCupSpec extends AnyWordSpec {
       }
     }
     "dices are put out the Dice Cup or in" should {
-      val diceCup: DiceCup = new DiceCup()
+      val diceCup: DiceCup = new DiceCup(List.fill(0)(0), List.fill(5)(Random.between(1, 7)), 2)
       val sortOut: DiceCup = diceCup.putDicesOut(diceCup.inCup.take(2))
       "be inserted into the locked list of a new DiceCup Object" in {
         sortOut.locked.size should be(2)
@@ -71,20 +78,27 @@ class DiceCupSpec extends AnyWordSpec {
       val diceCup = DiceCup(List(2, 2), List(2, 2, 2), 2)
       val diceCup2 = DiceCup(List(2, 3), List(4, 5, 6), 2)
       val diceCup3 = DiceCup(List(2, 2), List(3, 3, 3), 2)
+      val diceCup4 = DiceCup(List(), List(), 2)
       "return the right value" in {
+        diceCup.result(0) should be(0)
         diceCup.result(1) should be(10)
         diceCup.result(9) should be(10)
         diceCup.result(10) should be(10)
-        diceCup.result(11) should be(0)
-        diceCup3.result(11) should be(25)
-        diceCup2.result(12) should be(30)
         diceCup.result(12) should be(0)
-        diceCup2.result(13) should be(40)
+        diceCup.result(11) should be(0)
         diceCup.result(13) should be(0)
         diceCup.result(14) should be(50)
-        diceCup2.result(14) should be(0)
         diceCup.result(15) should be(10)
         diceCup.result(1998) should be(0)
+        diceCup2.result(2) should be(3)
+        diceCup2.result(3) should be(4)
+        diceCup2.result(4) should be(5)
+        diceCup2.result(5) should be(6)
+        diceCup2.result(12) should be(30)
+        diceCup2.result(13) should be(40)
+        diceCup2.result(14) should be(0)
+        diceCup3.result(11) should be(25)
+        diceCup4.result(1) should be(0)
       }
     }
     "when displayed" should {
@@ -111,6 +125,12 @@ class DiceCupSpec extends AnyWordSpec {
       }
     }
 
+    "next round is called" should {
+      val diceCup: DiceCup = new DiceCup()
+      "should have the same State as initially" in {
+        diceCup should be (diceCup.nextRound())
+      }
+    }
 
     /*"when DiceCupState changed" should {
       val diceCup: DiceCup = new DiceCup()
