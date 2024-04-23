@@ -1,4 +1,5 @@
 import org.scoverage.coveralls.GitHubActions
+import scoverage.ScoverageKeys.coverageEnabled
 
 val scala3Version = "3.3.3"
 
@@ -43,28 +44,32 @@ lazy val dicecup = (project in file("dicecup"))
   .settings(
     name := "dicecup",
     version := dicecupVersion,
-    dependencies
+    dependencies,
+    coverageEnabled := true
   )
 
 lazy val field = (project in file("field"))
   .settings(
     name := "field",
     version := fieldVersion,
-    dependencies
+    dependencies,
+    coverageEnabled := true
   )
 
 lazy val game = (project in file("game"))
   .settings(
     name := "game",
     version := gameVersion,
-    dependencies
+    dependencies,
+    coverageEnabled := true
   )
 
 lazy val fileIO = (project in file("fileIO"))
   .settings(
     name := "fileIO",
     version := fileIOVersion,
-    dependencies
+    dependencies,
+    coverageEnabled := true
   )
 
 lazy val controller = (project in file("controller"))
