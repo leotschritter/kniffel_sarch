@@ -99,8 +99,7 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
   }
 
   private val IntList: PathMatcher1[List[Int]] = PathMatcher("""list=\d+(?:,\d+)*""".r).flatMap { str =>
-    val ints = str.split("=").tail.mkString(",").split(",").map(_.toInt)
-    Some(ints.toList)
+    Some(str.split("=").tail.mkString(",").split(",").map(_.toInt).toList)
   }
 
   private val StringValue: PathMatcher1[String] = PathMatcher("""\w+""".r)
@@ -122,6 +121,9 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
         concat(
           pathSingleSlash {
             complete(toString)
+          },
+          path("controller") {
+            complete(toJson.toString)
           },
           path("field") {
             complete(field)
@@ -181,7 +183,7 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
           }
         )
       },
-      post {
+     /* post {
         concat(
           path("put") {
             entity(as[String]) { requestBody =>
@@ -198,7 +200,7 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
             sys.error("No such POST route")
           }
         )
-      }
+      }*/
     )
 
   private def getNextGame: String = {
@@ -210,7 +212,7 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
     }
   }
 
-  private def jsonStringToController(controller: String): IController = {
+  def jsonStringToController(controller: String): IController = {
     val controllerJson = Json.parse(controller)
     val f = Json.obj("field" -> (controllerJson \ "controller" \ "field").as[JsObject]).toString
     val dc = Json.obj("dicecup" -> (controllerJson \ "controller" \ "dicecup").as[JsObject]).toString
@@ -218,7 +220,7 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
     new Controller(f, dc, g)
   }
 
-  private def jsonStringToMove(move: String): Move = {
+  def jsonStringToMove(move: String): Move = {
     Move(
       (Json.parse(move) \ "move" \ "value").as[Int],
       (Json.parse(move) \ "move" \ "x").as[Int],
@@ -228,7 +230,7 @@ class Controller @Inject()(var field: String, var diceCup: String, var game: Str
 
   private def getPlayerName: String = (Json.parse(sendRequest("game/playerName", game)) \ "playerName").as[String]
 
-  private def writeDown(move: Move): String = {
+  def writeDown(move: Move): String = {
     put(move)
     next()
     doAndPublish(nextRound())

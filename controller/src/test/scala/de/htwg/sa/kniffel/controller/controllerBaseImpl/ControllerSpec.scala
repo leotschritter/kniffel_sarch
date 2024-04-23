@@ -4,7 +4,7 @@ import de.htwg.sa.kniffel.util.HttpUtil.sendRequest
 import de.htwg.sa.kniffel.util.{Event, HttpUtil, Move, Observer}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.libs.json.{JsDefined, JsNull, JsNumber, Json}
+import play.api.libs.json.{JsArray, JsDefined, JsNull, JsNumber, Json}
 
 
 class ControllerSpec extends AnyWordSpec {
@@ -28,19 +28,111 @@ class ControllerSpec extends AnyWordSpec {
     }
 
     "dices are put out the Dice Cup or in" should {
-      controller.diceCup = sendRequest("diceCup/dice", controller.diceCup)
-      val inCup: List[Int] = (Json.parse(controller.diceCup) \ "dicecup" \ "incup").as[List[Int]]
-      controller.diceCup = controller.putOut(inCup.take(2))
-      val sortOut = Json.parse(controller.diceCup) \ "dicecup"
+      class TestObserver(controller: Controller) extends Observer:
+        controller.add(this)
+        var bing = false
+
+        def update(e: Event): Unit = {
+          bing = true
+        }
+      val testObserver = TestObserver(controller)
+      testObserver.bing should be(false)
+
+      controller2.diceCup = controller2.dice()
+      val inCup2: List[Int] = (Json.parse(controller2.diceCup) \ "dicecup" \ "incup").as[List[Int]]
+      val resultPutOut = controller2.doAndPublish(controller2.putOut(inCup2.take(2)))
+      val sortOut2 = Json.parse(controller2.diceCup) \ "dicecup"
       "be inserted into the locked list of a new DiceCup Object" in {
-        (sortOut \ "stored").as[List[Int]].size should be (2)
-        (sortOut \ "incup").as[List[Int]].size should be (3)
+        (sortOut2 \ "stored").as[List[Int]].size should be (2)
+        (sortOut2 \ "incup").as[List[Int]].size should be (3)
+        resultPutOut should startWith("    |P1 |P2 \n" +
+          "+---+---+---+\n" +
+          "|1  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|2  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|3  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|4  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|5  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|6  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|G  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|B  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|O  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|3x |   |   |\n" +
+          "+---+---+---+\n" +
+          "|4x |   |   |\n" +
+          "+---+---+---+\n" +
+          "|FH |   |   |\n" +
+          "+---+---+---+\n" +
+          "|KS |   |   |\n" +
+          "+---+---+---+\n" +
+          "|GS |   |   |\n" +
+          "+---+---+---+\n" +
+          "|KN |   |   |\n" +
+          "+---+---+---+\n" +
+          "|CH |   |   |\n" +
+          "+---+---+---+\n" +
+          "|U  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|O  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|E  |   |   |\n" +
+          "+---+---+---+\n")
+        testObserver.bing should be(true)
       }
       "be inserted into the inCup list of a new DiceCup Object" in {
-        val locked: List[Int] = (Json.parse(controller.diceCup) \ "dicecup" \ "stored").as[List[Int]]
-        val putIn = Json.parse(controller.putIn(locked)) \ "dicecup"
-        (putIn \ "stored").as[List[Int]].size should be (0)
-        (putIn \ "incup").as[List[Int]].size should be (5)
+        val locked2: List[Int] = (Json.parse(controller2.diceCup) \ "dicecup" \ "stored").as[List[Int]]
+        val resultPutIn = controller2.doAndPublish(controller2.putIn(locked2.take(2)))
+        (Json.parse(controller2.diceCup) \ "dicecup" \ "stored").as[List[Int]].size should be (0)
+        (Json.parse(controller2.diceCup) \ "dicecup" \ "incup").as[List[Int]].size should be (5)
+        resultPutIn should startWith("    |P1 |P2 \n" +
+          "+---+---+---+\n" +
+          "|1  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|2  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|3  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|4  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|5  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|6  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|G  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|B  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|O  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|3x |   |   |\n" +
+          "+---+---+---+\n" +
+          "|4x |   |   |\n" +
+          "+---+---+---+\n" +
+          "|FH |   |   |\n" +
+          "+---+---+---+\n" +
+          "|KS |   |   |\n" +
+          "+---+---+---+\n" +
+          "|GS |   |   |\n" +
+          "+---+---+---+\n" +
+          "|KN |   |   |\n" +
+          "+---+---+---+\n" +
+          "|CH |   |   |\n" +
+          "+---+---+---+\n" +
+          "|U  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|O  |   |   |\n" +
+          "+---+---+---+\n" +
+          "|E  |   |   |\n" +
+          "+---+---+---+\n")
+        testObserver.bing should be(true)
       }
     }
 
@@ -161,6 +253,50 @@ class ControllerSpec extends AnyWordSpec {
         controller.game should be(game)
       }
     }
+
+    "when writeDown is called" should {
+      "return the changed controller" in {
+        controller.writeDown(Move(50, 0, 14))
+        val jsArray = (controller.toJson \ "controller" \ "field" \ "rows").as[JsArray]
+        jsArray(14)(0) should be (JsNumber(50))
+      }
+    }
+
+    "when a JSON String is converted to a move" should {
+      "have the expected returned move" in {
+        controller.jsonStringToMove("{\"move\":{\"value\":12,\"x\":1,\"y\":0}}") should be (Move(12, 1, 0))
+      }
+    }
+
+    "when parsed from JSON String" should {
+      "be the exact same controller again" in {
+        controller.jsonStringToController("{\"controller\":{\"dicecup\":{\"stored\":[],\"incup\":[],\"remainingDices\":2},\"field\":{\"numberOfPlayers\":2,\"rows\":[[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]]},\"game\":{\"nestedList\":\"0,0,0,0,0,0;0,0,0,0,0,0\",\"remainingMoves\":26,\"currentPlayerID\":0,\"currentPlayerName\":\"Player 1\",\"players\":[{\"id\":0,\"name\":\"Player 1\"},{\"id\":1,\"name\":\"Player 2\"}]}}}").toJson.toString should be (Controller().toJson.toString)
+      }
+    }
+
+    "when dice are rolled" should {
+      "return a valid diceCup" in {
+        controller.diceCup = controller.dice()
+        Json.parse(controller.diceCup) \ "dicecup" should not be (JsNull)
+      }
+      "return a the same diceCup as before" in {
+        controller.diceCup = controller.dice()
+        controller.diceCup = controller.dice()
+        controller.diceCup = controller.dice()
+        val diceCupBefore = controller.diceCup
+        controller.diceCup = controller.dice()
+        diceCupBefore should be (controller.diceCup)
+      }
+    }
+
+    // Working but not improving coverage
+    /*"routes must be reachable" in {
+      sendRequest("controller/") should be ("    |P1 |P2 \n+---+---+---+\n|1  |   |   |\n+---+---+---+\n|2  |   |   |\n+---+---+---+\n|3  |   |   |\n+---+---+---+\n|4  |   |   |\n+---+---+---+\n|5  |   |   |\n+---+---+---+\n|6  |   |   |\n+---+---+---+\n|G  |   |   |\n+---+---+---+\n|B  |   |   |\n+---+---+---+\n|O  |   |   |\n+---+---+---+\n|3x |   |   |\n+---+---+---+\n|4x |   |   |\n+---+---+---+\n|FH |   |   |\n+---+---+---+\n|KS |   |   |\n+---+---+---+\n|GS |   |   |\n+---+---+---+\n|KN |   |   |\n+---+---+---+\n|CH |   |   |\n+---+---+---+\n|U  |   |   |\n+---+---+---+\n|O  |   |   |\n+---+---+---+\n|E  |   |   |\n+---+---+---+\nIm Becher: \n"+ "Rausgenommen: \n"+ "Verbleibende Würfe: 3\n"+ "Bitte wählen Sie aus: 1 2 3 4 5 6 3X 4X FH KS GS KN CH\n"+ "Player 1 ist an der Reihe.")
+      sendRequest("controller/controller") should be ("{\"controller\":{\"dicecup\":{\"stored\":[],\"incup\":[],\"remainingDices\":2},\"field\":{\"numberOfPlayers\":2,\"rows\":[[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]]},\"game\":{\"nestedList\":\"0,0,0,0,0,0;0,0,0,0,0,0\",\"remainingMoves\":26,\"currentPlayerID\":0,\"currentPlayerName\":\"Player 1\",\"players\":[{\"id\":0,\"name\":\"Player 1\"},{\"id\":1,\"name\":\"Player 2\"}]}}}")
+      sendRequest("controller/diceCup") should be ("{\"dicecup\":{\"stored\":[],\"incup\":[],\"remainingDices\":2}}")
+      sendRequest("controller/field") should be ("{\"field\":{\"numberOfPlayers\":2,\"rows\":[[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]]}}")
+      sendRequest("controller/game") should be ("{\"game\":{\"nestedList\":\"0,0,0,0,0,0;0,0,0,0,0,0\",\"remainingMoves\":26,\"currentPlayerID\":0,\"currentPlayerName\":\"Player 1\",\"players\":[{\"id\":0,\"name\":\"Player 1\"},{\"id\":1,\"name\":\"Player 2\"}]}}")
+    }*/
   }
 }
 
