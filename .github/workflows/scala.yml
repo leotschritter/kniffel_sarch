@@ -24,47 +24,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build Project and Run Tests for DiceCup
+      - name: Build Project and Run Tests
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
         run: sbt +clean +coverage +test +coverageReport
-        working-directory: ./dicecup
-      - name: Export Coverage for DiceCup
+      - name: Export Coverage
         run: sbt coverageAggregate coveralls
-        working-directory: ./dicecup
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build Project and Run Tests for Field
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        run: sbt +clean +coverage +test +coverageReport
-        working-directory: ./field
-      - name: Export Coverage for Field
-        run: sbt coverageAggregate coveralls
-        working-directory: ./field
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build Project and Run Tests for Game
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        run: sbt +clean +coverage +test +coverageReport
-        working-directory: ./game
-      - name: Export Coverage for Game
-        run: sbt coverageAggregate coveralls
-        working-directory: ./game
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build Project and Run Tests for FileIO
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        run: sbt +clean +coverage +test +coverageReport
-        working-directory: ./fileIO
-      - name: Export Coverage for FileIO
-        run: sbt coverageAggregate coveralls
-        working-directory: ./fileIO
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}

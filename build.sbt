@@ -37,7 +37,8 @@ lazy val root = (project in file(""))
   .settings(
     name := "kniffel",
     version := "0.1.0-SNAPSHOT",
-    dependencies
+    dependencies,
+    coverageEnabled := false
   )
 
 lazy val dicecup = (project in file("dicecup"))
@@ -76,21 +77,24 @@ lazy val controller = (project in file("controller"))
   .settings(
     name := "controller",
     version := controllerVersion,
-    dependencies
+    dependencies,
+    coverageEnabled := false
   )
 
 lazy val gui = (project in file("gui"))
   .settings(
     name := "gui",
     version := guiVersion,
-    dependencies
+    dependencies,
+    coverageEnabled := false
   )
 
 lazy val tui = (project in file("tui"))
   .settings(
     name := "tui",
     version := tuiVersion,
-    dependencies
+    dependencies,
+    coverageEnabled := false
   )
 
 lazy val rest = (project in file("rest"))
@@ -99,7 +103,8 @@ lazy val rest = (project in file("rest"))
   .settings(
     name := "rest",
     version := restVersion,
-    dependencies
+    dependencies,
+    coverageEnabled := false
   )
 
 import org.scoverage.coveralls.Imports.CoverallsKeys.*
