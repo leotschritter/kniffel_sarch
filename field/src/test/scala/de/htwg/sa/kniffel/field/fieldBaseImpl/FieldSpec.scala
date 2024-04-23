@@ -83,6 +83,24 @@ class FieldSpec extends AnyWordSpec {
     val field = new Field(2)
     field.numberOfPlayers should be(2)
   }
+  "when converted to JSON" should {
+    "look like" in {
+      val field: Field = new Field(2)
+      field.toJson.toString should be(
+        "{\"field\":{\"numberOfPlayers\":2,\"rows\":[[null,null],[null,null],[null,null],[null,null]," +
+          "[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]," +
+          "[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]]}}")
+    }
+  }
+  "when converted from JSON" should {
+    "look like" in {
+      val field: Field = new Field(2)
+      field.jsonStringToField("{\"field\":{\"numberOfPlayers\":2,\"rows\":[[null,null],[null,null],[null,null],[null,null]," +
+        "[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]," +
+        "[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]]}}") should be(
+        field)
+    }
+  }
 }
 
 

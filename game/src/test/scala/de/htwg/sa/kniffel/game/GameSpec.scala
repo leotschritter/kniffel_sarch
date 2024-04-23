@@ -58,7 +58,26 @@ class GameSpec extends AnyWordSpec {
     }
     "a nested list is requested" should {
       "return the nested list with the expected values" in {
-        game.get.nestedList should be (game.get.resultNestedList)
+        game.get.nestedList should be(game.get.resultNestedList)
+      }
+    }
+    "when converted to JSON" should {
+      "look like" in {
+        val game: Game = new Game(2)
+        game.toJson.toString should be(
+          "{\"game\":{\"nestedList\":\"0,0,0,0,0,0;0,0,0,0,0,0\",\"remainingMoves\":26,\"currentPlayerID\":0," +
+            "\"currentPlayerName\":\"Player 1\",\"players\":[{\"id\":0,\"name\":\"Player 1\"},{\"id\":1," +
+            "\"name\":\"Player 2\"}]}}"
+        )
+      }
+    }
+    "when converted from JSON" should {
+      "look like" in {
+        val game: Game = new Game(2)
+        game.jsonStringToGame("{\"game\":{\"nestedList\":\"0,0,0,0,0,0;0,0,0,0,0,0\",\"remainingMoves\":26," +
+          "\"currentPlayerID\":0,\"currentPlayerName\":\"Player 1\",\"players\":[{\"id\":0,\"name\":\"Player 1\"}," +
+          "{\"id\":1,\"name\":\"Player 2\"}]}}") should be(
+          game)
       }
     }
   }

@@ -1,6 +1,5 @@
 package de.htwg.sa.kniffel.dicecup.dicecupBaseImpl
 
-import de.htwg.sa.kniffel.dicecup.dicecupBaseImpl.DiceCup
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -97,6 +96,22 @@ class DiceCupSpec extends AnyWordSpec {
         )
       }
     }
+    "when converted to JSON" should {
+      "look like" in {
+        val diceCup: DiceCup = DiceCup(List(2, 2), List(2, 2, 2), 2)
+        diceCup.toJson.toString should be(
+          "{\"dicecup\":{\"stored\":[2,2],\"incup\":[2,2,2],\"remainingDices\":2}}")
+      }
+    }
+    "when converted from JSON" should {
+      "look like" in {
+        val diceCup: DiceCup = DiceCup(List(2, 2), List(2, 2, 2), 2)
+        diceCup.jsonStringToDiceCup("{\"dicecup\":{\"stored\":[2,2],\"incup\":[2,2,2],\"remainingDices\":2}}") should be(
+          diceCup)
+      }
+    }
+
+
     /*"when DiceCupState changed" should {
       val diceCup: DiceCup = new DiceCup()
       diceCup.state = new Start
