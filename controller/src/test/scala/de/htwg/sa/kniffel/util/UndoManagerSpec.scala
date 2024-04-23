@@ -2,45 +2,48 @@ package de.htwg.sa.kniffel
 package util
 
 import de.htwg.sa.kniffel.controller.controllerBaseImpl.SetCommand
-import de.htwg.sa.kniffel.field.IField
-import de.htwg.sa.kniffel.field.fieldBaseImpl.Field
-import de.htwg.sa.kniffel.game.IGame
-import de.htwg.sa.kniffel.game.gameBaseImpl.{Game, Player}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 
 class UndoManagerSpec extends AnyWordSpec {
   "An UndoManager" should {
-    val undoManager = new UndoManager[IGame, IField]
-    val players: List[Player] = List(Player(0, "Player1"), Player(1, "Player2"), Player(2, "Player3"), Player(3, "Player4"))
-    var game = Option(Game(players, players.head, players.length * 13, List.fill(players.length, 6)(0)))
-    var field = new Field(4)
+    val undoManager = new UndoManager[String, String]
+    val game = "{\"game\":{\"nestedList\":\"0,0,0,0,0,0;0,0,0,0,0,0\",\"remainingMoves\":26,\"currentPlayerID\":0," +
+      "\"currentPlayerName\":\"Player 1\",\"players\":[{\"id\":0,\"name\":\"Player 1\"},{\"id\":1," +
+      "\"name\":\"Player 2\"}]}}"
+    val field = "{\"field\":{\"numberOfPlayers\":2,\"rows\":[[null,null],[null,null],[null,null],[null,null]," +
+      "[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]," +
+      "[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]]}}"
+
 
     "have a do, undo and redo" in {
-      var r = undoManager.doStep(game.get, field, SetCommand(Move(12, 0, 0)))
-      var iGame:IGame = Option(r._1).get
-      var iField:IField = r._2
-      iGame.playerName should be ("Player1")
+      var r = undoManager.doStep(game, field, SetCommand(Move(12, 0, 0)))
+      var iGame = r._1
+      var iField = r._2
+      iGame should be("{\"game\":{\"nestedList\":\"12,0,12,0,12,12;0,0,0,0,0,0\",\"remainingMoves\":26,\"currentPlayerID\":0," +
+        "\"currentPlayerName\":\"Player 1\",\"players\":[{\"id\":0,\"name\":\"Player 1\"},{\"id\":1,\"name\":\"Player 2\"}]}}")
 
-      r = undoManager.undoStep(game.get, field)
+      r = undoManager.undoStep(game, field)
+      iGame = r._1
+      iField = r._2
+      iGame should be("{\"game\":{\"nestedList\":\"0,0,0,0,0,0;-12,0,-12,0,-12,-12\",\"remainingMoves\":27,\"currentPlayerID\":1," +
+        "\"currentPlayerName\":\"Player 2\",\"players\":[{\"id\":0,\"name\":\"Player 1\"},{\"id\":1,\"name\":\"Player 2\"}]}}")
+      r = undoManager.undoStep(game, field)
+      iGame = r._1
+      iField = r._2
+      iGame should be(game)
+
+      r = undoManager.redoStep(game, field)
       iGame = Option(r._1).get
       iField = r._2
-      iGame.playerName should be ("Player4")
+      iGame should be("{\"game\":{\"nestedList\":\"12,0,12,0,12,12;0,0,0,0,0,0\",\"remainingMoves\":25,\"currentPlayerID\":1," +
+        "\"currentPlayerName\":\"Player 2\",\"players\":[{\"id\":0,\"name\":\"Player 1\"},{\"id\":1,\"name\":\"Player 2\"}]}}")
 
-      r = undoManager.undoStep(game.get, field)
+
+      r = undoManager.redoStep(game, field)
       iGame = Option(r._1).get
       iField = r._2
-      iGame.playerName should be ("Player1")
-
-      r = undoManager.redoStep(game.get, field)
-      iGame = Option(r._1).get
-      iField = r._2
-      iGame.playerName should be ("Player2")
-
-      r = undoManager.redoStep(game.get, field)
-      iGame = Option(r._1).get
-      iField = r._2
-      iGame.playerName should be ("Player1")
+      iGame should be(game)
     }
   }
 }
