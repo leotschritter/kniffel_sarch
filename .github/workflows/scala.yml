@@ -24,39 +24,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build Project and Run Tests for field
+      - name: Build Project and Run Tests
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-        run: sbt "; project field; +clean; +coverage; +test; +coverageReport"
-      - name: Build Project and Run Tests for dicecup
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        run: sbt "; project dicecup; +clean; +coverage; +test; +coverageReport"
-      - name: Build Project and Run Tests for game
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        run: sbt "; project game; +clean; +coverage; +test; +coverageReport"
-      - name: Build Project and Run Tests for fileIO
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        run: sbt "; project fileIO; +clean; +coverage; +test; +coverageReport"
-      - name: Export Coverage for field
-        run: sbt "; project field; coverageAggregate; coveralls"
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Export Coverage for dicecup
-        run: sbt "; project dicecup; coverageAggregate; coveralls"
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Export Coverage for game
-        run: sbt "; project game; coverageAggregate; coveralls"
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Export Coverage for fileIO
-        run: sbt "; project fileIO; coverageAggregate; coveralls"
+        run: |
+          sbt "; project field; +clean; +coverage; +test; +coverageReport"
+          sbt "; project dicecup; +clean; +coverage; +test; +coverageReport"
+          sbt "; project game; +clean; +coverage; +test; +coverageReport"
+          sbt "; project fileIO; +clean; +coverage; +test; +coverageReport"
+      - name: Export Coverage
+        run: |
+          sbt "; project field; coverageAggregate; coveralls"
+          sbt "; project dicecup; coverageAggregate; coveralls"
+          sbt "; project game; coverageAggregate; coveralls"
+          sbt "; project fileIO; coverageAggregate; coveralls"
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
