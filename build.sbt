@@ -6,10 +6,9 @@ val dicecupVersion = "0.1.0-SNAPSHOT"
 val fieldVersion = "0.1.0-SNAPSHOT"
 val gameVersion = "0.1.0-SNAPSHOT"
 val fileIOVersion = "0.1.0-SNAPSHOT"
-val controllerVersion = "0.1.0-SNAPSHOT"
 val guiVersion = "0.1.0-SNAPSHOT"
 val tuiVersion = "0.1.0-SNAPSHOT"
-val restVersion = "0.1.0-SNAPSHOT"
+val restcontrollerVersion = "0.1.0-SNAPSHOT"
 
 lazy val dependencies = Seq(
   scalaVersion := scala3Version,
@@ -31,8 +30,6 @@ lazy val dependencies = Seq(
 )
 
 lazy val root = (project in file(""))
-  .dependsOn(controller, rest)
-  .aggregate(controller, rest)
   .settings(
     name := "kniffel",
     version := "0.1.0-SNAPSHOT",
@@ -67,12 +64,6 @@ lazy val fileIO = (project in file("fileIO"))
     dependencies
   )
 
-lazy val controller = (project in file("controller"))
-  .settings(
-    name := "controller",
-    version := controllerVersion,
-    dependencies
-  )
 
 lazy val gui = (project in file("gui"))
   .settings(
@@ -88,12 +79,10 @@ lazy val tui = (project in file("tui"))
     dependencies
   )
 
-lazy val rest = (project in file("rest"))
-  .dependsOn(controller, dicecup, field, game, fileIO, gui, tui)
-  .aggregate(controller, dicecup, field, game, fileIO, gui, tui)
+lazy val restcontroller = (project in file("restcontroller"))
   .settings(
-    name := "rest",
-    version := restVersion,
+    name := "restcontroller",
+    version := restcontrollerVersion,
     dependencies
   )
 
