@@ -1,7 +1,7 @@
 package de.htwg.sa.kniffel.controller.controllerBaseImpl
 
-import de.htwg.sa.kniffel.util.HttpUtil.sendRequest
 import de.htwg.sa.kniffel.util.{Event, HttpUtil, Move, Observer}
+import de.htwg.sa.kniffel.util.HttpUtil.sendRequest
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.{JsArray, JsDefined, JsNull, JsNumber, Json}
@@ -9,8 +9,8 @@ import play.api.libs.json.{JsArray, JsDefined, JsNull, JsNumber, Json}
 
 class ControllerSpec extends AnyWordSpec {
   "The Controller" should {
-    val controller = new Controller()
-    val controller2 = new Controller()
+    val controller = new Controller(2)
+    val controller2 = new Controller(2)
 
     "notify its observers on change" in {
       class TestObserver(controller: Controller) extends Observer :

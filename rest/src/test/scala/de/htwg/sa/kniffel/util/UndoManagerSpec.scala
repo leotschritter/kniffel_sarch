@@ -1,5 +1,4 @@
-package de.htwg.sa.kniffel
-package util
+package de.htwg.sa.kniffel.util
 
 import de.htwg.sa.kniffel.controller.controllerBaseImpl.SetCommand
 import org.scalatest.matchers.should.Matchers.*

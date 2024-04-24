@@ -1,5 +1,4 @@
-package de.htwg.sa.kniffel
-package util
+package de.htwg.sa.kniffel.util
 
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec

@@ -10,7 +10,7 @@ class KniffelModule extends AbstractModule with ScalaModule {
   val numberOfPlayers: Int = 2
 
   override def configure(): Unit = {
-    bind[IController].toInstance(new Controller())
+    bind[IController].toInstance(new Controller(2))
   }
 
 }

@@ -2,6 +2,9 @@ package de.htwg.sa.kniffel
 package controller
 
 import akka.http.scaladsl.server.Route
+import de.htwg.sa.kniffel.dicecup.IDiceCup
+import de.htwg.sa.kniffel.field.IField
+import de.htwg.sa.kniffel.game.IGame
 import de.htwg.sa.kniffel.util.{Move, Observable}
 import play.api.libs.json.JsObject
 
@@ -16,25 +19,25 @@ trait IController extends Observable {
 
   def next(): String
 
-  def doAndPublish(doThis: List[Int] => String, list: List[Int]): String
+  def doAndPublish(doThis: List[Int] => IDiceCup, list: List[Int]): String
 
-  def putOut(list: List[Int]): String
+  def putOut(list: List[Int]): IDiceCup
 
-  def putIn(list: List[Int]): String
+  def putIn(list: List[Int]): IDiceCup
 
-  def doAndPublish(doThis: => String): String
+  def doAndPublish(doThis: => IDiceCup): String
 
-  def dice(): String
+  def dice(): IDiceCup
 
-  def nextRound(): String
+  def nextRound(): IDiceCup
 
   def toString: String
 
-  def field: String
+  def field: IField
 
-  def diceCup: String
+  def diceCup: IDiceCup
 
-  def game: String
+  def game: IGame
 
   def save(): String
 
