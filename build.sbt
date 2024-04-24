@@ -1,5 +1,4 @@
 import org.scoverage.coveralls.GitHubActions
-import scoverage.ScoverageKeys.coverageEnabled
 
 val scala3Version = "3.3.3"
 
@@ -37,64 +36,56 @@ lazy val root = (project in file(""))
   .settings(
     name := "kniffel",
     version := "0.1.0-SNAPSHOT",
-    dependencies,
-    coverageEnabled := false
+    dependencies
   )
 
 lazy val dicecup = (project in file("dicecup"))
   .settings(
     name := "dicecup",
     version := dicecupVersion,
-    dependencies,
-    coverageEnabled := true
+    dependencies
   )
 
 lazy val field = (project in file("field"))
   .settings(
     name := "field",
     version := fieldVersion,
-    dependencies,
-    coverageEnabled := true
+    dependencies
   )
 
 lazy val game = (project in file("game"))
   .settings(
     name := "game",
     version := gameVersion,
-    dependencies,
-    coverageEnabled := true
+    dependencies
   )
 
 lazy val fileIO = (project in file("fileIO"))
   .settings(
     name := "fileIO",
     version := fileIOVersion,
-    dependencies,
-    coverageEnabled := true
+    dependencies
   )
 
 lazy val controller = (project in file("controller"))
   .settings(
     name := "controller",
     version := controllerVersion,
-    dependencies,
-    coverageEnabled := false
+    dependencies
   )
 
 lazy val gui = (project in file("gui"))
   .settings(
     name := "gui",
     version := guiVersion,
-    dependencies,
-    coverageEnabled := false
+    dependencies
   )
 
 lazy val tui = (project in file("tui"))
   .settings(
     name := "tui",
     version := tuiVersion,
-    dependencies,
-    coverageEnabled := false
+    dependencies
   )
 
 lazy val rest = (project in file("rest"))
@@ -103,8 +94,7 @@ lazy val rest = (project in file("rest"))
   .settings(
     name := "rest",
     version := restVersion,
-    dependencies,
-    coverageEnabled := false
+    dependencies
   )
 
 import org.scoverage.coveralls.Imports.CoverallsKeys.*
