@@ -60,12 +60,11 @@ case class Field(matrix: Matrix[Option[Int]]) extends IField:
 
   def undoMove(valueList: List[Int], x: Int, y: Int): Field = putMulti(valueList, None, x, y)
 
-  def putMulti(valueList: List[Int], putInValue: Option[Int], x: Int, y: Int): Field = {
+  def putMulti(valueList: List[Int], putInValue: Option[Int], x: Int, y: Int): Field = 
     val indexList: List[Int] = List(6, 7, 8, 16, 17, 18)
     this.copy(matrix.fill(x, indexList.head, Some(valueList.head)).fill(x, indexList(1), Some(valueList(1)))
       .fill(x, indexList(2), Some(valueList(2))).fill(x, indexList(3), Some(valueList(3)))
       .fill(x, indexList(4), Some(valueList(4))).fill(x, indexList.last, Some(valueList.last)).fill(x, y, putInValue))
-  }
 
   def numberOfPlayers: Int = defaultPlayers
 

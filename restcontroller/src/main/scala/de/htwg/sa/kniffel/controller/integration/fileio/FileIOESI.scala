@@ -8,14 +8,14 @@ class FileIOESI:
 
   val baseUrl = "http://localhost:9000/"
 
-  def loadDiceCupRequest(path: String, requestBody: String = ""): DiceCup =
-    new DiceCup().jsonStringToDiceCup(sendRequest(path, requestBody))
+  def loadDiceCupRequest: DiceCup =
+    new DiceCup().jsonStringToDiceCup(sendRequest("io/loadDiceCup"))
     
-  def loadFieldRequest(path: String, requestBody: String = ""): Field =
-    new Field(2).jsonStringToField(sendRequest(path, requestBody))
+  def loadFieldRequest: Field =
+    new Field(2).jsonStringToField(sendRequest("io/loadField"))
   
-  def loadGameRequest(path: String, requestBody: String = ""): Game =
-    new Game(2).jsonStringToGame(sendRequest(path, requestBody))
+  def loadGameRequest: Game =
+    new Game(2).jsonStringToGame(sendRequest("io/loadGame"))
     
   def saveRequest(path: String, requestBody: String = ""): Unit =
     sendRequest(path, requestBody)  

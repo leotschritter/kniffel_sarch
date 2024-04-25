@@ -13,7 +13,7 @@ import de.htwg.sa.kniffel.controller.util.{Event, Move, Observer}
 import java.net.{HttpURLConnection, URL}
 import scala.concurrent.ExecutionContext
 
-case class Rest(controller: IController, tuiESI: TuiESI, guiESI: GuiESI) extends Observer:
+case class RestControllerApi(controller: IController, tuiESI: TuiESI, guiESI: GuiESI) extends Observer:
   def this(controller: IController) = this(controller, TuiESI(), GuiESI())
   controller.add(this)
 

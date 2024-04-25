@@ -1,4 +1,4 @@
-package de.htwg.sa.kniffel.util
+package de.htwg.sa.kniffel.controller.util
 
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec

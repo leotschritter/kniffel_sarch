@@ -46,7 +46,7 @@ class Controller @Inject()(var field: Field, var diceCup: DiceCup, var game: Gam
 
   def put(move: Move): String = {
     diceCup = nextRound()
-    val r = undoManager.doStep(game, field, SetCommand(move))
+    val r = undoManager.doStep(game, field, SetCommand(move, gameESI, fieldESI))
     game = r._1
     field = r._2
     toString
@@ -95,9 +95,9 @@ class Controller @Inject()(var field: Field, var diceCup: DiceCup, var game: Gam
     toString
 
   def load(): String =
-    field = fileIOESI.loadFieldRequest("io/loadField")
-    game = fileIOESI.loadGameRequest("io/loadGame")
-    diceCup = fileIOESI.loadDiceCupRequest("io/loadDiceCup")
+    field = fileIOESI.loadFieldRequest
+    game = fileIOESI.loadGameRequest
+    diceCup = fileIOESI.loadDiceCupRequest
     notifyObservers(Event.Load)
     toString
 

@@ -26,7 +26,9 @@ lazy val dependencies = Seq(
   libraryDependencies += "org.apache.cassandra" % "cassandra-all" % "4.1.4" excludeAll(
     ExclusionRule(organization = "org.slf4j", name = "slf4j-log4j12"),
     ExclusionRule(organization = "log4j", name = "log4j")
-  )
+  ),
+  libraryDependencies += "org.scalatestplus" %% "mockito-5-10" % "3.2.18.0" % Test
+
 )
 
 lazy val root = (project in file(""))
