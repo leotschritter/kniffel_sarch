@@ -10,8 +10,8 @@ import de.htwg.sa.kniffel.controller.model.IController
 import de.htwg.sa.kniffel.controller.util.Event.*
 import de.htwg.sa.kniffel.controller.util.{Event, Move, Observer}
 
-import java.net.{HttpURLConnection, URL}
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success, Try}
 
 case class RestControllerApi(controller: IController, tuiESI: TuiESI, guiESI: GuiESI) extends Observer:
   def this(controller: IController) = this(controller, TuiESI(), GuiESI())
@@ -91,14 +91,15 @@ case class RestControllerApi(controller: IController, tuiESI: TuiESI, guiESI: Gu
               },
               path("writeDown" / StringValue) {
                 (value: String) =>
-                  try {
+                  Try({
                     val currentPlayer = controller.gameESI.sendPlayerIDRequest(controller.game)
                     val indexOfField = controller.diceCupESI.sendIndexOfFieldRequest(value)
                     val result = controller.diceCupESI.sendResultRequest(indexOfField, controller.diceCup)
                     complete(controller.writeDown(Move(result, currentPlayer, indexOfField)))
-                  } catch {
-                    case e: Throwable => complete("Invalid Input!")
-                  }
+                  }) match
+                    case Failure(exception) => complete("Invalid Input!")
+                    case Success(value) => value
+
               },
               path("") {
                 sys.error("No such GET route")

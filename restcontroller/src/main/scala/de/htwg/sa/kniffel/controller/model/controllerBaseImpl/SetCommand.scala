@@ -4,9 +4,6 @@ import de.htwg.sa.kniffel.controller.entity.{Field, Game}
 import de.htwg.sa.kniffel.controller.integration.field.FieldESI
 import de.htwg.sa.kniffel.controller.integration.game.GameESI
 import de.htwg.sa.kniffel.controller.util.{Command, Move}
-import play.api.libs.json.Json
-
-import scala.util.Try
 
 class SetCommand(move: Move, val gameESI: GameESI, val fieldESI: FieldESI) extends Command[Game, Field]:
   def this(move: Move) = this(move, GameESI(), FieldESI())
@@ -30,13 +27,8 @@ class SetCommand(move: Move, val gameESI: GameESI, val fieldESI: FieldESI) exten
         (
           nextG,
           fieldESI.sendRequest(s"field/putMulti/list=$list/${move.value}/${move.x}/${move.y}",
-            field.toJson.toString)
-        )
+            field.toJson.toString))
     }
-
-  private def getListAsString(game: String, x: Int): String = {
-    (Json.parse(game) \ "game" \ "nestedList").as[String].split(";")(x)
-  }
 
   override def undoStep(game: Game, field: Field): (Game, Field) =
     val g = gameESI.sendRequest(s"game/undoMove/${move.value}/${move.y}", game.toJson.toString)
