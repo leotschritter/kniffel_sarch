@@ -110,6 +110,22 @@ class DiceCupSpec extends AnyWordSpec {
           diceCup)
       }
     }
+    "when a result for an empty DiceCup is evaluated it" should {
+      "be 0" in {
+        val diceCup: DiceCup = DiceCup(List(), List(), 0)
+
+        diceCup.result(0) should be(0)
+      }
+    }
+    "when the next round function is called it" should {
+      "return a new empty dicecup" in {
+        var diceCup: DiceCup = new DiceCup()
+        diceCup = diceCup.nextRound()
+        diceCup.remainingDices should be(2)
+        diceCup.locked.size should be(0)
+        diceCup.inCup.size should be(0)
+      }
+    }
 
 
     /*"when DiceCupState changed" should {

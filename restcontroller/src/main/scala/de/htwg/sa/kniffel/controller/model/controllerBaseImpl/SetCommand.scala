@@ -28,11 +28,10 @@ class SetCommand(move: Move, val gameESI: GameESI, val fieldESI: FieldESI) exten
       case Some(nextG) =>
         val list = nextG.nestedList(move.x).mkString(",")
         (
-        nextG,
+          nextG,
           fieldESI.sendRequest(s"field/putMulti/list=$list/${move.value}/${move.x}/${move.y}",
-            field.toJson.toString
+            field.toJson.toString)
         )
-          )
     }
 
   private def getListAsString(game: String, x: Int): String = {
@@ -44,7 +43,7 @@ class SetCommand(move: Move, val gameESI: GameESI, val fieldESI: FieldESI) exten
     val list = g.nestedList(move.x).mkString(",")
     (
       g,
-      fieldESI.sendRequest(s"field/undoMove/list=$list/${move.x}/${move.y}",field.toJson.toString)
+      fieldESI.sendRequest(s"field/undoMove/list=$list/${move.x}/${move.y}", field.toJson.toString)
     )
 
   override def noStep(game: Game, field: Field): (Game, Field) =

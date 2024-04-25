@@ -19,9 +19,7 @@ trait IController extends Observable {
   def quit(): String
 
   def next(): String
-
-  def doAndPublish(doThis: List[Int] => DiceCup, list: List[Int]): String
-
+  
   def putOut(list: List[Int]): DiceCup
 
   def putIn(list: List[Int]): DiceCup

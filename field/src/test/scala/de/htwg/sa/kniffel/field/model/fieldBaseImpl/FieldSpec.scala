@@ -102,6 +102,14 @@ class FieldSpec extends AnyWordSpec {
         field)
     }
   }
+
+  "when the newField function is called it" should {
+    "return a new empty Field" in {
+      var field: Field = new Field(2)
+
+      field.newField(2) should be(field)
+    }
+  }
 }
 
 

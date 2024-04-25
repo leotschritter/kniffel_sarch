@@ -13,15 +13,13 @@ import play.api.libs.json.{JsObject, JsValue, Json}
 
 class Controller @Inject()(var field: Field, var diceCup: DiceCup, var game: Game, val diceCupESI: DiceCupESI,
                            val fieldESI: FieldESI, val gameESI: GameESI, val fileIOESI: FileIOESI) extends IController:
-  def this(numberOfPlayers: Int) = {
+  def this(numberOfPlayers: Int) =
     this(new Field(numberOfPlayers), new DiceCup(), new Game(numberOfPlayers),
       new DiceCupESI(), new FieldESI(), new GameESI(), new FileIOESI())
-  }
 
-  def this(field: Field, diceCup: DiceCup, game: Game) = {
+  def this(field: Field, diceCup: DiceCup, game: Game) =
     this(field, diceCup, game,
       new DiceCupESI(), new FieldESI(), new GameESI(), new FileIOESI())
-  }
 
 
   val undoManager = new UndoManager[Game, Field]
@@ -60,13 +58,7 @@ class Controller @Inject()(var field: Field, var diceCup: DiceCup, var game: Gam
   def next(): String =
     game = getNextGame
     toString
-
-  // doAndPublish for putOut and putIn
-  def doAndPublish(doThis: List[Int] => DiceCup, list: List[Int]): String =
-    diceCup = doThis(list)
-    notifyObservers(Event.Move)
-    toString
-
+  
   def putOut(list: List[Int]): DiceCup =
     diceCupESI.sendRequest(s"diceCup/putOut/list=${list.mkString(",")}", diceCup.toJson.toString)
 
@@ -123,30 +115,20 @@ class Controller @Inject()(var field: Field, var diceCup: DiceCup, var game: Gam
     val f = Json.obj("field" -> (controllerJson \ "controller" \ "field").as[JsObject]).toString
     val dc = Json.obj("dicecup" -> (controllerJson \ "controller" \ "dicecup").as[JsObject]).toString
     val g = Json.obj("game" -> (controllerJson \ "controller" \ "game").as[JsObject]).toString
-    new Controller(unpackField(f), unpackDiceCup(dc), unpackGame(g))
+    new Controller(field.jsonStringToField(f), diceCup.jsonStringToDiceCup(dc), game.jsonStringToGame(g))
 
-  override def jsonStringToMove(move: String): Move = {
+  override def jsonStringToMove(move: String): Move =
     Move(
       (Json.parse(move) \ "move" \ "value").as[Int],
       (Json.parse(move) \ "move" \ "x").as[Int],
       (Json.parse(move) \ "move" \ "y").as[Int]
     )
-  }
 
   private def getPlayerName: String =
     gameESI.sendPlayerNameRequest(game)
 
-  override def writeDown(move: Move): String = {
+  override def writeDown(move: Move): String =
     put(move)
     next()
     doAndPublish(nextRound())
-  }
-
-  private def unpackDiceCup(diceCup: String): DiceCup =
-    this.diceCup.jsonStringToDiceCup(diceCup)
-
-  private def unpackGame(game: String): Game =
-    this.game.jsonStringToGame(game)
-
-  private def unpackField(field: String): Field =
-    this.field.jsonStringToField(field)
+  

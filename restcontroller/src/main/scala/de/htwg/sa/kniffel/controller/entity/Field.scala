@@ -23,19 +23,15 @@ case class Field(matrix: Matrix[Option[Int]]):
   }
 
 
-  def jsonStringToField(field: String): Field = {
+  def jsonStringToField(field: String): Field =
     val json: JsValue = Json.parse(field)
     val jsonRows: JsArray = (json \ "field" \ "rows").get.as[JsArray]
 
     val rows: Vector[Vector[Option[Int]]] = jsonRows.value.map { row =>
       row.as[JsArray].value.map {
-        case JsNull => None
         case JsNumber(value) => Some(value.toInt)
         case _ => None
       }.toVector
     }.toVector
 
     Field(Matrix(rows))
-  }
-  
-  
