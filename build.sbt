@@ -6,9 +6,9 @@ val dicecupVersion = "0.1.0-SNAPSHOT"
 val fieldVersion = "0.1.0-SNAPSHOT"
 val gameVersion = "0.1.0-SNAPSHOT"
 val fileIOVersion = "0.1.0-SNAPSHOT"
-val controllerVersion = "0.1.0-SNAPSHOT"
 val guiVersion = "0.1.0-SNAPSHOT"
 val tuiVersion = "0.1.0-SNAPSHOT"
+val restcontrollerVersion = "0.1.0-SNAPSHOT"
 
 lazy val dependencies = Seq(
   scalaVersion := scala3Version,
@@ -19,12 +19,21 @@ lazy val dependencies = Seq(
   libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "2.3.0",
   libraryDependencies += ("com.typesafe.play" %% "play-json" % "2.10.4"),
   libraryDependencies += "com.google.inject" % "guice" % "7.0.0",
-  libraryDependencies += "net.codingwell" %% "scala-guice" % "7.0.0"
+  libraryDependencies += "net.codingwell" %% "scala-guice" % "7.0.0",
+  libraryDependencies += "com.typesafe.akka" %% "akka-actor-typed" % "2.8.5",
+  libraryDependencies += "com.typesafe.akka" %% "akka-http" % "10.5.3",
+  libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.8.5",
+  libraryDependencies += "org.apache.cassandra" % "cassandra-all" % "4.1.4" excludeAll(
+    ExclusionRule(organization = "org.slf4j", name = "slf4j-log4j12"),
+    ExclusionRule(organization = "log4j", name = "log4j")
+  ),
+  libraryDependencies += "org.scalatestplus" %% "mockito-5-10" % "3.2.18.0" % Test
+
 )
 
 lazy val root = (project in file(""))
-  .dependsOn(dicecup, fileIO, field, game, controller, gui, tui)
-  .aggregate(dicecup, fileIO, field, game, controller, gui, tui)
+  .dependsOn(dicecup, field, game, fileIO, gui, tui, restcontroller)
+  .aggregate(dicecup, field, game, fileIO, gui, tui, restcontroller)
   .settings(
     name := "kniffel",
     version := "0.1.0-SNAPSHOT",
@@ -53,26 +62,14 @@ lazy val game = (project in file("game"))
   )
 
 lazy val fileIO = (project in file("fileIO"))
-  .dependsOn(dicecup, field, game)
-  .aggregate(dicecup, field, game)
   .settings(
     name := "fileIO",
     version := fileIOVersion,
     dependencies
   )
 
-lazy val controller = (project in file("controller"))
-  .dependsOn(game, field, dicecup, fileIO)
-  .aggregate(game, field, dicecup, fileIO)
-  .settings(
-    name := "controller",
-    version := controllerVersion,
-    dependencies
-  )
 
 lazy val gui = (project in file("gui"))
-  .dependsOn(controller)
-  .aggregate(controller)
   .settings(
     name := "gui",
     version := guiVersion,
@@ -80,11 +77,16 @@ lazy val gui = (project in file("gui"))
   )
 
 lazy val tui = (project in file("tui"))
-  .dependsOn(controller)
-  .aggregate(controller)
   .settings(
     name := "tui",
     version := tuiVersion,
+    dependencies
+  )
+
+lazy val restcontroller = (project in file("restcontroller"))
+  .settings(
+    name := "restcontroller",
+    version := restcontrollerVersion,
     dependencies
   )
 
