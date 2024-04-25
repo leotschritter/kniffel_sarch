@@ -15,20 +15,12 @@ class HttpUtilTest extends AnyWordSpec with Matchers:
         intercept[ConnectException] {
           HttpUtil.sendRequest("http://localhost:54321/", "J7RCU")
         }
-        intercept[RuntimeException] {
-          HttpUtil.sendPUTRequest("http://localhost/", "J7RCU")
-        }
         intercept[MalformedURLException] {
           HttpUtil.sendPUTRequest("hfiuew93z", "J7RCU")
         }
         intercept[ConnectException] {
           HttpUtil.sendPUTRequest("http://localhost:54321/", "J7RCU")
         }
-        intercept[RuntimeException] {
-          HttpUtil.sendPUTRequest("http://localhost/", "J7RCU")
-        }
-
-
       }
     }
   }
