@@ -1,6 +1,5 @@
 package de.htwg.sa.kniffel.fileio.model.fileIOJsonImpl
 
-import de.htwg.sa.kniffel.fileio.fileIOJsonImpl.FileIO
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 

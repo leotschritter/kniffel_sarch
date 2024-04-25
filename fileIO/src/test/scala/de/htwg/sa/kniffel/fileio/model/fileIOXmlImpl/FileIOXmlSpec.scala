@@ -1,6 +1,5 @@
 package de.htwg.sa.kniffel.fileio.model.fileIOXmlImpl
 
-import de.htwg.sa.kniffel.fileio.fileIOXmlImpl.FileIO
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 

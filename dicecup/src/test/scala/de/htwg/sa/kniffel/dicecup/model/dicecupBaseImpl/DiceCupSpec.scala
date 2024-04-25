@@ -1,4 +1,4 @@
-package de.htwg.sa.kniffel.dicecup.dicecupBaseImpl
+package de.htwg.sa.kniffel.dicecup.model.dicecupBaseImpl
 
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec

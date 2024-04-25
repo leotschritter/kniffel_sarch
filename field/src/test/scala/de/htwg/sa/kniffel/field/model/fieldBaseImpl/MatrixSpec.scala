@@ -1,6 +1,5 @@
 package de.htwg.sa.kniffel.field.model.fieldBaseImpl
 
-import de.htwg.sa.kniffel.field.fieldBaseImpl.Matrix
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 
