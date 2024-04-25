@@ -30,8 +30,19 @@ jobs:
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-        run: sbt +clean +coverage +test +coverageReport
+        run: |
+          sbt "; project dicecup; +clean; +coverage; +test; +coverageReport"
+          sbt "; project field; +clean; +coverage; +test; +coverageReport"
+          sbt "; project fileIO; +clean; +coverage; +test; +coverageReport"
+          sbt "; project game; +clean; +coverage; +test; +coverageReport"
+          sbt "; project restcontroller; +clean; +coverage; +test; +coverageReport"
       - name: Export Coverage
-        run: sbt coverageAggregate coveralls
+        run: |
+          sbt "; project dicecup; coverageAggregate; coveralls"
+          sbt "; project field; coverageAggregate; coveralls"
+          sbt "; project fileIO; coverageAggregate; coveralls"        
+          sbt "; project game; coverageAggregate; coveralls"
+          sbt "; project restcontroller; coverageAggregate; coveralls"
+
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
