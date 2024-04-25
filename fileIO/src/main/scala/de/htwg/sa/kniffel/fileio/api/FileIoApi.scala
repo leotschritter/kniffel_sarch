@@ -4,17 +4,16 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.Route
-import com.google.inject.Inject
 import de.htwg.sa.kniffel.fileio.model.IFileIO
 
 import scala.concurrent.ExecutionContext
+import scala.io.StdIn
 
-class FileIoApi @Inject()(fileIO: IFileIO):
+class FileIoApi(using fileIO: IFileIO):
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
-
-
-  Http().newServerAt("localhost", 9000).bind(
+  
+  private val bindingFuture =  Http().newServerAt("localhost", 9000).bind(
     pathPrefix("io") {
       concat(
         get {
@@ -58,3 +57,7 @@ class FileIoApi @Inject()(fileIO: IFileIO):
       )
     }
   )
+  StdIn.readLine()
+
+  bindingFuture.flatMap(_.unbind())
+    .onComplete(_ => system.terminate())

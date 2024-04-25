@@ -7,10 +7,9 @@ import de.htwg.sa.kniffel.tui.aview.TUI
 
 import scala.concurrent.ExecutionContext
 
-class TuiApi(val tui: TUI):
+class TuiApi(using val tui: TUI):
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
-
 
   Http().newServerAt("localhost", 9005).bind(
     pathPrefix("tui") {
@@ -34,6 +33,3 @@ class TuiApi(val tui: TUI):
       )
     }
   )
-
-
-

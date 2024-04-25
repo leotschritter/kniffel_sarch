@@ -8,8 +8,9 @@ import de.htwg.sa.kniffel.dicecup.model.IDiceCup
 import play.api.libs.json.{JsNull, JsNumber, Json}
 
 import scala.concurrent.ExecutionContext
+import scala.io.StdIn
 
-class DiceCupApi(diceCup: IDiceCup) {
+class DiceCupApi(using diceCup: IDiceCup):
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
@@ -18,9 +19,8 @@ class DiceCupApi(diceCup: IDiceCup) {
     val ints = str.split("=").tail.mkString(",").split(",").map(_.toInt)
     Some(ints.toList)
   }
-
-
-  Http().newServerAt("localhost", 9002).bind(
+  
+  private val bindingFuture = Http().newServerAt("localhost", 9002).bind(
     pathPrefix("diceCup") {
       concat(
         get {
@@ -97,4 +97,7 @@ class DiceCupApi(diceCup: IDiceCup) {
       )
     }
   )
-}
+  StdIn.readLine()
+
+  bindingFuture.flatMap(_.unbind())
+    .onComplete(_ => system.terminate())

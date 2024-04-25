@@ -1,16 +1,21 @@
 package de.htwg.sa.kniffel.controller
 
-import com.google.inject.{Guice, Injector}
 import de.htwg.sa.kniffel.controller.api.RestControllerApi
+import de.htwg.sa.kniffel.controller.integration.gui.GuiESI
+import de.htwg.sa.kniffel.controller.integration.tui.TuiESI
 import de.htwg.sa.kniffel.controller.model.IController
+import de.htwg.sa.kniffel.controller.model.controllerBaseImpl.Controller
 
-object RestControllerService {
+// @formatter:off
+object RestControllerService:
+  val numberOfPlayers: Int = 2
+  val controller: IController = new Controller(numberOfPlayers)
+  val guiESI: GuiESI = GuiESI()
+  val tuiESI: TuiESI = TuiESI()
+  given IController = controller
+  given GuiESI = guiESI
+  given TuiESI = tuiESI
 
-  private val injector: Injector = Guice.createInjector(new RestControllerModule)
+  def main(args: Array[String]): Unit = RestControllerApi()
 
-  def main(args: Array[String]): Unit = {
-    val rest: RestControllerApi = new RestControllerApi(injector.getInstance(classOf[IController]))
-    println("Welcome to Kniffel")
-  }
-
-}
+// @formatter:on

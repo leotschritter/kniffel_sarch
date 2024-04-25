@@ -1,13 +1,11 @@
 package de.htwg.sa.kniffel.fileio
 
-import com.google.inject.{Guice, Injector}
 import de.htwg.sa.kniffel.fileio.api.FileIoApi
 import de.htwg.sa.kniffel.fileio.model.IFileIO
+import de.htwg.sa.kniffel.fileio.model.fileIOXmlImpl.FileIO
 
-object FileIOService {
-  private val injector: Injector = Guice.createInjector(new FileIOModule)
-
-  def main(args: Array[String]): Unit = {
-    val fileIoApi: FileIoApi = new FileIoApi(injector.getInstance(classOf[IFileIO]))
-  }
-}
+object FileIOService:
+  val fileIO: IFileIO = new FileIO()
+  given IFileIO = fileIO 
+  
+  def main(args: Array[String]): Unit = new FileIoApi()

@@ -3,19 +3,18 @@ package de.htwg.sa.kniffel.game.api
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives.*
-import com.google.inject.Inject
 import de.htwg.sa.kniffel.game.model.IGame
 import play.api.libs.json.{JsNull, JsNumber, Json}
 
 import scala.concurrent.ExecutionContext
+import scala.io.StdIn
 
-class GameApi @Inject()(game: IGame):
+class GameApi(using game: IGame):
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
 
-
-  Http().newServerAt("localhost", 9003).bind(
+  private val bindingFuture = Http().newServerAt("localhost", 9003).bind(
     pathPrefix("game") {
       concat(
         get {
@@ -115,4 +114,7 @@ class GameApi @Inject()(game: IGame):
       )
     }
   )
+  StdIn.readLine()
 
+  bindingFuture.flatMap(_.unbind())
+    .onComplete(_ => system.terminate())

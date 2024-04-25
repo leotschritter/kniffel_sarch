@@ -8,14 +8,14 @@ import akka.http.scaladsl.server.Directives.*
 import de.htwg.sa.kniffel.field.model.IField
 
 import scala.concurrent.ExecutionContext
+import scala.io.StdIn
 
-class FieldApi(field: IField) {
+class FieldApi(using field: IField):
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
-
-
-  Http().newServerAt("localhost", 9001).bind(
+  
+  private val bindingFuture = Http().newServerAt("localhost", 9001).bind(
     pathPrefix("field") {
       val IntList: PathMatcher1[List[Int]] = PathMatcher("""list=\d+(?:,\d+)*""".r).flatMap { str =>
         val ints = str.split("=").tail.mkString(",").split(",").map(_.toInt)
@@ -90,4 +90,7 @@ class FieldApi(field: IField) {
       )
     }
   )
-}
+  StdIn.readLine()
+
+  bindingFuture.flatMap(_.unbind())
+    .onComplete(_ => system.terminate())

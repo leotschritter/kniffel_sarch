@@ -7,7 +7,7 @@ import de.htwg.sa.kniffel.gui.aview.GUI
 
 import scala.concurrent.ExecutionContext
 
-class GuiApi(gui: GUI):
+class GuiApi(using gui: GUI):
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
 

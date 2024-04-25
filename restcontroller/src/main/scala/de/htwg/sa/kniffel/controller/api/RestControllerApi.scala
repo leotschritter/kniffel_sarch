@@ -11,10 +11,10 @@ import de.htwg.sa.kniffel.controller.util.Event.*
 import de.htwg.sa.kniffel.controller.util.{Event, Move, Observer}
 
 import scala.concurrent.ExecutionContext
+import scala.io.StdIn
 import scala.util.{Failure, Success, Try}
 
-case class RestControllerApi(controller: IController, tuiESI: TuiESI, guiESI: GuiESI) extends Observer:
-  def this(controller: IController) = this(controller, TuiESI(), GuiESI())
+class RestControllerApi(using controller: IController, tuiESI: TuiESI, guiESI: GuiESI) extends Observer:
   controller.add(this)
 
   override def update(e: Event): Unit = e match
@@ -33,7 +33,7 @@ case class RestControllerApi(controller: IController, tuiESI: TuiESI, guiESI: Gu
 
   private val StringValue: PathMatcher1[String] = PathMatcher("""\w+""".r)
 
-  Http().newServerAt("localhost", 9006).bind(
+  private val bindingFuture = Http().newServerAt("localhost", 9006).bind(
     concat(
       pathPrefix("controller") {
         concat(
@@ -128,3 +128,7 @@ case class RestControllerApi(controller: IController, tuiESI: TuiESI, guiESI: Gu
       }
     )
   )
+  StdIn.readLine()
+
+  bindingFuture.flatMap(_.unbind())
+    .onComplete(_ => system.terminate())
