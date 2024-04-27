@@ -1,6 +1,5 @@
-package de.htwg.sa.kniffel.game.model
+package de.htwg.sa.kniffel.game.model.gameBaseImpl
 
-import de.htwg.sa.kniffel.game.model.gameBaseImpl.{Game, Player}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 

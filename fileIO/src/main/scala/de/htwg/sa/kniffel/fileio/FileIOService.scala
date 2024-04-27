@@ -6,6 +6,6 @@ import de.htwg.sa.kniffel.fileio.model.fileIOXmlImpl.FileIO
 
 object FileIOService:
   val fileIO: IFileIO = new FileIO()
-  given IFileIO = fileIO 
-  
-  def main(args: Array[String]): Unit = new FileIoApi()
+  given IFileIO = fileIO
+
+  @main def main(): Unit = FileIoApi().start

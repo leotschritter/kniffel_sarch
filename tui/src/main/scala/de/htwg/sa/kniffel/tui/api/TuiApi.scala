@@ -14,6 +14,13 @@ class TuiApi(using val tui: TUI):
   Http().newServerAt("localhost", 9005).bind(
     pathPrefix("tui") {
       concat(
+        get {
+          concat(
+            path("ping") {
+              complete("pong")
+            }
+          )
+        },
         put {
           concat(
             path("quit") {

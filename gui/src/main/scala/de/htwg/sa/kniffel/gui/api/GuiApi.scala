@@ -14,6 +14,13 @@ class GuiApi(using gui: GUI):
   Http().newServerAt("localhost", 9004).bind(
     pathPrefix("gui") {
       concat(
+        get {
+          concat(
+            path("ping") {
+              complete("pong")
+            }
+          )
+        },
         put {
           concat(
             path("quit") {

@@ -1,16 +1,14 @@
 package de.htwg.sa.kniffel.fileio.model.fileIOJsonImpl
 
 import de.htwg.sa.kniffel.fileio.model.IFileIO
-import play.api.libs.json.*
+import play.api.libs.json.{JsBoolean, Json}
 
-import scala.Predef.ArrowAssoc
+import java.io.{File, PrintWriter}
 import scala.io.{BufferedSource, Source}
-
 
 class FileIO extends IFileIO {
 
   override def saveGame(game: String): String = {
-    import java.io.*
     val pw = new PrintWriter(new File("game.json"))
     pw.write(Json.prettyPrint(Json.parse(game)))
     pw.close()
@@ -18,7 +16,6 @@ class FileIO extends IFileIO {
   }
 
   override def saveField(field: String): String = {
-    import java.io.*
     val pw = new PrintWriter(new File("field.json"))
     pw.write(Json.prettyPrint(Json.parse(field)))
     pw.close()
@@ -26,7 +23,6 @@ class FileIO extends IFileIO {
   }
 
   override def saveDiceCup(diceCup: String): String = {
-    import java.io.*
     val pw = new PrintWriter(new File("dicecup.json"))
     pw.write(Json.prettyPrint(Json.parse(diceCup)))
     pw.close()

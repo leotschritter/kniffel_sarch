@@ -1,5 +1,6 @@
-package de.htwg.sa.kniffel.fileio.model.fileIOJsonImpl
+package de.htwg.kniffel.fileio.model.fileIOJsonImpl
 
+import de.htwg.sa.kniffel.fileio.model.fileIOJsonImpl.FileIO
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -15,7 +16,7 @@ class FileIOJsonSpec extends AnyWordSpec {
     val diceCup1 = "{\"dicecup\":{\"stored\":[2,2],\"incup\":[2,2,2],\"remainingDices\":2}}"
     val diceCup2 = "{\"dicecup\":{\"stored\":[1,2,3],\"incup\":[2,2],\"remainingDices\":1}}"
 
-    val fileio:FileIO = new FileIO()
+    val fileio: FileIO = new FileIO()
     "loaded after save" should {
       "be the same game" in {
         fileio.saveGame(game)

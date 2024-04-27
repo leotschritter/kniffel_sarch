@@ -2,8 +2,9 @@ package de.htwg.sa.kniffel.fileio.model.fileIOXmlImpl
 
 import de.htwg.sa.kniffel.fileio.model.IFileIO
 import de.htwg.sa.kniffel.fileio.model.fileIOXmlImpl.converter.JsonToXmlConverter
-import play.api.libs.json.*
+import play.api.libs.json.{JsArray, JsBoolean, JsNumber, Json}
 
+import java.io.{File, PrintWriter}
 import scala.util.Try
 import scala.xml.{Elem, NodeSeq, PrettyPrinter}
 
@@ -14,7 +15,6 @@ class FileIO(converter: JsonToXmlConverter) extends IFileIO {
   }
 
   override def saveDiceCup(diceCup: String): String = {
-    import java.io.*
     val pw = new PrintWriter(new File("dicecup.xml"))
     val prettyPrinter = new PrettyPrinter(120, 4)
     val xml = prettyPrinter.format(converter.diceCupToXml(diceCup))
@@ -24,7 +24,6 @@ class FileIO(converter: JsonToXmlConverter) extends IFileIO {
   }
 
   override def saveGame(game: String): String = {
-    import java.io.*
     val pw = new PrintWriter(new File("game.xml"))
     val prettyPrinter = new PrettyPrinter(120, 4)
     val xml = prettyPrinter.format(converter.gameToXml(game))
@@ -34,7 +33,6 @@ class FileIO(converter: JsonToXmlConverter) extends IFileIO {
   }
 
   override def saveField(field: String): String = {
-    import java.io.*
     val pw = new PrintWriter(new File("field.xml"))
     val prettyPrinter = new PrettyPrinter(120, 4)
     val xml = prettyPrinter.format(converter.fieldToXml(field))

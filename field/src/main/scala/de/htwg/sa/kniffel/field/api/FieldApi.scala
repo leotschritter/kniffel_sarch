@@ -2,20 +2,20 @@ package de.htwg.sa.kniffel.field.api
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.{PathMatcher, PathMatcher1, Route}
-import play.api.libs.json.{JsBoolean, JsNull, JsNumber, Json}
 import akka.http.scaladsl.server.Directives.*
+import akka.http.scaladsl.server.{PathMatcher, PathMatcher1, Route}
 import de.htwg.sa.kniffel.field.model.IField
+import play.api.libs.json.{JsBoolean, JsNull, JsNumber, Json}
 
-import scala.concurrent.ExecutionContext
-import scala.io.StdIn
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class FieldApi(using field: IField):
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
-  
-  private val bindingFuture = Http().newServerAt("localhost", 9001).bind(
+
+  Http().newServerAt("localhost", 9001).bind(
     pathPrefix("field") {
       val IntList: PathMatcher1[List[Int]] = PathMatcher("""list=\d+(?:,\d+)*""".r).flatMap { str =>
         val ints = str.split("=").tail.mkString(",").split(",").map(_.toInt)
@@ -26,6 +26,9 @@ class FieldApi(using field: IField):
           concat(
             pathSingleSlash {
               complete(field.newField(2).toJson.toString)
+            },
+            path("ping") {
+              complete("pong")
             },
             path("new" / IntNumber) {
               (numberOfPlayers: Int) =>
@@ -90,7 +93,5 @@ class FieldApi(using field: IField):
       )
     }
   )
-  StdIn.readLine()
 
-  bindingFuture.flatMap(_.unbind())
-    .onComplete(_ => system.terminate())
+  def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)

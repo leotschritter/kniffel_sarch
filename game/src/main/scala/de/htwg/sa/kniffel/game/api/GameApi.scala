@@ -6,21 +6,24 @@ import akka.http.scaladsl.server.Directives.*
 import de.htwg.sa.kniffel.game.model.IGame
 import play.api.libs.json.{JsNull, JsNumber, Json}
 
-import scala.concurrent.ExecutionContext
-import scala.io.StdIn
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class GameApi(using game: IGame):
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
 
-  private val bindingFuture = Http().newServerAt("localhost", 9003).bind(
+  Http().newServerAt("localhost", 9003).bind(
     pathPrefix("game") {
       concat(
         get {
           concat(
             pathSingleSlash {
               complete(game.newGame(2).toJson.toString)
+            },
+            path("ping") {
+              complete("pong")
             },
             path("new" / IntNumber) {
               (numberOfPlayers: Int) =>
@@ -114,7 +117,5 @@ class GameApi(using game: IGame):
       )
     }
   )
-  StdIn.readLine()
 
-  bindingFuture.flatMap(_.unbind())
-    .onComplete(_ => system.terminate())
+  def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)

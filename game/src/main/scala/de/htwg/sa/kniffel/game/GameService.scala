@@ -9,4 +9,4 @@ object GameService:
   val game: IGame = new Game(numberOfPlayers)
   given IGame = game
 
-  def main(args: Array[String]): Unit = GameApi()
+  @main def main(): Unit = GameApi().start

@@ -16,6 +16,6 @@ object RestControllerService:
   given GuiESI = guiESI
   given TuiESI = tuiESI
 
-  def main(args: Array[String]): Unit = RestControllerApi()
+  @main def main(): Unit = RestControllerApi().start
 
 // @formatter:on

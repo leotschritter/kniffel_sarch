@@ -10,18 +10,18 @@ import de.htwg.sa.kniffel.controller.model.IController
 import de.htwg.sa.kniffel.controller.util.Event.*
 import de.htwg.sa.kniffel.controller.util.{Event, Move, Observer}
 
-import scala.concurrent.ExecutionContext
-import scala.io.StdIn
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 class RestControllerApi(using controller: IController, tuiESI: TuiESI, guiESI: GuiESI) extends Observer:
   controller.add(this)
 
   override def update(e: Event): Unit = e match
-    case Event.Quit => guiESI.sendRequest("gui/quit"); tuiESI.sendRequest("tui/quit")
-    case Event.Save => guiESI.sendRequest("gui/save"); tuiESI.sendRequest("tui/save")
-    case Event.Load => guiESI.sendRequest("gui/load"); tuiESI.sendRequest("tui/load")
-    case Event.Move => guiESI.sendRequest("gui/move"); tuiESI.sendRequest("tui/move")
+    case Event.Quit => /*guiESI.sendRequest("gui/quit");*/ tuiESI.sendRequest("tui/quit")
+    case Event.Save => /*guiESI.sendRequest("gui/save");*/ tuiESI.sendRequest("tui/save")
+    case Event.Load => /*guiESI.sendRequest("gui/load");*/ tuiESI.sendRequest("tui/load")
+    case Event.Move => /*guiESI.sendRequest("gui/move");*/ tuiESI.sendRequest("tui/move")
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
@@ -33,7 +33,7 @@ class RestControllerApi(using controller: IController, tuiESI: TuiESI, guiESI: G
 
   private val StringValue: PathMatcher1[String] = PathMatcher("""\w+""".r)
 
-  private val bindingFuture = Http().newServerAt("localhost", 9006).bind(
+  Http().newServerAt("localhost", 9006).bind(
     concat(
       pathPrefix("controller") {
         concat(
@@ -41,6 +41,9 @@ class RestControllerApi(using controller: IController, tuiESI: TuiESI, guiESI: G
             concat(
               pathSingleSlash {
                 complete(controller.toString)
+              },
+              path("ping") {
+                complete("pong")
               },
               path("controller") {
                 complete(controller.toJson.toString)
@@ -128,7 +131,5 @@ class RestControllerApi(using controller: IController, tuiESI: TuiESI, guiESI: G
       }
     )
   )
-  StdIn.readLine()
 
-  bindingFuture.flatMap(_.unbind())
-    .onComplete(_ => system.terminate())
+  def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)

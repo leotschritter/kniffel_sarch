@@ -6,18 +6,21 @@ import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.Route
 import de.htwg.sa.kniffel.fileio.model.IFileIO
 
-import scala.concurrent.ExecutionContext
-import scala.io.StdIn
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class FileIoApi(using fileIO: IFileIO):
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
-  
-  private val bindingFuture =  Http().newServerAt("localhost", 9000).bind(
+
+  Http().newServerAt("localhost", 9000).bind(
     pathPrefix("io") {
       concat(
         get {
           concat(
+            path("ping") {
+              complete("pong")
+            },
             path("loadField") {
               complete(fileIO.loadField)
             },
@@ -57,7 +60,5 @@ class FileIoApi(using fileIO: IFileIO):
       )
     }
   )
-  StdIn.readLine()
 
-  bindingFuture.flatMap(_.unbind())
-    .onComplete(_ => system.terminate())
+  def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)

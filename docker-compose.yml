@@ -1,0 +1,49 @@
+services:
+
+  dicecup:
+    container_name: dicecup
+    image: dicecup-image:latest
+    network_mode: host
+    ports:
+      - 9002:9002
+
+  field:
+    container_name: field
+    image: field-image:latest
+    network_mode: host
+    ports:
+      - 9001:9001
+
+  fileIO:
+    container_name: fileIO
+    image: fileio-image:latest
+    network_mode: host
+    ports:
+      - 9000:9000
+
+  game:
+    container_name: game
+    image: game-image:latest
+    network_mode: host
+    ports:
+      - 9003:9003
+
+  restcontroller:
+    container_name: restcontroller
+    image: restcontroller-image:latest
+    network_mode: host
+    ports:
+      - 9006:9006
+
+#  tui:
+#    container_name: tui
+#    image: tui-image:latest
+#    network_mode: host
+#    ports:
+#      - 9005:9005
+#
+#  gui:
+#    container_name: gui
+#    image: gui-image:latest
+#    ports:
+#      - 9004:9004
