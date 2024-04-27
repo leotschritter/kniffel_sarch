@@ -18,10 +18,10 @@ class RestControllerApi(using controller: IController, tuiESI: TuiESI, guiESI: G
   controller.add(this)
 
   override def update(e: Event): Unit = e match
-    case Event.Quit => /*guiESI.sendRequest("gui/quit");*/ tuiESI.sendRequest("tui/quit")
-    case Event.Save => /*guiESI.sendRequest("gui/save");*/ tuiESI.sendRequest("tui/save")
-    case Event.Load => /*guiESI.sendRequest("gui/load");*/ tuiESI.sendRequest("tui/load")
-    case Event.Move => /*guiESI.sendRequest("gui/move");*/ tuiESI.sendRequest("tui/move")
+    case Event.Save => guiESI.sendRequest("gui/save"); tuiESI.sendRequest("tui/save")
+    case Event.Load => guiESI.sendRequest("gui/load"); tuiESI.sendRequest("tui/load")
+    case Event.Quit => guiESI.sendRequest("gui/quit"); tuiESI.sendRequest("tui/quit")
+    case Event.Move => guiESI.sendRequest("gui/move"); tuiESI.sendRequest("tui/move")
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
