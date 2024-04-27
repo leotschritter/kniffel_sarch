@@ -1,6 +1,5 @@
 package de.htwg.sa.kniffel.controller.model.controllerBaseImpl
 
-import com.google.inject.Inject
 import de.htwg.sa.kniffel.controller.entity.{DiceCup, Field, Game}
 import de.htwg.sa.kniffel.controller.integration.dicecup.DiceCupESI
 import de.htwg.sa.kniffel.controller.integration.field.FieldESI
@@ -11,7 +10,7 @@ import de.htwg.sa.kniffel.controller.util.{Event, Move, UndoManager}
 import play.api.libs.json
 import play.api.libs.json.{JsObject, JsValue, Json}
 
-class Controller @Inject()(var field: Field, var diceCup: DiceCup, var game: Game, val diceCupESI: DiceCupESI,
+class Controller (var field: Field, var diceCup: DiceCup, var game: Game, val diceCupESI: DiceCupESI,
                            val fieldESI: FieldESI, val gameESI: GameESI, val fileIOESI: FileIOESI) extends IController:
   def this(numberOfPlayers: Int) =
     this(new Field(numberOfPlayers), new DiceCup(), new Game(numberOfPlayers),
