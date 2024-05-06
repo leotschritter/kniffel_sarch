@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # List of module directories containing Dockerfiles
-MODULES=("dicecup" "field" "fileio" "game" "tui" "restcontroller") #"gui")
+MODULES=("dicecup" "field" "fileio" "game" "tui" "restcontroller" "gui")
 
 # Function to build Dockerfile in a directory
 build_dockerfile() {

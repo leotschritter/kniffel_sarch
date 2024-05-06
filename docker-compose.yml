@@ -35,15 +35,20 @@ services:
 #    ports:
 #      - 9006:9006
 
-#  tui:
-#    container_name: tui
-#    image: tui-image:latest
-#    network_mode: host
+  tui:
+    container_name: tui
+    image: tui-image:latest
+    network_mode: host
+    stdin_open: true
+    tty: true
 #    ports:
 #      - 9005:9005
-#
-#  gui:
-#    container_name: gui
-#    image: gui-image:latest
+
+  gui:
+    container_name: gui
+    image: gui-image:latest
+    network_mode: host
+    environment:
+      DISPLAY: 0.0
 #    ports:
 #      - 9004:9004
