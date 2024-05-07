@@ -24,10 +24,6 @@ services:
   game:
     container_name: game
     image: game-image:latest
-    volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix
-    environment:
-      DISPLAY: ${DISPLAY}
     network_mode: host
   #    ports:
   #      - 9003:9003

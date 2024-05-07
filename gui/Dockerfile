@@ -2,7 +2,6 @@ FROM hseeberger/scala-sbt:17.0.2_1.6.2_3.1.1
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends openjfx && \
-#    rm -rf /var/lib/apt/lists/* && \
     apt-get install -y \
     libxext6 \
     libxrender1 \
