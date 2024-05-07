@@ -5,7 +5,8 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives.*
 import de.htwg.sa.kniffel.gui.aview.GUI
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class GuiApi(using gui: GUI):
   implicit val system: ActorSystem = ActorSystem()
@@ -40,3 +41,5 @@ class GuiApi(using gui: GUI):
       )
     }
   )
+
+  def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)

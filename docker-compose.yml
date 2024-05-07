@@ -16,7 +16,7 @@ services:
 
   fileIO:
     container_name: fileIO
-    image: fileio-image:latest
+    image: fileIO-image:latest
     network_mode: host
   #    ports:
   #      - 9000:9000
@@ -24,6 +24,10 @@ services:
   game:
     container_name: game
     image: game-image:latest
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      DISPLAY: ${DISPLAY}
     network_mode: host
   #    ports:
   #      - 9003:9003
@@ -48,7 +52,9 @@ services:
     container_name: gui
     image: gui-image:latest
     network_mode: host
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
     environment:
-      DISPLAY: 0.0
+      DISPLAY: ${DISPLAY}
 #    ports:
 #      - 9004:9004

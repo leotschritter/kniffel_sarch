@@ -7,5 +7,5 @@ object GUIService:
   val gui: GUI = GUI()
   given GUI = gui
 
-  def main(args: Array[String]): Unit =  GuiApi()
+  def main(args: Array[String]): Unit = GuiApi().start
   
