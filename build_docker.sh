@@ -12,7 +12,7 @@ build_dockerfile() {
 
 # Loop through each module and build Dockerfile
 for module in "${MODULES[@]}"; do
-    build_dockerfile "$module"
+    build_dockerfile "$module" || exit 1
 done
 
 echo "All Dockerfiles built successfully!"
