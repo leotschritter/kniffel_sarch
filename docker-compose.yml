@@ -16,7 +16,7 @@ services:
 
   fileIO:
     container_name: fileIO
-    image: fileIO-image:latest
+    image: fileio-image:latest
     network_mode: host
   #    ports:
   #      - 9000:9000
