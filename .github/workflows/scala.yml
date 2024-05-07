@@ -31,14 +31,14 @@ jobs:
         run: |
           sbt "; project field; +clean; +coverage; +test; +coverageReport"
           sbt "; project dicecup; +clean; +coverage; +test; +coverageReport"
-          sbt "; project fileIO; +clean; +coverage; +test; +coverageReport"
+          sbt "; project fileio; +clean; +coverage; +test; +coverageReport"
           sbt "; project game; +clean; +coverage; +test; +coverageReport"
           sbt "; project restcontroller; +clean; +coverage; +test; +coverageReport"
       - name: Create Coverage Report
         run: |
           sbt "; project field; coverageAggregate; coveralls"
           sbt "; project dicecup; coverageAggregate; coveralls"
-          sbt "; project fileIO; coverageAggregate; coveralls"        
+          sbt "; project fileio; coverageAggregate; coveralls"        
           sbt "; project game; coverageAggregate; coveralls"
           sbt "; project restcontroller; coverageAggregate; coveralls"
         env:
