@@ -1,4 +1,4 @@
-package de.htwg.kniffel.fileio.model.fileIOXmlImpl
+package de.htwg.sa.kniffel.fileio.model.fileIOXmlImpl
 
 import de.htwg.sa.kniffel.fileio.model.fileIOXmlImpl.FileIO
 import org.scalatest.matchers.should.Matchers.*

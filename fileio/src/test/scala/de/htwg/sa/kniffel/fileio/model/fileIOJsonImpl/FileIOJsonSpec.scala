@@ -1,4 +1,4 @@
-package de.htwg.kniffel.fileio.model.fileIOJsonImpl
+package de.htwg.sa.kniffel.fileio.model.fileIOJsonImpl
 
 import de.htwg.sa.kniffel.fileio.model.fileIOJsonImpl.FileIO
 import org.scalatest.matchers.should.Matchers.*

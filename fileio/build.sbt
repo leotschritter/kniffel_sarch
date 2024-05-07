@@ -21,7 +21,7 @@ lazy val dependencies = Seq(
 )
 
 
-lazy val fileIO = (project in file("."))
+lazy val fileio = (project in file("."))
   .settings(
     dependencies
   )

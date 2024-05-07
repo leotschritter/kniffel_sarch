@@ -21,7 +21,7 @@ lazy val dependencies = Seq(
 
 )
 
-lazy val root = (project in file(""))
+lazy val root = (project in file("."))
   .dependsOn(dicecup, field, game, fileio, restcontroller)
   .aggregate(dicecup, field, game, fileio, restcontroller)
   .settings(
