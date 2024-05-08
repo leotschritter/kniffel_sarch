@@ -5,11 +5,14 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.{PathMatcher, PathMatcher1}
 import de.htwg.sa.kniffel.dicecup.model.IDiceCup
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.{JsNull, JsNumber, Json}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
-class DiceCupApi(diceCup: IDiceCup) {
+class DiceCupApi(using diceCup: IDiceCup):
+  private val log: Logger = LoggerFactory.getLogger(classOf[DiceCupApi])
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
@@ -19,7 +22,6 @@ class DiceCupApi(diceCup: IDiceCup) {
     Some(ints.toList)
   }
 
-
   Http().newServerAt("localhost", 9002).bind(
     pathPrefix("diceCup") {
       concat(
@@ -27,6 +29,9 @@ class DiceCupApi(diceCup: IDiceCup) {
           concat(
             pathSingleSlash {
               complete(diceCup.toJson.toString)
+            },
+            path("ping") {
+              complete("pong")
             },
             path("indexOfField") {
               complete(Json.obj("indexOfField" -> diceCup.indexOfField).toString)
@@ -90,6 +95,7 @@ class DiceCupApi(diceCup: IDiceCup) {
               }
             },
             path("") {
+
               sys.error("No such POST route")
             }
           )
@@ -97,4 +103,5 @@ class DiceCupApi(diceCup: IDiceCup) {
       )
     }
   )
-}
+
+  def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)

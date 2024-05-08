@@ -8,7 +8,7 @@ import de.htwg.sa.kniffel.controller.integration.game.GameESI
 import de.htwg.sa.kniffel.controller.util.{Event, Move, Observer}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{doNothing, when}
-import org.scalatest.matchers.should.Matchers.*
+import org.scalatest.matchers.should.Matchers.{should, *}
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar.mock
 
@@ -103,7 +103,7 @@ class ControllerSpec extends AnyWordSpec {
           List(List(11, 0, 11, 11, 0, 11), List(0, 0, 0, 0, 0, 0)))
 
         val expectedField: Field = Field(new Matrix[Option[Int]](2).fill(0, 0, Some(11)))
-        when(diceCupESI.sendRequest(any[String], any[String])).thenReturn(new DiceCup())
+        when(diceCupESI.sendRequest(any[String], any[String])).thenReturn(DiceCup(List(), List(6, 3, 2, 6, 3), 2))
         when(gameESI.sendStringRequest(any[String], any[String])).thenReturn("")
         when(gameESI.sendRequest(any[String], any[String])).thenReturn(expectedGame)
         when(fieldESI.sendRequest(any[String], any[String])).thenReturn(expectedField)
@@ -112,13 +112,13 @@ class ControllerSpec extends AnyWordSpec {
       }
 
       "undo" in {
-        when(diceCupESI.sendRequest(any[String], any[String])).thenReturn(new DiceCup())
+        when(diceCupESI.sendRequest(any[String], any[String])).thenReturn(DiceCup(List(), List(6, 3, 2, 6, 3), 2))
         when(fieldESI.sendRequest(any[String], any[String])).thenReturn(new Field(2))
         controller.undo()
         controller.field.matrix.cell(0, 0) should be(None)
       }
       "redo" in {
-        when(diceCupESI.sendRequest(any[String], any[String])).thenReturn(new DiceCup())
+        when(diceCupESI.sendRequest(any[String], any[String])).thenReturn(DiceCup(List(), List(6, 3, 2, 6, 3), 2))
         when(fieldESI.sendRequest(any[String], any[String])).thenReturn(Field(new Matrix[Option[Int]](2).fill(0, 0, Some(11))))
         when(gameESI.sendRequest(any[String], any[String])).thenReturn(new Game(2))
         controller.redo()
@@ -152,6 +152,50 @@ class ControllerSpec extends AnyWordSpec {
         controller.game should be(game)
       }
     }
+
+    "a controller when converted to JSON" should {
+      "return a valid JSON String" in {
+        val controller: Controller = new Controller(2)
+        controller.diceCup = DiceCup(List(), List(6, 3, 2, 6, 3), 2)
+        controller.toJson.toString should be("{\"controller\":{\"dicecup\":{\"stored\":[],\"incup\":[6,3,2,6,3],\"remainingDices\":2},\"field\":{\"numberOfPlayers\":2,\"rows\":[[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]]},\"game\":{\"nestedList\":\"0,0,0,0,0,0;0,0,0,0,0,0\",\"remainingMoves\":26,\"currentPlayerID\":0,\"currentPlayerName\":\"Player 1\",\"players\":[{\"id\":0,\"name\":\"Player 1\"},{\"id\":1,\"name\":\"Player 2\"}]}}}")
+      }
+    }
+
+    "a controller when converted from JSON" should {
+      "return a valid contoller" in {
+
+        when(fieldESI.sendStringRequest(any[String], any[String])).thenReturn(controller.field.toString)
+        when(diceCupESI.sendStringRequest(any[String], any[String])).thenReturn(controller.diceCup.toString)
+        when(gameESI.sendPlayerNameRequest(any[Game])).thenReturn(controller.game.playerName)
+        val controllerJson: String = "{\"controller\":{\"dicecup\":{\"stored\":[],\"incup\":[6,3,2,6,3],\"remainingDices\":2},\"field\":{\"numberOfPlayers\":2,\"rows\":[[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]]},\"game\":{\"nestedList\":\"0,0,0,0,0,0;0,0,0,0,0,0\",\"remainingMoves\":26,\"currentPlayerID\":0,\"currentPlayerName\":\"Player 1\",\"players\":[{\"id\":0,\"name\":\"Player 1\"},{\"id\":1,\"name\":\"Player 2\"}]}}}"
+        controller.diceCup = DiceCup(List(), List(6, 3, 2, 6, 3), 2)
+
+        controller.jsonStringToController(controllerJson).diceCup.remainingDices should be(2)
+      }
+    }
+
+    "converts a move as json" should {
+      "return a valid Move" in {
+        val expectedMove = Move(12, 0, 0)
+        controller.jsonStringToMove("{\"move\":{\"value\":12,\"x\":0,\"y\":0}}") should be(expectedMove)
+      }
+    }
+
+    "calls writeDown" should {
+      "return contoller as String" in {
+        controller.diceCup = DiceCup(List(), List(6, 3, 2, 6, 3), 2)
+
+        val fieldString = new Field(2).toString
+        val diceCupString = new DiceCup().toString
+        when(fieldESI.sendStringRequest(any[String], any[String])).thenReturn(fieldString)
+        when(diceCupESI.sendStringRequest(any[String], any[String])).thenReturn(diceCupString)
+        when(gameESI.sendPlayerNameRequest(any[Game])).thenReturn("Player 2")
+
+        controller.writeDown(Move(0, 0, 0)) should be(fieldString + "\n" + diceCupString + "\n"
+          + "Player 2 ist an der Reihe.")
+      }
+    }
+
   }
 }
 

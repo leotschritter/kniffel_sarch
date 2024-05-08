@@ -3,17 +3,16 @@ package de.htwg.sa.kniffel.game.api
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives.*
-import com.google.inject.Inject
 import de.htwg.sa.kniffel.game.model.IGame
 import play.api.libs.json.{JsNull, JsNumber, Json}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
-class GameApi @Inject()(game: IGame):
+class GameApi(using game: IGame):
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
-
 
   Http().newServerAt("localhost", 9003).bind(
     pathPrefix("game") {
@@ -22,6 +21,9 @@ class GameApi @Inject()(game: IGame):
           concat(
             pathSingleSlash {
               complete(game.newGame(2).toJson.toString)
+            },
+            path("ping") {
+              complete("pong")
             },
             path("new" / IntNumber) {
               (numberOfPlayers: Int) =>
@@ -116,3 +118,4 @@ class GameApi @Inject()(game: IGame):
     }
   )
 
+  def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)

@@ -1,6 +1,5 @@
 package de.htwg.sa.kniffel.field.model.fieldBaseImpl
 
-
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -100,6 +99,14 @@ class FieldSpec extends AnyWordSpec {
         "[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]," +
         "[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]]}}") should be(
         field)
+    }
+  }
+
+  "when the newField function is called it" should {
+    "return a new empty Field" in {
+      var field: Field = new Field(2)
+
+      field.newField(2) should be(field)
     }
   }
 }

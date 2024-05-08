@@ -60,7 +60,7 @@ case class Field(matrix: Matrix[Option[Int]]) extends IField:
 
   def undoMove(valueList: List[Int], x: Int, y: Int): Field = putMulti(valueList, None, x, y)
 
-  def putMulti(valueList: List[Int], putInValue: Option[Int], x: Int, y: Int): Field = 
+  def putMulti(valueList: List[Int], putInValue: Option[Int], x: Int, y: Int): Field =
     val indexList: List[Int] = List(6, 7, 8, 16, 17, 18)
     this.copy(matrix.fill(x, indexList.head, Some(valueList.head)).fill(x, indexList(1), Some(valueList(1)))
       .fill(x, indexList(2), Some(valueList(2))).fill(x, indexList(3), Some(valueList(3)))
@@ -79,14 +79,12 @@ case class Field(matrix: Matrix[Option[Int]]) extends IField:
     )
   }
 
-
   def jsonStringToField(field: String): IField = {
     val json: JsValue = Json.parse(field)
     val jsonRows: JsArray = (json \ "field" \ "rows").get.as[JsArray]
 
     val rows: Vector[Vector[Option[Int]]] = jsonRows.value.map { row =>
       row.as[JsArray].value.map {
-        case JsNull => None
         case JsNumber(value) => Some(value.toInt)
         case _ => None
       }.toVector

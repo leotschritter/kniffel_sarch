@@ -1,7 +1,5 @@
 package de.htwg.sa.kniffel.dicecup.model.dicecupBaseImpl
 
-import akka.http.scaladsl.server.Directives.*
-import akka.http.scaladsl.server.{PathMatcher, PathMatcher1}
 import de.htwg.sa.kniffel.dicecup.model.{EvaluateStrategy, Evaluator, IDiceCup}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 

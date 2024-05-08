@@ -10,17 +10,17 @@ import de.htwg.sa.kniffel.controller.model.IController
 import de.htwg.sa.kniffel.controller.util.Event.*
 import de.htwg.sa.kniffel.controller.util.{Event, Move, Observer}
 
-import java.net.{HttpURLConnection, URL}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
-case class RestControllerApi(controller: IController, tuiESI: TuiESI, guiESI: GuiESI) extends Observer:
-  def this(controller: IController) = this(controller, TuiESI(), GuiESI())
+class RestControllerApi(using controller: IController, tuiESI: TuiESI, guiESI: GuiESI) extends Observer:
   controller.add(this)
 
   override def update(e: Event): Unit = e match
-    case Event.Quit => guiESI.sendRequest("gui/quit"); tuiESI.sendRequest("tui/quit")
     case Event.Save => guiESI.sendRequest("gui/save"); tuiESI.sendRequest("tui/save")
     case Event.Load => guiESI.sendRequest("gui/load"); tuiESI.sendRequest("tui/load")
+    case Event.Quit => guiESI.sendRequest("gui/quit"); tuiESI.sendRequest("tui/quit")
     case Event.Move => guiESI.sendRequest("gui/move"); tuiESI.sendRequest("tui/move")
 
   implicit val system: ActorSystem = ActorSystem()
@@ -41,6 +41,9 @@ case class RestControllerApi(controller: IController, tuiESI: TuiESI, guiESI: Gu
             concat(
               pathSingleSlash {
                 complete(controller.toString)
+              },
+              path("ping") {
+                complete("pong")
               },
               path("controller") {
                 complete(controller.toJson.toString)
@@ -91,14 +94,15 @@ case class RestControllerApi(controller: IController, tuiESI: TuiESI, guiESI: Gu
               },
               path("writeDown" / StringValue) {
                 (value: String) =>
-                  try {
+                  Try({
                     val currentPlayer = controller.gameESI.sendPlayerIDRequest(controller.game)
                     val indexOfField = controller.diceCupESI.sendIndexOfFieldRequest(value)
                     val result = controller.diceCupESI.sendResultRequest(indexOfField, controller.diceCup)
                     complete(controller.writeDown(Move(result, currentPlayer, indexOfField)))
-                  } catch {
-                    case e: Throwable => complete("Invalid Input!")
-                  }
+                  }) match
+                    case Failure(exception) => complete("Invalid Input!")
+                    case Success(value) => value
+
               },
               path("") {
                 sys.error("No such GET route")
@@ -127,3 +131,5 @@ case class RestControllerApi(controller: IController, tuiESI: TuiESI, guiESI: Gu
       }
     )
   )
+
+  def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)

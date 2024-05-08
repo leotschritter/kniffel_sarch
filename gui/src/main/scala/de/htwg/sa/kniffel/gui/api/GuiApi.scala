@@ -5,15 +5,23 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives.*
 import de.htwg.sa.kniffel.gui.aview.GUI
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
-class GuiApi(gui: GUI):
+class GuiApi(using gui: GUI):
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
 
   Http().newServerAt("localhost", 9004).bind(
     pathPrefix("gui") {
       concat(
+        get {
+          concat(
+            path("ping") {
+              complete("pong")
+            }
+          )
+        },
         put {
           concat(
             path("quit") {
@@ -33,3 +41,5 @@ class GuiApi(gui: GUI):
       )
     }
   )
+
+  def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)

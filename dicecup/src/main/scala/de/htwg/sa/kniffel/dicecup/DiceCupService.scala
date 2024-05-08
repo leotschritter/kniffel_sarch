@@ -1,13 +1,11 @@
 package de.htwg.sa.kniffel.dicecup
 
-import com.google.inject.{Guice, Injector}
 import de.htwg.sa.kniffel.dicecup.api.DiceCupApi
 import de.htwg.sa.kniffel.dicecup.model.IDiceCup
+import de.htwg.sa.kniffel.dicecup.model.dicecupBaseImpl.DiceCup
 
-object DiceCupService {
-  private val injector: Injector = Guice.createInjector(new DiceCupModule)
+object DiceCupService:
+  val diceCup: IDiceCup = new DiceCup()
+  given IDiceCup = diceCup
 
-  def main(args: Array[String]): Unit = {
-    val diceCupApi = new DiceCupApi(injector.getInstance(classOf[IDiceCup]))
-  }
-}
+  @main def main(): Unit = DiceCupApi().start

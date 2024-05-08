@@ -24,14 +24,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Run App
-        run: sbt run &
-      - name: Build Project and Run Tests
+      - name: Run Tests
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-        run: sbt +clean +coverage +test +coverageReport
-      - name: Export Coverage
-        run: sbt coverageAggregate coveralls
+        run: |
+          sbt "; project field; +clean; +coverage; +test; +coverageReport"
+          sbt "; project dicecup; +clean; +coverage; +test; +coverageReport"
+          sbt "; project fileio; +clean; +coverage; +test; +coverageReport"
+          sbt "; project game; +clean; +coverage; +test; +coverageReport"
+          sbt "; project restcontroller; +clean; +coverage; +test; +coverageReport"
+      - name: Create Coverage Report
+        run: |
+          sbt "; project field; coverageAggregate; coveralls"
+          sbt "; project dicecup; coverageAggregate; coveralls"
+          sbt "; project fileio; coverageAggregate; coveralls"        
+          sbt "; project game; coverageAggregate; coveralls"
+          sbt "; project restcontroller; coverageAggregate; coveralls"
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}

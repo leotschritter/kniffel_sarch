@@ -1,14 +1,12 @@
 package de.htwg.sa.kniffel.field
 
-import com.google.inject.{Guice, Injector}
 import de.htwg.sa.kniffel.field.api.FieldApi
 import de.htwg.sa.kniffel.field.model.IField
+import de.htwg.sa.kniffel.field.model.fieldBaseImpl.Field
 
-object FieldService {
-  
-  val injector: Injector = Guice.createInjector(new FieldModule)
+object FieldService:
+  val numberOfPlayers:Int = 2
+  val field: IField = new Field(numberOfPlayers)
+  given IField = field
 
-  def main(args: Array[String]): Unit = {
-    val fileIoApi: FieldApi = new FieldApi(injector.getInstance(classOf[IField]))
-  }
-}
+  @main def main(): Unit = FieldApi().start
