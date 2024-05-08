@@ -32,6 +32,8 @@ null/*
 .idea_modules
 /.worksheet/
 
+postgres
+
 dicecup.json
 dicecup.xml
 field.json
