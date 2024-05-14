@@ -2,7 +2,7 @@ package de.htwg.sa.kniffel.persistence.persistence.slickImpl
 
 import de.htwg.sa.kniffel.persistence.persistence.IPersistence
 import de.htwg.sa.kniffel.persistence.persistence.slickImpl.table.*
-import play.api.libs.json.{JsBoolean, JsNumber, JsObject, JsValue, Json}
+import play.api.libs.json.{JsArray, JsBoolean, JsNumber, JsObject, JsValue, Json}
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api.*
 import slick.lifted.TableQuery
@@ -10,6 +10,7 @@ import slick.lifted.TableQuery
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.util.Try
 
 class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val inCupDice: TableQuery[InCupDice], val storedDice: TableQuery[StoredDice], val players: TableQuery[Players], val db: Database) extends IPersistence {
   def this() =
@@ -96,7 +97,7 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
         val playerID = (playerJson \ "id").as[Int]
         val playerName = (playerJson \ "name").as[String]
         (players.map(p => (p.name, p.isTurn, p.top, p.bonus, p.sumTop, p.sumBottom, p.total, p.gameId)) returning players.map(_.id)) +=
-          (playerName, (playerID == currentPlayerID), nestedList(playersJson.indexOf(playerJson)).head.toInt,
+          (playerName, playerID == currentPlayerID, nestedList(playersJson.indexOf(playerJson)).head.toInt,
             nestedList(playersJson.indexOf(playerJson))(1).toInt, nestedList(playersJson.indexOf(playerJson))(2).toInt,
             nestedList(playersJson.indexOf(playerJson))(3).toInt, nestedList(playersJson.indexOf(playerJson)).last.toInt, maxId)
       }
@@ -179,7 +180,7 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
 
 
   override def loadGame: String = {
-    /*val maxId: Int = getHighestGameId
+    val maxId: Int = getHighestGameId
 
     val selectActionsGame = games.filter(_.id === maxId).map(g => g.remMoves).sum
 
@@ -192,43 +193,33 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
       .filter(_.gameId === maxId)
       .sortBy(p => p.name)
       .map(p => (p.name, p.isTurn, p.top, p.bonus, p.sumTop, p.sumBottom, p.total)).result
-      .map(_.toList)
-      .map(t => List)
-  // List(p.top, p.bonus, p.sumTop, p.sumBottom, p.sumTop, p.total)
-    val resultMap: Map[Int, List[List[Int]]] = Await.result(db.run(query).map(_.toList), Duration.Inf)
-      .map {
 
-      }.toMap*/
+    val resultTuples: List[(String, Boolean, Int, Int, Int, Int, Int)] =
+      Await.result(db.run(query).map(_.toList).recover(_ => List.empty), Duration.Inf)
 
-    /*val file: Elem = scala.xml.XML.loadFile("game.xml")
-    val remainingMoves: Int = (file \\ "game" \ "@remainingMoves").text.trim.toInt
-    val currentPlayerID: Int = (file \\ "game" \ "@currentPlayerID").text.trim.toInt
-    val currentPlayerName: String = (file \\ "game" \ "@currentPlayerName").text.trim
-    val playersList: JsArray = JsArray((file \\ "player").map { player =>
+    val resultNestedList: List[List[Int]] = resultTuples
+      .map(p => List(p._3, p._4, p._5, p._6, p._5, p._7))
+    
+    val currentPlayer: (String, Int) = resultTuples.find(_._2)
+      .map(p => (p._1, p._1.substring(6).toIntOption.getOrElse(1)))
+      .getOrElse(("Player 1", 1))
+      
+    val playersList: JsArray = JsArray(resultTuples.map { p =>
       Json.obj(
-        "id" -> JsNumber((player \ "@playerid").text.trim.toInt),
-        "name" -> (player \ "@playername").text.trim
+        "id" -> JsNumber(p._1.substring(6).toIntOption.getOrElse(1)),
+        "name" -> p._1
       )
-    })
-    val total: Seq[Int] = (file \\ "total").map(_.text.trim.toInt)
-    val bonus: Seq[Int] = (file \\ "bonus").map(_.text.trim.toInt)
-    val total_of_upper_section: Seq[Int] = (file \\ "total_of_upper_section").map(_.text.trim.toInt)
-    val total_of_lower_section: Seq[Int] = (file \\ "total_of_lower_section").map(_.text.trim.toInt)
-    val grand_total: Seq[Int] = (file \\ "grand_total").map(_.text.trim.toInt)
-    val resultNestedList: List[List[Int]] = total.indices.map { x =>
-      List(total(x), bonus(x), total_of_upper_section(x), total_of_lower_section(x), total_of_upper_section(x), grand_total(x))
-    }.toList
+    })  
 
     Json.obj(
       "game" -> Json.obj(
         "nestedList" -> resultNestedList.map(_.mkString(",")).mkString(";"),
-        "remainingMoves" -> JsNumber(remainingMoves),
-        "currentPlayerID" -> JsNumber(currentPlayerID),
-        "currentPlayerName" -> currentPlayerName,
+        "remainingMoves" -> JsNumber(remMoves),
+        "currentPlayerID" -> JsNumber(currentPlayer._2),
+        "currentPlayerName" -> currentPlayer._1,
         "players" -> playersList
       )
-    ).toString*/
-    "Not implemented"
+    ).toString
   }
 
   override def loadField: String = {

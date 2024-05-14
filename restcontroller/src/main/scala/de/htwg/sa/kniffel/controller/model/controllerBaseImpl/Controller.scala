@@ -10,8 +10,8 @@ import de.htwg.sa.kniffel.controller.util.{Event, Move, UndoManager}
 import play.api.libs.json
 import play.api.libs.json.{JsObject, JsValue, Json}
 
-class Controller (var field: Field, var diceCup: DiceCup, var game: Game, val diceCupESI: DiceCupESI,
-                           val fieldESI: FieldESI, val gameESI: GameESI, val fileIOESI: FileIOESI) extends IController:
+class Controller(var field: Field, var diceCup: DiceCup, var game: Game, val diceCupESI: DiceCupESI,
+                 val fieldESI: FieldESI, val gameESI: GameESI, val fileIOESI: FileIOESI) extends IController:
   def this(numberOfPlayers: Int) =
     this(new Field(numberOfPlayers), new DiceCup(), new Game(numberOfPlayers),
       new DiceCupESI(), new FieldESI(), new GameESI(), new FileIOESI())
@@ -57,7 +57,7 @@ class Controller (var field: Field, var diceCup: DiceCup, var game: Game, val di
   def next(): String =
     game = getNextGame
     toString
-  
+
   def putOut(list: List[Int]): DiceCup =
     diceCupESI.sendRequest(s"diceCup/putOut/list=${list.mkString(",")}", diceCup.toJson.toString)
 
@@ -87,7 +87,7 @@ class Controller (var field: Field, var diceCup: DiceCup, var game: Game, val di
 
   def load(): String =
     field = fileIOESI.loadFieldRequest
-    // game = fileIOESI.loadGameRequest
+    game = fileIOESI.loadGameRequest
     diceCup = fileIOESI.loadDiceCupRequest
     notifyObservers(Event.Load)
     toString
