@@ -38,8 +38,8 @@ jobs:
         run: |
           sbt "; project field; coverageAggregate; coveralls"
           sbt "; project dicecup; coverageAggregate; coveralls"
-          sbt "; project fileio; coverageAggregate; coveralls"        
+          sbt "; project persistence; coverageAggregate; coveralls"        
           sbt "; project game; coverageAggregate; coveralls"
-          sbt "; project persistence; coverageAggregate; coveralls"
+          sbt "; project restcontroller; coverageAggregate; coveralls"
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
