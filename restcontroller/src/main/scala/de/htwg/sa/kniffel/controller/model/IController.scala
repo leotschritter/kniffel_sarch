@@ -1,6 +1,5 @@
 package de.htwg.sa.kniffel.controller.model
 
-import akka.http.scaladsl.server.Route
 import de.htwg.sa.kniffel.controller.entity.{DiceCup, Field, Game}
 import de.htwg.sa.kniffel.controller.integration.dicecup.DiceCupESI
 import de.htwg.sa.kniffel.controller.integration.field.FieldESI

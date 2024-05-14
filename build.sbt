@@ -31,8 +31,8 @@ lazy val dependencies = Seq(
 )
 
 lazy val root = (project in file("."))
-  .dependsOn(dicecup, field, game, fileio, restcontroller)
-  .aggregate(dicecup, field, game, fileio, restcontroller)
+  .dependsOn(dicecup, field, game, persistence, restcontroller)
+  .aggregate(dicecup, field, game, persistence, restcontroller)
   .settings(
     name := "kniffel",
     version := "0.1.0-SNAPSHOT",
@@ -41,20 +41,17 @@ lazy val root = (project in file("."))
 
 lazy val dicecup = project in file("dicecup")
 
-
 lazy val field = project in file("field")
 
 lazy val game = project in file("game")
 
-lazy val fileio = project in file("fileio")
+lazy val persistence = project in file("persistence")
 
 lazy val gui = project in file("gui")
 
 lazy val tui = project in file("tui")
 
 lazy val restcontroller = project in file("restcontroller")
-
-lazy val persistence = project in file("persistence")
 
 import org.scoverage.coveralls.Imports.CoverallsKeys.*
 

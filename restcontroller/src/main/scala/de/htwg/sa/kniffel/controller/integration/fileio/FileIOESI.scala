@@ -20,6 +20,10 @@ class FileIOESI:
   def saveRequest(path: String, requestBody: String = ""): Unit =
     sendRequest(path, requestBody)  
 
+  def createGameRequest(numberOfPlayers: Int): Unit =
+    sendRequest("io/createGame/" + numberOfPlayers)
+  
   private def sendRequest(path: String, requestBody: String = ""): String =
     HttpUtil.sendRequest(baseUrl, path, requestBody)
+
 

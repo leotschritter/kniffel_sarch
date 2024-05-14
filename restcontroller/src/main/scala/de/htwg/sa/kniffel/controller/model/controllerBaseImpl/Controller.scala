@@ -87,7 +87,7 @@ class Controller (var field: Field, var diceCup: DiceCup, var game: Game, val di
 
   def load(): String =
     field = fileIOESI.loadFieldRequest
-    game = fileIOESI.loadGameRequest
+    // game = fileIOESI.loadGameRequest
     diceCup = fileIOESI.loadDiceCupRequest
     notifyObservers(Event.Load)
     toString

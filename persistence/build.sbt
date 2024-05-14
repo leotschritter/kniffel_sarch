@@ -8,7 +8,8 @@ lazy val dependencies = Seq(
   libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test,
   libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.18",
   libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % "test",
-  libraryDependencies += ("com.typesafe.play" %% "play-json" % "2.10.5"),
+  libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "2.3.0",
+  libraryDependencies += ("com.typesafe.play" %% "play-json" % "2.10.4"),
   libraryDependencies += "com.typesafe.akka" %% "akka-actor-typed" % "2.8.5",
   libraryDependencies += "com.typesafe.akka" %% "akka-http" % "10.5.3",
   libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.8.5",
@@ -26,7 +27,9 @@ lazy val dependencies = Seq(
     "ch.qos.logback" % "logback-classic" % "1.5.6",
     "org.slf4j" % "slf4j-api" % "2.0.12"
   )
+
 )
+
 
 lazy val persistence = (project in file("."))
   .settings(

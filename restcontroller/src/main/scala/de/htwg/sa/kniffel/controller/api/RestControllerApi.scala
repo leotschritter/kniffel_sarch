@@ -132,4 +132,7 @@ class RestControllerApi(using controller: IController, tuiESI: TuiESI, guiESI: G
     )
   )
 
-  def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)
+  def start: Future[Nothing] = {
+    controller.fileIOESI.createGameRequest(2)
+    Await.result(Future.never, Duration.Inf)
+  }
