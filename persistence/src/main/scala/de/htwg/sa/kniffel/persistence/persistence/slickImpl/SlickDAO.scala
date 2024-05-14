@@ -2,7 +2,7 @@ package de.htwg.sa.kniffel.persistence.persistence.slickImpl
 
 import de.htwg.sa.kniffel.persistence.persistence.IPersistence
 import de.htwg.sa.kniffel.persistence.persistence.slickImpl.table.*
-import play.api.libs.json.{JsArray, JsBoolean, JsNumber, JsObject, JsValue, Json}
+import play.api.libs.json.{JsArray, JsBoolean, JsNull, JsNumber, JsObject, JsValue, Json}
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api.*
 import slick.lifted.TableQuery
@@ -65,15 +65,7 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
         (inCupDice.map(s => (s.value, s.gameId)) returning inCupDice.map(_.id)) += (value, maxId)
       }
 
-    val combinedAction = DBIO.sequence(insertActions).flatMap { _ =>
-      DBIO.successful(())
-    }
-    val resultFuture: Future[Unit] = db.run(combinedAction)
-    val result = Await.result(resultFuture
-      .map(_ => Json.obj("savedSuccessfully" -> JsBoolean.apply(true)).toString)
-      .recover(_ => Json.obj("savedSuccessfully" -> JsBoolean.apply(false)).toString), Duration.Inf
-    )
-    result
+    executeInsertStatement(insertActions)
   }
 
   override def saveGame(game: String): String = {
@@ -102,16 +94,9 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
             nestedList(playersJson.indexOf(playerJson))(3).toInt, nestedList(playersJson.indexOf(playerJson)).last.toInt, maxId)
       }
 
-    val combinedAction = DBIO.sequence(insertActions).flatMap { _ =>
-      DBIO.successful(())
-    }
-    val resultFuture: Future[Unit] = db.run(combinedAction)
-    val result = Await.result(resultFuture
-      .map(_ => Json.obj("savedSuccessfully" -> JsBoolean.apply(true)).toString)
-      .recover(_ => Json.obj("savedSuccessfully" -> JsBoolean.apply(false)).toString), Duration.Inf
-    )
-    result
+    executeInsertStatement(insertActions)
   }
+
 
   override def saveField(field: String): String = {
     createTablesIfNotExist()
@@ -138,15 +123,7 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
       }
     }
 
-    val combinedAction = DBIO.sequence(insertActions).flatMap { _ =>
-      DBIO.successful(())
-    }
-    val resultFuture: Future[Unit] = db.run(combinedAction)
-    val result = Await.result(resultFuture
-      .map(_ => Json.obj("savedSuccessfully" -> JsBoolean.apply(true)).toString)
-      .recover(_ => Json.obj("savedSuccessfully" -> JsBoolean.apply(false)).toString), Duration.Inf
-    )
-    result
+    executeInsertStatement(insertActions)
   }
 
 
@@ -169,15 +146,8 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
       case None => 2
     }, Duration.Inf)
 
-    Json.obj(
-      "dicecup" -> Json.obj(
-        "stored" -> getStoredValuesByGameId(maxId),
-        "incup" -> getInCupValuesByGameId(maxId),
-        "remainingDices" -> JsNumber(remDice)
-      )
-    ).toString
+    diceCupToJsonString(remDice, getStoredValuesByGameId(maxId), getInCupValuesByGameId(maxId))
   }
-
 
   override def loadGame: String = {
     val maxId: Int = getHighestGameId
@@ -197,31 +167,9 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
     val resultTuples: List[(String, Boolean, Int, Int, Int, Int, Int)] =
       Await.result(db.run(query).map(_.toList).recover(_ => List.empty), Duration.Inf)
 
-    val resultNestedList: List[List[Int]] = resultTuples
-      .map(p => List(p._3, p._4, p._5, p._6, p._5, p._7))
-    
-    val currentPlayer: (String, Int) = resultTuples.find(_._2)
-      .map(p => (p._1, p._1.substring(6).toIntOption.getOrElse(1)))
-      .getOrElse(("Player 1", 1))
-      
-    val playersList: JsArray = JsArray(resultTuples.map { p =>
-      Json.obj(
-        "id" -> JsNumber(p._1.substring(6).toIntOption.getOrElse(1)),
-        "name" -> p._1
-      )
-    })  
-
-    Json.obj(
-      "game" -> Json.obj(
-        "nestedList" -> resultNestedList.map(_.mkString(",")).mkString(";"),
-        "remainingMoves" -> JsNumber(remMoves),
-        "currentPlayerID" -> JsNumber(currentPlayer._2),
-        "currentPlayerName" -> currentPlayer._1,
-        "players" -> playersList
-      )
-    ).toString
+    gameToJsonString(remMoves, resultTuples)
   }
-
+  
   override def loadField: String = {
     val maxId: Int = getHighestGameId
     val selectActions = cells.filter(_.gameId === maxId).map(g => g.x).max
@@ -236,10 +184,42 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
         (key1, key2, value) => (key1, key2) -> value
       }.toMap
 
-    val nestedVector: Vector[Vector[Option[Int]]] =
+    fieldToJsonString(numberOfPlayers, resultMap)
+  }
+
+  override def createGame(numberOfPlayers: Int): String = {
+    val insertGame = (games.map(g => (g.remMoves, g.remDice)) returning games.map(_.id)) += (13 * numberOfPlayers, 2)
+    val insertFuture = db.run(insertGame)
+    val result = Await.result(insertFuture.map(_ => "Inserted Game successfully").recover(_ => "Failure inserting Game"), Duration.Inf)
+    result
+  }
+
+  private def executeInsertStatement(insertActions: Seq[DBIOAction[_, NoStream, Effect.Write]])
+  : String = {
+    val combinedAction = DBIO.sequence(insertActions).flatMap { _ =>
+      DBIO.successful(())
+    }
+    Await.result(db.run(combinedAction)
+      .map(_ => Json.obj("savedSuccessfully" -> JsBoolean.apply(true)).toString)
+      .recover(_ => Json.obj("savedSuccessfully" -> JsBoolean.apply(false)).toString), Duration.Inf
+    )
+  }
+
+  private def diceCupToJsonString(remDice: Int, stored: List[Int], inCup: List[Int]) = {
+    Json.obj(
+      "dicecup" -> Json.obj(
+        "stored" -> stored,
+        "incup" -> inCup,
+        "remainingDices" -> JsNumber(remDice)
+      )
+    ).toString
+  }
+
+  private def fieldToJsonString(numberOfPlayers: Int, resultMap: Map[(Int, Int), Option[Int]]): String = {
+    val nestedVector: Vector[Vector[JsValue]] =
       (0 until 19).map { rows =>
         (0 until numberOfPlayers).map { cols =>
-          resultMap((cols, rows))
+          resultMap((cols, rows)).map(JsNumber(_)).getOrElse(JsNull)
         }.toVector
       }.toVector
 
@@ -251,10 +231,28 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
     ).toString
   }
 
-  override def createGame(numberOfPlayers: Int): String = {
-    val insertGame = (games.map(g => (g.remMoves, g.remDice)) returning games.map(_.id)) += (13 * numberOfPlayers, 2)
-    val insertFuture = db.run(insertGame)
-    val result = Await.result(insertFuture.map(_ => "Inserted Game successfully").recover(_ => "Failure inserting Game"), Duration.Inf)
-    result
+  private def gameToJsonString(remMoves: Int, resultTuples: List[(String, Boolean, Int, Int, Int, Int, Int)]) = {
+    val resultNestedList: List[List[Int]] = resultTuples
+      .map(p => List(p._3, p._4, p._5, p._6, p._5, p._7))
+
+    val currentPlayer: (String, Int) = resultTuples.find(_._2)
+      .map(p => (p._1, p._1.substring(6).toIntOption.getOrElse(1)))
+      .getOrElse(("Player 1", 1))
+
+    val playersList: JsArray = JsArray(resultTuples.map { p =>
+      Json.obj(
+        "id" -> JsNumber(p._1.substring(6).toIntOption.getOrElse(1)),
+        "name" -> p._1
+      )
+    })
+    Json.obj(
+      "game" -> Json.obj(
+        "nestedList" -> resultNestedList.map(_.mkString(",")).mkString(";"),
+        "remainingMoves" -> JsNumber(remMoves),
+        "currentPlayerID" -> JsNumber(currentPlayer._2),
+        "currentPlayerName" -> currentPlayer._1,
+        "players" -> playersList
+      )
+    ).toString
   }
 }
