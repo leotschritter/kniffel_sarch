@@ -51,12 +51,9 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
     val maxId: Int = getHighestGameId
     val updateAction = games.filter(_.id === maxId).map(g => g.remDice).update(remainingDices)
     db.run(updateAction)
-
-    val deleteAction = storedDice.filter(_.gameId === maxId).delete
-    db.run(deleteAction)
-
-    val deleteAction2 = inCupDice.filter(_.gameId === maxId).delete
-    db.run(deleteAction2)
+    
+    deleteStoredDice(maxId)
+    deleteInCup(maxId)
 
     val insertActions =
       lockedList.map { (value: Int) =>
@@ -68,6 +65,14 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
     executeInsertStatement(insertActions)
   }
 
+  override def deleteInCup(gameId: Int): Unit = {
+    db.run(inCupDice.filter(_.gameId === gameId).delete)
+  }
+
+  override def deleteStoredDice(gameId: Int): Unit = {
+    db.run(storedDice.filter(_.gameId === gameId).delete)
+  }
+
   override def saveGame(game: String): String = {
     createTablesIfNotExist()
     val maxId: Int = getHighestGameId
@@ -76,8 +81,7 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
     val updateAction = games.filter(_.id === maxId).map(g => g.remMoves).update(remainingMoves)
     db.run(updateAction)
 
-    val deleteAction = players.filter(_.gameId === maxId).delete
-    db.run(deleteAction)
+    deleteGame(maxId)
 
 
     val nestedList: Array[Array[String]] = (Json.parse(game) \ "game" \ "nestedList").as[String].split(";").map(elem => elem.split(","))
@@ -98,12 +102,15 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
   }
 
 
+  override def deleteGame(maxId: Int): Unit = {
+    deleteField(maxId)
+  }
+
   override def saveField(field: String): String = {
     createTablesIfNotExist()
     val maxId: Int = getHighestGameId
-
-    val deleteAction = players.filter(_.gameId === maxId).delete
-    db.run(deleteAction)
+    
+    deleteField(maxId)
 
     val numberOfPlayers = (Json.parse(field) \ "field" \ "numberOfPlayers").as[Int]
     val rows = (Json.parse(field) \ "field" \ "rows").as[Array[JsValue]].map { outerValue =>
@@ -126,6 +133,10 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
     executeInsertStatement(insertActions)
   }
 
+
+  override def deleteField(maxId: Int): Unit = {
+    db.run(players.filter(_.gameId === maxId).delete)
+  }
 
   private def getInCupValuesByGameId(gameId: Int): List[Int] = {
     val selectAction = inCupDice.filter(_.gameId === gameId).map(_.value).result
@@ -271,4 +282,10 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
       )
     ).toString
   }
+
+  override def updateDiceCup(diceValue: String, gameId: Int): Unit = ???
+  
+  override def updateField(field: String, gameId: Int): Unit = ???
+  
+  override def updateGame(game: String, gameId: Int): Unit = ???
 }

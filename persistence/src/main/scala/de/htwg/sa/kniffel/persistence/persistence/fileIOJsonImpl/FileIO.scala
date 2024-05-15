@@ -59,4 +59,18 @@ class FileIO extends IPersistence {
   override def createGame(numberOfPlayers: Int): String = "JSON FileIO does not implement this"
   
   override def loadOptions: String = "1"
+
+  override def deleteGame(gameId: Int): Unit = ???
+
+  override def deleteField(gameId: Int): Unit = ???
+
+  override def deleteInCup(gameId: Int): Unit = ???
+
+  override def deleteStoredDice(gameId: Int): Unit = ???
+
+  override def updateGame(game: String, gameId: Int): Unit = ???
+
+  override def updateField(field: String, gameId: Int): Unit = ???
+
+  override def updateDiceCup(diceCup: String, gameId: Int): Unit = ???
 }

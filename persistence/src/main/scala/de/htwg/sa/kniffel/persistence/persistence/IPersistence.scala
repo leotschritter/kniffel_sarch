@@ -22,4 +22,18 @@ trait IPersistence {
   def loadDiceCup(gameId: Int): String
   
   def loadOptions: String
+  
+  def deleteGame(gameId: Int): Unit
+  
+  def deleteField(gameId: Int): Unit
+  
+  def deleteInCup(gameId: Int): Unit
+  
+  def deleteStoredDice(gameId: Int): Unit
+  
+  def updateGame(game: String, gameId: Int): Unit
+  
+  def updateField(field: String, gameId: Int): Unit
+  
+  def updateDiceCup(diceCup: String, gameId: Int): Unit
 }

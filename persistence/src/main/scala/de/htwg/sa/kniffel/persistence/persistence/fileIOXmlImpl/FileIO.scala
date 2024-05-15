@@ -124,4 +124,18 @@ class FileIO(converter: JsonToXmlConverter) extends IPersistence {
   override def loadField(gameId: Int): String = loadField
 
   override def loadGame(gameId: Int): String = loadGame
+  
+  override def deleteGame(gameId:  Int): Unit = ???
+  
+  override def deleteField(gameId:  Int): Unit = ???
+  
+  override def deleteInCup(gameId:  Int): Unit = ???
+  
+  override def deleteStoredDice(gameId:  Int): Unit = ???
+  
+  override def updateGame(game:  String, gameId:  Int): Unit = ???
+  
+  override def updateField(field:  String, gameId:  Int): Unit = ???
+  
+  override def updateDiceCup(diceCup:  String, gameId:  Int): Unit = ???
 }
