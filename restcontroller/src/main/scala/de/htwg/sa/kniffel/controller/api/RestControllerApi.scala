@@ -63,6 +63,13 @@ class RestControllerApi(using controller: IController, tuiESI: TuiESI, guiESI: G
               path("next") {
                 complete(controller.next())
               },
+              path("loadOptions") {
+                complete(controller.loadOptions)
+              },
+              path("load" / IntNumber) {
+                (id: Int) =>
+                  complete(controller.load(id))
+              },
               pathPrefix("doAndPublish") {
                 concat(
                   path("nextRound") {

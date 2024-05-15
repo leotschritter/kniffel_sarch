@@ -14,4 +14,12 @@ trait IPersistence {
   def saveDiceCup(diceCup: String): String
 
   def createGame(numberOfPlayers: Int): String
+
+  def loadField(gameId: Int): String
+
+  def loadGame(gameId: Int): String
+
+  def loadDiceCup(gameId: Int): String
+  
+  def loadOptions: String
 }

@@ -115,5 +115,13 @@ class FileIO(converter: JsonToXmlConverter) extends IPersistence {
   }
 
   override def createGame(numberOfPlayers:  Int): String = "XML FileIO does not implement this"
-  
+
+  override def loadOptions: String = "1"
+
+
+  override def loadDiceCup(gameId: Int): String = loadDiceCup
+
+  override def loadField(gameId: Int): String = loadField
+
+  override def loadGame(gameId: Int): String = loadGame
 }

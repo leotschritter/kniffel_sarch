@@ -139,20 +139,27 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
 
   override def loadDiceCup: String = {
     val maxId: Int = getHighestGameId
-    val selectActionsGame = games.filter(_.id === maxId).map(g => g.remDice).sum
+    loadDiceCup(maxId)
+  }
+
+  override def loadDiceCup(gameId: Int): String = {
+    val selectActionsGame = games.filter(_.id === gameId).map(g => g.remDice).sum
 
     val remDice: Int = Await.result(db.run(selectActionsGame.result).map {
       case Some(value) => value
       case None => 2
     }, Duration.Inf)
 
-    diceCupToJsonString(remDice, getStoredValuesByGameId(maxId), getInCupValuesByGameId(maxId))
+    diceCupToJsonString(remDice, getStoredValuesByGameId(gameId), getInCupValuesByGameId(gameId))
   }
 
   override def loadGame: String = {
     val maxId: Int = getHighestGameId
+    loadGame(maxId)
+  }
 
-    val selectActionsGame = games.filter(_.id === maxId).map(g => g.remMoves).sum
+  override def loadGame(gameId: Int): String = {
+    val selectActionsGame = games.filter(_.id === gameId).map(g => g.remMoves).sum
 
     val remMoves: Int = Await.result(db.run(selectActionsGame.result).map {
       case Some(value) => value
@@ -160,7 +167,7 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
     }, Duration.Inf)
 
     val query = players
-      .filter(_.gameId === maxId)
+      .filter(_.gameId === gameId)
       .sortBy(p => p.name)
       .map(p => (p.name, p.isTurn, p.top, p.bonus, p.sumTop, p.sumBottom, p.total)).result
 
@@ -169,16 +176,15 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
 
     gameToJsonString(remMoves, resultTuples)
   }
-  
-  override def loadField: String = {
-    val maxId: Int = getHighestGameId
-    val selectActions = cells.filter(_.gameId === maxId).map(g => g.x).max
+
+  override def loadField(gameId: Int): String = {
+    val selectActions = cells.filter(_.gameId === gameId).map(g => g.x).max
     val numberOfPlayers: Int = Await.result(db.run(selectActions.result).map {
       case Some(value) => value + 1
       case None => 2
     }, Duration.Inf)
 
-    val query = cells.filter(_.gameId === maxId).map(c => (c.x, c.y, c.value)).result
+    val query = cells.filter(_.gameId === gameId).map(c => (c.x, c.y, c.value)).result
     val resultMap: Map[(Int, Int), Option[Int]] = Await.result(db.run(query).map(_.toList), Duration.Inf)
       .map {
         (key1, key2, value) => (key1, key2) -> value
@@ -187,11 +193,21 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
     fieldToJsonString(numberOfPlayers, resultMap)
   }
 
+  override def loadField: String = {
+    val maxId: Int = getHighestGameId
+    loadField(maxId)
+  }
+
   override def createGame(numberOfPlayers: Int): String = {
     val insertGame = (games.map(g => (g.remMoves, g.remDice)) returning games.map(_.id)) += (13 * numberOfPlayers, 2)
     val insertFuture = db.run(insertGame)
     val result = Await.result(insertFuture.map(_ => "Inserted Game successfully").recover(_ => "Failure inserting Game"), Duration.Inf)
     result
+  }
+
+  override def loadOptions: String = {
+    Await.result(db.run(games.map(g => g.id).result)
+      .map(_.toList).recover(_ => List.empty), Duration.Inf).mkString(", ")
   }
 
   private def executeInsertStatement(insertActions: Seq[DBIOAction[_, NoStream, Effect.Write]])

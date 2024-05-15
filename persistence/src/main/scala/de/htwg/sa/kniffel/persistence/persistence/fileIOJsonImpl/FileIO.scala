@@ -50,5 +50,13 @@ class FileIO extends IPersistence {
     source.replaceAll("\\s", "")
   }
 
+  override def loadDiceCup(gameId: Int): String = loadDiceCup
+
+  override def loadField(gameId: Int): String = loadField
+  
+  override def loadGame(gameId: Int): String = loadGame
+
   override def createGame(numberOfPlayers: Int): String = "JSON FileIO does not implement this"
+  
+  override def loadOptions: String = "1"
 }

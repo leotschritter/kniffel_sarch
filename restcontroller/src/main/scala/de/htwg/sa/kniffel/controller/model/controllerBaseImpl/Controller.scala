@@ -85,13 +85,22 @@ class Controller(var field: Field, var diceCup: DiceCup, var game: Game, val dic
     notifyObservers(Event.Save)
     toString
 
-  def load(): String =
+  override def load(): String =
     field = fileIOESI.loadFieldRequest
     game = fileIOESI.loadGameRequest
     diceCup = fileIOESI.loadDiceCupRequest
     notifyObservers(Event.Load)
     toString
+    
+  override def load(gameId: Int): String =
+    field = fileIOESI.loadFieldRequest(gameId)
+    game = fileIOESI.loadGameRequest(gameId)
+    diceCup = fileIOESI.loadDiceCupRequest(gameId)
+    notifyObservers(Event.Load)
+    toString
 
+  override def loadOptions: String = 
+    fileIOESI.loadOptionsRequest
 
   override def toString: String =
     s"${fieldESI.sendStringRequest("field/mesh", field.toJson.toString)}\n" +

@@ -40,15 +40,19 @@ trait IController extends Observable {
   def save(): String
 
   def load(): String
+  
+  def load(id: Int): String
+
+  def loadOptions: String
 
   def toJson: JsObject
-  
+
   def gameESI: GameESI
-  
+
   def diceCupESI: DiceCupESI
-  
+
   def fieldESI: FieldESI
-  
+
   def fileIOESI: FileIOESI
 
   def writeDown(move: Move): String

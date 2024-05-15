@@ -27,6 +27,18 @@ class PersistenceApi(using persistence: IPersistence):
             path("loadGame") {
               complete(persistence.loadGame)
             },
+            path("loadDiceCup" / IntNumber) {
+              (gameId: Int) =>
+              complete(persistence.loadDiceCup(gameId))
+            },
+            path("loadField" / IntNumber) {
+              (gameId: Int) =>
+              complete(persistence.loadField(gameId))
+            },
+            path("loadGame" / IntNumber) {
+              (gameId: Int) =>
+              complete(persistence.loadGame(gameId))
+            },
             path("loadDiceCup") {
               complete(persistence.loadDiceCup)
             },
@@ -37,6 +49,9 @@ class PersistenceApi(using persistence: IPersistence):
             },
             path("") {
               sys.error("No such GET route")
+            },
+            path("loadOptions") {
+              complete(persistence.loadOptions)
             }
           )
         },

@@ -79,14 +79,23 @@ class GUI(val gameESI: GameESI, val diceCupESI: DiceCupESI, val controllerESI: C
       repaint()
       Json.obj("event" -> event).toString
 
+  private val gameList: List[String] = controllerESI.sendGETRequest("controller/loadOptions")
+    .split(",").toList.map(game => "Game " + game.trim)
+  val loadMenu: Menu = new Menu("Load") {
+    gameList.foreach{game =>
+      val gameId = game.substring(5)
+      contents += new MenuItem(Action(game) {
+        controllerESI.sendGETRequest(s"controller/load/$gameId")
+      })
+    }
+  }
+
   menuBar = new MenuBar {
     contents += new Menu("File") {
       contents += new MenuItem(Action("Exit") {
         sys.exit(0)
       })
-      contents += new MenuItem(Action("Load") {
-        controllerESI.sendGETRequest("controller/load")
-      })
+      contents += loadMenu
       contents += new MenuItem(Action("Save") {
         controllerESI.sendGETRequest("controller/save")
       })
