@@ -54,9 +54,8 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
     val updateAction = games.filter(_.id === maxId).map(g => g.remDice).update(remainingDices)
     db.run(updateAction)
     
-    deleteStoredDice(maxId)
-    deleteInCup(maxId)
-
+    deleteDiceCup(maxId)
+    
     val insertActions =
       lockedList.map { (value: Int) =>
         (storedDice.map(s => (s.value, s.gameId)) returning storedDice.map(_.id)) += (value, maxId)

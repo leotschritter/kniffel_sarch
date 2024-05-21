@@ -34,6 +34,7 @@ class MongoDAO(converter: JsonConverter) extends IPersistence {
 
   override def saveField(field: String): String = {
     val id = getLatestGameId
+    deleteField(id)
     val json: JsValue = Json.parse(field)
     val jsonRows: JsArray = (json \ "field" \ "rows").get.as[JsArray]
 
@@ -81,17 +82,18 @@ class MongoDAO(converter: JsonConverter) extends IPersistence {
   }
 
   override def saveDiceCup(diceCup: String): String = {
-    val lockedList: List[Int] = (Json.parse(diceCup) \ "dicecup" \ "stored").as[List[Int]]
-    val remainingDices: Int = (Json.parse(diceCup) \ "dicecup" \ "remainingDices").as[Int]
-    val inCupList: List[Int] = (Json.parse(diceCup) \ "dicecup" \ "incup").as[List[Int]]
+    val id: Int = getLatestGameId
+    deleteDiceCup(id)
 
-    val maxId: Int = getLatestGameId
+    val remainingDices: Int = (Json.parse(diceCup) \ "dicecup" \ "remainingDices").as[Int]
+    val stored: List[Int] = (Json.parse(diceCup) \ "dicecup" \ "stored").as[List[Int]]
+    val inCup: List[Int] = (Json.parse(diceCup) \ "dicecup" \ "incup").as[List[Int]]
 
     val document = Document(
-      "_id" -> maxId,
+      "_id" -> id,
       "remainingDices" -> remainingDices,
-      "stored" -> lockedList,
-      "incup" -> inCupList
+      "stored" -> stored,
+      "incup" -> inCup
     )
 
     executeInsertStatement(diceCupCollection.insertOne(document))
