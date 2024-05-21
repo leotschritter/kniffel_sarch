@@ -65,18 +65,18 @@ class MongoDAO(converter: JsonConverter) extends IPersistence {
 
     val playersDocuments: List[Document] = (json \ "game" \ "players").as[List[JsObject]]
       .map { player =>
-      Document(
-        "id" -> (player \ "id").as[Int],
-        "name" -> (player \ "name").as[String]
-      )
-    }
+        Document(
+          "id" -> (player \ "id").as[Int],
+          "name" -> (player \ "name").as[String]
+        )
+      }
 
     executeUpdateStatement(gameCollection.updateOne(equal("_id", getLatestGameId),
       combine(set("nestedList", nestedList),
-      set("remainingMoves", remainingMoves),
-      set("currentPlayerID", currentPlayerID),
-      set("currentPlayerName", currentPlayerName),
-      set("players", playersDocuments))
+        set("remainingMoves", remainingMoves),
+        set("currentPlayerID", currentPlayerID),
+        set("currentPlayerName", currentPlayerName),
+        set("players", playersDocuments))
     ))
   }
 
@@ -87,7 +87,7 @@ class MongoDAO(converter: JsonConverter) extends IPersistence {
 
     val maxId: Int = getLatestGameId
 
-    val  document = Document(
+    val document = Document(
       "_id" -> maxId,
       "remainingDices" -> remainingDices,
       "stored" -> lockedList,
@@ -164,7 +164,7 @@ class MongoDAO(converter: JsonConverter) extends IPersistence {
 
   override def loadOptions: String = {
     Await.result(gameCollection.find().map(_.get("_id").map(_.asInt32().getValue).getOrElse(0)).toFuture(), Duration.Inf)
-    .mkString(",")
+      .mkString(",")
   }
 
   override def deleteGame(gameId: Int): Unit =
