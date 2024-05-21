@@ -27,9 +27,7 @@ trait IPersistence {
   
   def deleteField(gameId: Int): Unit
   
-  def deleteInCup(gameId: Int): Unit
-  
-  def deleteStoredDice(gameId: Int): Unit
+  def deleteDiceCup(gameId: Int): Unit
   
   def updateGame(game: String, gameId: Int): Unit
   

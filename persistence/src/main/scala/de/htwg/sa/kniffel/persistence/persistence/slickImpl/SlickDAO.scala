@@ -2,6 +2,7 @@ package de.htwg.sa.kniffel.persistence.persistence.slickImpl
 
 import de.htwg.sa.kniffel.persistence.persistence.IPersistence
 import de.htwg.sa.kniffel.persistence.persistence.slickImpl.table.*
+import de.htwg.sa.kniffel.persistence.persistence.util.JsonConverter
 import play.api.libs.json.{JsArray, JsBoolean, JsNull, JsNumber, JsObject, JsValue, Json}
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api.*
@@ -12,7 +13,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import scala.util.Try
 
-class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val inCupDice: TableQuery[InCupDice], val storedDice: TableQuery[StoredDice], val players: TableQuery[Players], val db: Database) extends IPersistence {
+class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val inCupDice: TableQuery[InCupDice], val storedDice: TableQuery[StoredDice], val players: TableQuery[Players], val db: Database, converter: JsonConverter) extends IPersistence {
   def this() =
     this(
       TableQuery[Games],
@@ -20,7 +21,8 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
       TableQuery[InCupDice],
       TableQuery[StoredDice],
       TableQuery[Players],
-      Database.forConfig(path = "postgres")
+      Database.forConfig(path = "postgres"),
+      JsonConverter()
     )
 
   private def getHighestGameId: Int = {
@@ -65,13 +67,15 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
     executeInsertStatement(insertActions)
   }
 
-  override def deleteInCup(gameId: Int): Unit = {
+  private def deleteInCup(gameId: Int): Unit = 
     db.run(inCupDice.filter(_.gameId === gameId).delete)
-  }
 
-  override def deleteStoredDice(gameId: Int): Unit = {
+  private def deleteStoredDice(gameId: Int): Unit = 
     db.run(storedDice.filter(_.gameId === gameId).delete)
-  }
+
+  override def deleteDiceCup(gameId: Int): Unit =
+    deleteStoredDice(gameId)
+    deleteInCup(gameId)
 
   override def saveGame(game: String): String = {
     createTablesIfNotExist()
@@ -161,7 +165,7 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
       case None => 2
     }, Duration.Inf)
 
-    diceCupToJsonString(remDice, getStoredValuesByGameId(gameId), getInCupValuesByGameId(gameId))
+    converter.diceCupToJsonString(remDice, getStoredValuesByGameId(gameId), getInCupValuesByGameId(gameId))
   }
 
   override def loadGame: String = {
@@ -185,7 +189,7 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
     val resultTuples: List[(String, Boolean, Int, Int, Int, Int, Int)] =
       Await.result(db.run(query).map(_.toList).recover(_ => List.empty), Duration.Inf)
 
-    gameToJsonString(remMoves, resultTuples)
+    converter.gameToJsonString(remMoves, resultTuples)
   }
 
   override def loadField(gameId: Int): String = {
@@ -201,7 +205,14 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
         (key1, key2, value) => (key1, key2) -> value
       }.toMap
 
-    fieldToJsonString(numberOfPlayers, resultMap)
+    val nestedVector: Vector[Vector[Option[Int]]] =
+      (0 until 19).map { rows =>
+        (0 until numberOfPlayers).map { cols =>
+          resultMap((cols, rows))
+        }.toVector
+      }.toVector
+    
+    converter.fieldToJsonString(numberOfPlayers, nestedVector)
   }
 
   override def loadField: String = {
@@ -231,58 +242,7 @@ class SlickDAO(val games: TableQuery[Games], val cells: TableQuery[Cells], val i
       .recover(_ => Json.obj("savedSuccessfully" -> JsBoolean.apply(false)).toString), Duration.Inf
     )
   }
-
-  private def diceCupToJsonString(remDice: Int, stored: List[Int], inCup: List[Int]) = {
-    Json.obj(
-      "dicecup" -> Json.obj(
-        "stored" -> stored,
-        "incup" -> inCup,
-        "remainingDices" -> JsNumber(remDice)
-      )
-    ).toString
-  }
-
-  private def fieldToJsonString(numberOfPlayers: Int, resultMap: Map[(Int, Int), Option[Int]]): String = {
-    val nestedVector: Vector[Vector[JsValue]] =
-      (0 until 19).map { rows =>
-        (0 until numberOfPlayers).map { cols =>
-          resultMap((cols, rows)).map(JsNumber(_)).getOrElse(JsNull)
-        }.toVector
-      }.toVector
-
-    Json.obj(
-      "field" -> Json.obj(
-        "numberOfPlayers" -> JsNumber(numberOfPlayers),
-        "rows" -> nestedVector
-      )
-    ).toString
-  }
-
-  private def gameToJsonString(remMoves: Int, resultTuples: List[(String, Boolean, Int, Int, Int, Int, Int)]) = {
-    val resultNestedList: List[List[Int]] = resultTuples
-      .map(p => List(p._3, p._4, p._5, p._6, p._5, p._7))
-
-    val currentPlayer: (String, Int) = resultTuples.find(_._2)
-      .map(p => (p._1, p._1.substring(6).toIntOption.getOrElse(1)))
-      .getOrElse(("Player 1", 1))
-
-    val playersList: JsArray = JsArray(resultTuples.map { p =>
-      Json.obj(
-        "id" -> JsNumber(p._1.substring(6).toIntOption.getOrElse(1)),
-        "name" -> p._1
-      )
-    })
-    Json.obj(
-      "game" -> Json.obj(
-        "nestedList" -> resultNestedList.map(_.mkString(",")).mkString(";"),
-        "remainingMoves" -> JsNumber(remMoves),
-        "currentPlayerID" -> JsNumber(currentPlayer._2),
-        "currentPlayerName" -> currentPlayer._1,
-        "players" -> playersList
-      )
-    ).toString
-  }
-
+  
   override def updateDiceCup(diceValue: String, gameId: Int): Unit = ???
   
   override def updateField(field: String, gameId: Int): Unit = ???
