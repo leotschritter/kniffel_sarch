@@ -5,10 +5,11 @@ import org.mongodb.scala.Document
 import play.api.libs.json.*
 
 import scala.jdk.CollectionConverters.*
+import scala.util.Try
 
 class MongoDbDocumentConverter(converter: JsonConverter) {
   def this() = this(new JsonConverter())
-  
+
   def fieldToDocument(field: String, id: Int): Document = {
     val json: JsValue = Json.parse(field)
     val jsonRows: JsArray = (json \ "field" \ "rows").get.as[JsArray]
@@ -56,7 +57,7 @@ class MongoDbDocumentConverter(converter: JsonConverter) {
 
     Document(
       "_id" -> id,
-      "nestedList" -> nestedList.map(_.mkString(",")).mkString(";"),
+      "nestedList" -> nestedList,
       "remainingMoves" -> remainingMoves,
       "currentPlayerID" -> currentPlayerID,
       "currentPlayerName" -> currentPlayerName,
@@ -65,14 +66,12 @@ class MongoDbDocumentConverter(converter: JsonConverter) {
   }
 
   def resultToFieldJson(document: Document): String = {
-    val rows: Vector[Vector[Int]] = document("rows").asArray().getValues.asScala.map { row =>
-      row.asArray().getValues.asScala.map(_.asInt32().getValue).toVector
+    val rows: Vector[Vector[Option[Int]]] = document("rows").asArray().getValues.asScala.map { row =>
+      row.asArray().getValues.asScala.map { cell => Try(cell.asInt32().getValue).toOption
+      }.toVector
     }.toVector
 
-    converter.fieldToJsonString(
-      document("numberOfPlayers").asInt32().getValue,
-      rows.map(_.map(Option.apply))
-    )
+    converter.fieldToJsonString(document("numberOfPlayers").asInt32().getValue, rows)
   }
 
   def resultToGameJson(document: Document): String = {
@@ -88,8 +87,8 @@ class MongoDbDocumentConverter(converter: JsonConverter) {
       )
     }.toList
 
-    val resultNestedList: List[List[Int]] = document("nestedList").asString().getValue.split(";").map { stringList =>
-      stringList.split(",").map(_.toInt).toList
+    val resultNestedList: List[List[Int]] = document("nestedList").asArray().getValues.asScala.map { row =>
+      row.asArray().getValues.asScala.map(_.asInt32().getValue).toList
     }.toList
 
     converter.gameToJsonString(
@@ -99,10 +98,10 @@ class MongoDbDocumentConverter(converter: JsonConverter) {
           player.name,
           player.id == currentPlayer.id,
           resultNestedList(player.id).head,
-          resultNestedList(player.id - 1)(1),
-          resultNestedList(player.id - 1)(2),
-          resultNestedList(player.id - 1)(3),
-          resultNestedList(player.id - 1).last)
+          resultNestedList(player.id)(1),
+          resultNestedList(player.id)(2),
+          resultNestedList(player.id)(3),
+          resultNestedList(player.id).last)
       )
     )
   }

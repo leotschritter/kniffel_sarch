@@ -1,8 +1,7 @@
 package de.htwg.sa.kniffel.persistence.persistence.mongoImpl
 
 import de.htwg.sa.kniffel.persistence.persistence.IPersistence
-import de.htwg.sa.kniffel.persistence.persistence.mongoImpl.model.Player
-import de.htwg.sa.kniffel.persistence.persistence.util.{JsonConverter, MongoDbDocumentConverter}
+import de.htwg.sa.kniffel.persistence.persistence.util.MongoDbDocumentConverter
 import org.mongodb.scala.*
 import org.mongodb.scala.bson.BsonValue
 import org.mongodb.scala.model.Filters.*
@@ -13,12 +12,12 @@ import play.api.libs.json.*
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-import scala.jdk.CollectionConverters.*
+import scala.util.Try
 
 class MongoDAO(converter: MongoDbDocumentConverter) extends IPersistence {
   def this() = this(new MongoDbDocumentConverter())
 
-  private val client = MongoClient("mongodb://kniffeldbuser:kniffel@localhost:27017")
+  private val client = MongoClient("mongodb://localhost:27017/kniffeldbuser?authSource=kniffel")
   private val db: MongoDatabase = client.getDatabase("kniffeldb")
   private val gameCollection: MongoCollection[Document] = db.getCollection("game")
   private val fieldCollection: MongoCollection[Document] = db.getCollection("field")
@@ -68,7 +67,7 @@ class MongoDAO(converter: MongoDbDocumentConverter) extends IPersistence {
     executeDeleteStatement(diceCupCollection.deleteOne(equal("_id", gameId)))
 
   override def createGame(numberOfPlayers: Int): String = {
-    val id: Int = getLatestGameId + 1
+    val id: Int = Try(getLatestGameId).toOption.getOrElse(0) + 1
     val document = Document(
       "_id" -> id,
       "numberOfPlayers" -> numberOfPlayers
@@ -104,7 +103,7 @@ class MongoDAO(converter: MongoDbDocumentConverter) extends IPersistence {
   private def getLatestGameId: Int =
     val document = Await.result(gameCollection.find().sort(descending("_id")).first().head(), Duration.Inf)
     document.get("_id").map(_.asInt32().getValue).getOrElse(0)
-  
+
   private def executeUpdateStatement(statement: SingleObservable[UpdateResult]) = {
     Await.result(statement
       .map(_ => Json.obj("updated successfully" -> JsBoolean.apply(true)).toString)
