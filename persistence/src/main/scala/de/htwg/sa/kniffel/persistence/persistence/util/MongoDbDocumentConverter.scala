@@ -75,35 +75,36 @@ class MongoDbDocumentConverter(converter: JsonConverter) {
   }
 
   def resultToGameJson(document: Document): String = {
+    println(document.toJson())
     val currentPlayer: Player = Player(
       document("currentPlayerID").asInt32().getValue,
       document("currentPlayerName").asString().getValue
     )
 
-    val players: List[Player] = document("players").asArray().getValues.asScala.map { player =>
-      Player(
-        player.asDocument().get("id").asInt32().getValue,
-        player.asDocument().get("name").asString().getValue
+    val players: List[JsObject] = document("players").asArray().getValues.asScala.map { player =>
+      Json.obj(
+        "id" -> JsNumber(player.asDocument().get("id").asInt32().getValue),
+        "name" -> player.asDocument().get("name").asString().getValue
       )
     }.toList
+
+    val playersList: JsArray = JsArray(players)
 
     val resultNestedList: List[List[Int]] = document("nestedList").asArray().getValues.asScala.map { row =>
       row.asArray().getValues.asScala.map(_.asInt32().getValue).toList
     }.toList
 
-    converter.gameToJsonString(
-      document("remainingMoves").asInt32().getValue,
-      players.map(player =>
-        (
-          player.name,
-          player.id == currentPlayer.id,
-          resultNestedList(player.id).head,
-          resultNestedList(player.id)(1),
-          resultNestedList(player.id)(2),
-          resultNestedList(player.id)(3),
-          resultNestedList(player.id).last)
+    val res = Json.obj(
+      "game" -> Json.obj(
+        "nestedList" -> resultNestedList.map(_.mkString(",")).mkString(";"),
+        "remainingMoves" -> JsNumber(document("remainingMoves").asInt32().getValue),
+        "currentPlayerID" -> JsNumber(currentPlayer.id),
+        "currentPlayerName" -> currentPlayer.name,
+        "players" -> playersList
       )
-    )
+    ).toString
+    println("XXXXXXXXXXX" + res)
+    res
   }
 
   def resultToDiceCupJson(document: Document): String = {
