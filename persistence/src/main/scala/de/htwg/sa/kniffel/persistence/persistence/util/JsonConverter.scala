@@ -1,6 +1,6 @@
 package de.htwg.sa.kniffel.persistence.persistence.util
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 class JsonConverter {
 
@@ -31,12 +31,12 @@ class JsonConverter {
       .map(p => List(p._3, p._4, p._5, p._6, p._5, p._7))
 
     val currentPlayer: (String, Int) = resultTuples.find(_._2)
-      .map(p => (p._1, p._1.substring(6).toIntOption.getOrElse(1)))
+      .map(p => (p._1, p._1.substring(7).toIntOption.map(x => x - 1).getOrElse(1)))
       .getOrElse(("Player 1", 1))
 
     val playersList: JsArray = JsArray(resultTuples.map { p =>
       Json.obj(
-        "id" -> JsNumber(p._1.substring(6).toIntOption.getOrElse(1)),
+        "id" -> JsNumber(p._1.substring(7).toIntOption.map(x => x - 1).getOrElse(1)),
         "name" -> p._1
       )
     })
