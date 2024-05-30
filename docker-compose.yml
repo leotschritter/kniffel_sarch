@@ -54,3 +54,16 @@ services:
       DISPLAY: ${DISPLAY}
 #    ports:
 #      - 9004:9004
+
+  postgres:
+    container_name: kniffel-postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: kniffel_postgres
+      POSTGRES_USER: kniffeldbuser
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+
+volumes:
+  postgres:

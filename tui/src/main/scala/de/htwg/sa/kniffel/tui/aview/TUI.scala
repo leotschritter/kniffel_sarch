@@ -43,7 +43,13 @@ class TUI(val gameESI: GameESI, val diceCupESI: DiceCupESI, val fieldESI: FieldE
       case "u" => controllerESI.sendGETRequest("controller/undo"); None
       case "r" => controllerESI.sendGETRequest("controller/redo"); None
       case "s" => controllerESI.sendGETRequest("controller/save"); None
-      case "l" => controllerESI.sendGETRequest("controller/load"); None
+      case "lo" => println(controllerESI.sendGETRequest("controller/loadOptions")); None
+      case "l" =>  
+        validInput(textInputAsList) match {
+          case Success(f) => controllerESI.sendGETRequest("controller/load/"
+            + Try(textInputAsList.tail.head.toInt).toOption.getOrElse(1)); None
+          case Failure(v) => controllerESI.sendGETRequest("controller/load"); None
+        }
       case "wd" =>
         validInput(textInputAsList) match {
           case Success(f) => val posAndDesc = textInputAsList.tail.head
