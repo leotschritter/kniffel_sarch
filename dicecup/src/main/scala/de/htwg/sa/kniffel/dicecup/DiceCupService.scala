@@ -6,6 +6,7 @@ import de.htwg.sa.kniffel.dicecup.model.dicecupBaseImpl.DiceCup
 
 object DiceCupService:
   val diceCup: IDiceCup = new DiceCup()
+
   given IDiceCup = diceCup
 
   @main def main(): Unit = DiceCupApi().start
