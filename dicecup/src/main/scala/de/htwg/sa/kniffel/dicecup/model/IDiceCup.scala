@@ -3,7 +3,7 @@ package de.htwg.sa.kniffel.dicecup.model
 import akka.http.scaladsl.server.Route
 import play.api.libs.json.JsObject
 
-import scala.collection.immutable.ListMap
+import scala.collection.immutable.HashMap
 
 trait IDiceCup {
   def nextRound(): IDiceCup
@@ -22,7 +22,7 @@ trait IDiceCup {
 
   def dice(): Option[IDiceCup]
 
-  def indexOfField: ListMap[String, Int]
+  def indexOfField: HashMap[String, Int]
 
   def toJson: JsObject
 

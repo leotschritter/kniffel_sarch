@@ -3,7 +3,7 @@ package de.htwg.sa.kniffel.dicecup.model.dicecupBaseImpl
 import de.htwg.sa.kniffel.dicecup.model.{EvaluateStrategy, Evaluator, IDiceCup}
 import play.api.libs.json.{JsNumber, JsObject, JsValue, Json}
 
-import scala.collection.immutable.ListMap
+import scala.collection.immutable.HashMap
 import scala.util.Random
 
 case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends IDiceCup:
@@ -61,8 +61,8 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
       case _ => 0
     }
 
-  def indexOfField: ListMap[String, Int] =
-    ListMap("1" -> 0, "2" -> 1, "3" -> 2, "4" -> 3, "5" -> 4, "6" -> 5,
+  def indexOfField: HashMap[String, Int] =
+    HashMap("1" -> 0, "2" -> 1, "3" -> 2, "4" -> 3, "5" -> 4, "6" -> 5,
       "3X" -> 9, "4X" -> 10, "FH" -> 11, "KS" -> 12, "GS" -> 13, "KN" -> 14, "CH" -> 15)
 
   override def toString: String = "Im Becher: " + inCup.mkString(" ")
