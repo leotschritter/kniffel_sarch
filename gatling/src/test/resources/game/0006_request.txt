@@ -1,0 +1,1 @@
+{"game":{"nestedList":"0,0,0,40,0,40;0,0,0,0,0,0","remainingMoves":25,"currentPlayerID":1,"currentPlayerName":"Player 2","players":[{"id":0,"name":"Player 1"},{"id":1,"name":"Player 2"}]}}

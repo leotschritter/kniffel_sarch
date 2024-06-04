@@ -25,3 +25,13 @@
 
 ``sbt 'Gatling/testOnly it.dicecup.DiceCupStressItSimulation'``
 
+### Run a single game test
+``sbt 'Gatling/testOnly it.game.GameVolumeItSimulation'``
+
+``sbt 'Gatling/testOnly it.game.GameEnduranceItSimulation'``
+
+``sbt 'Gatling/testOnly it.game.GameLoadItSimulation'``
+
+``sbt 'Gatling/testOnly it.game.GameSpikeItSimulation'``
+
+``sbt 'Gatling/testOnly it.game.GameStressItSimulation'``

@@ -1,11 +1,8 @@
 package de.htwg.sa.kniffel.game.model.gameBaseImpl
 
-import play.api.libs.json.{JsArray, JsNull, JsNumber, JsObject, JsValue, Json}
+import play.api.libs.json.*
 import akka.http.scaladsl.server.Directives.*
-import akka.http.scaladsl.server.Route
 import de.htwg.sa.kniffel.game.model.IGame
-
-import scala.annotation.tailrec
 
 case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves: Int, resultNestedList: List[List[Int]]) extends IGame :
   def this(numberOfPlayers: Int) = this(
@@ -16,17 +13,13 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
   )
 
   def next(): Option[Game] = {
-    if (remainingMoves == 0)
-      None
-    else
-      Some(Game(playersList, nextPlayer, remainingMoves - 1, resultNestedList))
+    if (remainingMoves == 0) None
+    else Some(copy(currentPlayer = nextPlayer, remainingMoves = remainingMoves - 1))
   }
 
   private def previousPlayer: Player = {
-    if (playersList.indexOf(currentPlayer) - 1 < 0)
-      playersList(playersList.last.playerID)
-    else
-      playersList(playersList.indexOf(currentPlayer) - 1)
+    val prevIndex = (playersList.indexOf(currentPlayer) - 1 + playersList.size) % playersList.size
+    playersList(prevIndex)
   }
 
 
@@ -44,18 +37,17 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
 
   def sum(value: Int, y: Int): Game = {
     val (sumTop, sumBottom, bonus) = sums(value, y, currentPlayer)
-    Game(playersList, currentPlayer, remainingMoves, resultNestedList.updated(
-      playersList.indexOf(currentPlayer),
-      List(sumTop) :+ bonus :+ (sumTop + bonus) :+ sumBottom :+ (sumTop + bonus) :+ (sumBottom + sumTop + bonus)
-    ))
+    val updatedNestedList = List(sumTop, bonus, sumTop + bonus, sumBottom, sumTop + bonus, sumBottom + sumTop + bonus)
+    copy(resultNestedList = resultNestedList.updated(playersList.indexOf(currentPlayer), updatedNestedList))
+
   }
+
+
 
   def undoMove(value: Int, y: Int): Game = {
     val (sumTop, sumBottom, bonus) = sums(-value, y, previousPlayer)
-    Game(playersList, previousPlayer, remainingMoves + 1, resultNestedList.updated(
-      playersList.indexOf(previousPlayer),
-      List(sumTop) :+ bonus :+ (sumTop + bonus) :+ sumBottom :+ (sumTop + bonus) :+ (sumBottom + sumTop + bonus)
-    ))
+    val updatedNestedList = List(sumTop, bonus, sumTop + bonus, sumBottom, sumTop + bonus, sumBottom + sumTop + bonus)
+    copy(resultNestedList = resultNestedList.updated(playersList.indexOf(previousPlayer), updatedNestedList), remainingMoves = remainingMoves + 1)
   }
 
 
@@ -67,13 +59,8 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
 
   def nestedList: List[List[Int]] = resultNestedList
 
-
   def playerTuples: List[(Int, String)] =
-    @tailrec
-    def playerTuplesHelper(players: List[Player], acc: List[(Int, String)]): List[(Int, String)] = players match
-      case Nil => acc.reverse
-      case player :: rest => playerTuplesHelper(rest, (player.playerID, player.playerName) :: acc)
-    playerTuplesHelper(playersList, Nil)
+    playersList.map(player => (player.playerID, player.playerName))
 
   override def toJson: JsObject = {
     Json.obj(
@@ -94,7 +81,7 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
     )
   }
 
-  
+
 
   override def jsonStringToGame(game: String): IGame = {
     val json: JsValue = Json.parse(game)
