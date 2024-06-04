@@ -10,7 +10,7 @@
 
 ``sbt 'Gatling/testOnly it.persistence.PersistenceLoadItSimulation'``
 
-``sbt 'Gatling/testOnly it.persistence.PersistenceSparkItSimulation'``
+``sbt 'Gatling/testOnly it.persistence.PersistenceSpikeItSimulation'``
 
 ``sbt 'Gatling/testOnly it.persistence.PersistenceStressItSimulation'``
 

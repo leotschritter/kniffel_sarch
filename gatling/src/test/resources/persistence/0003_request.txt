@@ -1,0 +1,1 @@
+{"dicecup":{"stored":[],"incup":[3,5,6,6,6],"remainingDices":2}}
