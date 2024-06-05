@@ -35,3 +35,14 @@
 ``sbt 'Gatling/testOnly it.game.GameSpikeItSimulation'``
 
 ``sbt 'Gatling/testOnly it.game.GameStressItSimulation'``
+
+### Run a single field test
+``sbt 'Gatling/testOnly it.field.FieldVolumeItSimulation'``
+
+``sbt 'Gatling/testOnly it.field.FieldEnduranceItSimulation'``
+
+``sbt 'Gatling/testOnly it.field.FieldLoadItSimulation'``
+
+``sbt 'Gatling/testOnly it.field.FieldSpikeItSimulation'``
+
+``sbt 'Gatling/testOnly it.field.FieldStressItSimulation'``
