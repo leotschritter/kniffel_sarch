@@ -1,15 +1,22 @@
 package de.htwg.sa.kniffel.controller.api
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.server.Directives.*
-import akka.http.scaladsl.server.{PathMatcher, PathMatcher1, Route}
+import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.stream.scaladsl.GraphDSL.Builder
+import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge, Sink, Source}
+import akka.stream.{FlowShape, UniformFanInShape, UniformFanOutShape}
 import de.htwg.sa.kniffel.controller.integration.gui.GuiESI
 import de.htwg.sa.kniffel.controller.integration.tui.TuiESI
 import de.htwg.sa.kniffel.controller.model.IController
 import de.htwg.sa.kniffel.controller.util.Event.*
 import de.htwg.sa.kniffel.controller.util.{Event, Move, Observer}
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
@@ -26,115 +33,107 @@ class RestControllerApi(using controller: IController, tuiESI: TuiESI, guiESI: G
   implicit val system: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = system.dispatcher
 
+  private val controllerFlow: Flow[HttpRequest, String, Any] = Flow.fromGraph(GraphDSL.create() { implicit builder: Builder[NotUsed] =>
+    import GraphDSL.Implicits.*
 
-  private val IntList: PathMatcher1[List[Int]] = PathMatcher("""list=\d+(?:,\d+)*""".r).flatMap { str =>
-    Some(str.split("=").tail.mkString(",").split(",").map(_.toInt).toList)
-  }
+    val broadcast: UniformFanOutShape[HttpRequest, HttpRequest] = builder.add(Broadcast[HttpRequest](2))
+    val merge: UniformFanInShape[String, String] = builder.add(Merge[String](2))
 
-  private val StringValue: PathMatcher1[String] = PathMatcher("""\w+""".r)
+    val getRequestFlow = Flow[HttpRequest].map { req =>
+      req.uri.path.toString match {
+        case "/controller/ping" =>
+          HttpResponse(entity = "pong")
+        case "/controller/" =>
+          HttpResponse(entity = controller.toString)
+        case "/controller/controller" =>
+          HttpResponse(entity = controller.toJson.toString)
+        case "/controller/field" =>
+          HttpResponse(entity = controller.field.toJson.toString)
+        case "/controller/game" =>
+          HttpResponse(entity = controller.game.toJson.toString)
+        case "/controller/diceCup" =>
+          HttpResponse(entity = controller.diceCup.toJson.toString)
+        case "/controller/load" =>
+          HttpResponse(entity = controller.load())
+        case "/controller/next" =>
+          HttpResponse(entity = controller.next())
+        case "/controller/loadOptions" =>
+          HttpResponse(entity = controller.loadOptions)
+        case path if path.startsWith("/controller/load/") =>
+          val id = path.split("/").last.toInt
+          HttpResponse(entity = controller.load(id))
+        case "/controller/doAndPublish/nextRound" =>
+          HttpResponse(entity = controller.doAndPublish(controller.nextRound()))
+        case "/controller/doAndPublish/dice" =>
+          HttpResponse(entity = controller.doAndPublish(controller.dice()))
+        case path if path.startsWith("/controller/doAndPublish/putIn") =>
+          val pi = path.stripPrefix("/controller/doAndPublish/putIn/list=").split(",").map(_.toInt).toList
+          HttpResponse(entity = controller.doAndPublish(controller.putIn(pi)))
+        case path if path.startsWith("/controller/doAndPublish/putOut") =>
+          val po = path.stripPrefix("/controller/doAndPublish/putOut/list=").split(",").map(_.toInt).toList
+          HttpResponse(entity = controller.doAndPublish(controller.putOut(po)))
+        case path if path.startsWith("/controller/writeDown/") =>
+          val value = path.stripPrefix("/controller/writeDown/")
+          Try {
+            val currentPlayer = controller.gameESI.sendPlayerIDRequest(controller.game)
+            val indexOfField = controller.diceCupESI.sendIndexOfFieldRequest(value)
+            val result = controller.diceCupESI.sendResultRequest(indexOfField, controller.diceCup)
+            HttpResponse(entity = controller.writeDown(Move(result, currentPlayer, indexOfField)))
+          } match {
+            case Failure(_) => HttpResponse(entity = "Invalid Input!")
+            case Success(response) => response
+          }
+        case "/controller/save" =>
+          HttpResponse(entity = controller.save())
+        case "/controller/undo" =>
+          HttpResponse(entity = controller.undo())
+        case "/controller/redo" =>
+          HttpResponse(entity = controller.redo())
+      }
+    }
+    val getRequestFlowShape = builder.add(getRequestFlow)
+
+    val getResponseFlow = Flow[HttpResponse].mapAsync(1) { response =>
+      Unmarshal(response.entity).to[String]
+    }
+    val getResponseFlowShape = builder.add(getResponseFlow)
+
+    val postRequestFlow = Flow[HttpRequest].mapAsync(1) { req =>
+      req.uri.path.toString match {
+        case "/controller/put" =>
+          req.entity.toStrict(Duration.apply(3, TimeUnit.SECONDS)).map { entity =>
+            val requestBody = entity.data.utf8String
+            HttpResponse(entity = controller.put(controller.jsonStringToMove(requestBody)))
+          }
+        case "/controller/quit" =>
+          Future.successful(HttpResponse(entity = controller.quit()))
+        case "/controller/nextRound" =>
+          Future.successful(HttpResponse(entity = controller.nextRound().toJson.toString))
+        case _ =>
+          Future.successful(HttpResponse(404, entity = "Unknown route"))
+      }
+    }
+    val postRequestFlowShape = builder.add(postRequestFlow)
+
+    val postResponseFlow = Flow[HttpResponse].mapAsync(1) { response =>
+      Unmarshal(response.entity).to[String]
+    }
+    val postResponseFlowShape = builder.add(postResponseFlow)
+
+    broadcast.out(0) ~> getRequestFlowShape ~> getResponseFlowShape ~> merge.in(0)
+    broadcast.out(1) ~> postRequestFlowShape ~> postResponseFlowShape ~> merge.in(1)
+
+    FlowShape(broadcast.in, merge.out)
+  })
 
   Http().newServerAt("localhost", 9006).bind(
     concat(
       pathPrefix("controller") {
-        concat(
-          get {
-            concat(
-              pathSingleSlash {
-                complete(controller.toString)
-              },
-              path("ping") {
-                complete("pong")
-              },
-              path("controller") {
-                complete(controller.toJson.toString)
-              },
-              path("field") {
-                complete(controller.field.toJson.toString)
-              },
-              path("game") {
-                complete(controller.game.toJson.toString)
-              },
-              path("diceCup") {
-                complete(controller.diceCup.toJson.toString)
-              },
-              path("load") {
-                complete(controller.load())
-              },
-              path("next") {
-                complete(controller.next())
-              },
-              path("loadOptions") {
-                complete(controller.loadOptions)
-              },
-              path("load" / IntNumber) {
-                (id: Int) =>
-                  complete(controller.load(id))
-              },
-              pathPrefix("doAndPublish") {
-                concat(
-                  path("nextRound") {
-                    complete(controller.doAndPublish(controller.nextRound()))
-                  },
-                  path("dice") {
-                    val c = controller.doAndPublish(controller.dice())
-                    print(c)
-                    complete(c)
-                  },
-                  path("putIn" / IntList) {
-                    (pi: List[Int]) =>
-                      complete(controller.doAndPublish(controller.putIn(pi)))
-                  },
-                  path("putOut" / IntList) {
-                    (po: List[Int]) =>
-                      complete(controller.doAndPublish(controller.putOut(po)))
-                  }
-                )
-              },
-              path("save") {
-                complete(controller.save())
-              },
-              path("undo") {
-                complete(controller.undo())
-              },
-              path("redo") {
-                complete(controller.redo())
-              },
-              path("writeDown" / StringValue) {
-                (value: String) =>
-                  Try({
-                    val currentPlayer = controller.gameESI.sendPlayerIDRequest(controller.game)
-                    val indexOfField = controller.diceCupESI.sendIndexOfFieldRequest(value)
-                    val result = controller.diceCupESI.sendResultRequest(indexOfField, controller.diceCup)
-                    complete(controller.writeDown(Move(result, currentPlayer, indexOfField)))
-                  }) match
-                    case Failure(exception) => complete("Invalid Input!")
-                    case Success(value) => value
-
-              },
-              path("") {
-                sys.error("No such GET route")
-              }
-            )
-          },
-          post {
-            concat(
-              path("put") {
-                entity(as[String]) { requestBody =>
-                  complete(controller.put(controller.jsonStringToMove(requestBody)))
-                }
-              },
-              path("quit") {
-                complete(controller.quit())
-              },
-              path("nextRound") {
-                complete(controller.nextRound().toJson.toString)
-              },
-              path("") {
-                sys.error("No such POST route")
-              }
-            )
-          }
-        )
+        extractRequest { request =>
+          complete(
+            Source.single(request).via(controllerFlow).runWith(Sink.head).map(resp => resp)
+          )
+        }
       }
     )
   )
