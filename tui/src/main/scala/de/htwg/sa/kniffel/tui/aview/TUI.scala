@@ -1,17 +1,26 @@
 package de.htwg.sa.kniffel.tui.aview
 
+import akka.NotUsed
+import akka.actor.ActorSystem
+import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge, Sink, Source}
+import akka.stream.scaladsl.GraphDSL.Builder
+import akka.stream.{FlowShape, Graph}
 import de.htwg.sa.kniffel.tui.integration.controller.ControllerESI
 import de.htwg.sa.kniffel.tui.integration.dicecup.DiceCupESI
 import de.htwg.sa.kniffel.tui.integration.field.FieldESI
 import de.htwg.sa.kniffel.tui.integration.game.GameESI
 import play.api.libs.json.{JsNumber, JsObject, Json}
 
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext}
 import scala.io.StdIn.readLine
 import scala.util.{Failure, Success, Try}
 
 class TUI(val gameESI: GameESI, val diceCupESI: DiceCupESI, val fieldESI: FieldESI, val controllerESI: ControllerESI):
   def this() = this(GameESI(), DiceCupESI(), FieldESI(), ControllerESI())
 
+  implicit val system: ActorSystem = ActorSystem()
+  implicit val executionContext: ExecutionContext = system.dispatcher
   var continue = true
 
   def run(): Unit =
@@ -32,41 +41,61 @@ class TUI(val gameESI: GameESI, val diceCupESI: DiceCupESI, val fieldESI: FieldE
       case Some(move) => writeDown(move)
     if continue then inputLoop()
 
+  private def analyseInputGraph: Graph[FlowShape[List[String], Option[String]], NotUsed] = GraphDSL.create() { implicit builder: Builder[NotUsed] =>
+    import GraphDSL.Implicits.*
+
+    val broadcast = builder.add(Broadcast[List[String]](1))
+    val merge = builder.add(Merge[Option[String]](1))
+
+    val inputFlowShape = builder.add(
+      Flow[List[String]].map { textInput =>
+        textInput.head match
+          case "q" => None
+          case "po" => diceCupPutOut(textInput.tail.map(_.toInt)); None
+          case "pi" => diceCupPutIn(textInput.tail.map(_.toInt)); None
+          case "d" => controllerESI.sendGETRequest("controller/doAndPublish/dice"); None
+          case "u" => controllerESI.sendGETRequest("controller/undo"); None
+          case "r" => controllerESI.sendGETRequest("controller/redo"); None
+          case "s" => controllerESI.sendGETRequest("controller/save"); None
+          case "lo" => println(controllerESI.sendGETRequest("controller/loadOptions")); None
+          case "l" =>
+            validInput(textInput) match {
+              case Success(f) => controllerESI.sendGETRequest("controller/load/"
+                + Try(textInput.tail.head.toInt).toOption.getOrElse(1));
+                None
+              case Failure(v) => controllerESI.sendGETRequest("controller/load"); None
+            }
+          case "wd" =>
+            validInput(textInput) match {
+              case Success(f) => val posAndDesc = textInput.tail.head
+                getIndexOfField(posAndDesc)
+                  .match {
+                    case Some(index) =>
+                      if (checkIfEmpty(index))
+                        Some(moveToJson(getResult(index), getPlayerID, index).toString)
+                      else
+                        println("Da steht schon was!")
+                        None
+                    case None => println("Falsche Eingabe!"); None
+                  }
+              case Failure(v) => println("Falsche Eingabe"); None
+            }
+          case _ =>
+            println("Falsche Eingabe!"); None
+      }
+    )
+
+    broadcast.out(0) ~> inputFlowShape ~> merge.in(0)
+    FlowShape(broadcast.in, merge.out)
+  }
 
   def analyseInput(input: String): Option[String] =
-    val textInputAsList = input.split("\\s").toList
-    textInputAsList.head match
-      case "q" => None
-      case "po" => diceCupPutOut(textInputAsList.tail.map(_.toInt)); None
-      case "pi" => diceCupPutIn(textInputAsList.tail.map(_.toInt)); None
-      case "d" => controllerESI.sendGETRequest("controller/doAndPublish/dice"); None
-      case "u" => controllerESI.sendGETRequest("controller/undo"); None
-      case "r" => controllerESI.sendGETRequest("controller/redo"); None
-      case "s" => controllerESI.sendGETRequest("controller/save"); None
-      case "lo" => println(controllerESI.sendGETRequest("controller/loadOptions")); None
-      case "l" =>  
-        validInput(textInputAsList) match {
-          case Success(f) => controllerESI.sendGETRequest("controller/load/"
-            + Try(textInputAsList.tail.head.toInt).toOption.getOrElse(1)); None
-          case Failure(v) => controllerESI.sendGETRequest("controller/load"); None
-        }
-      case "wd" =>
-        validInput(textInputAsList) match {
-          case Success(f) => val posAndDesc = textInputAsList.tail.head
-            getIndexOfField(posAndDesc)
-              .match {
-                case Some(index) =>
-                  if (checkIfEmpty(index))
-                    Some(moveToJson(getResult(index), getPlayerID, index).toString)
-                  else
-                    println("Da steht schon was!")
-                    None
-                case None => println("Falsche Eingabe!"); None
-              }
-          case Failure(v) => println("Falsche Eingabe"); None
-        }
-      case _ =>
-        println("Falsche Eingabe!"); None
+    val textInputAsList: List[String] = input.split("\\s").toList
+    val resultGraph = Source.single(textInputAsList)
+      .via(Flow.fromGraph(analyseInputGraph))
+      .runWith(Sink.head)
+      .map(result => result)
+    Await.result(resultGraph, Duration.Inf)
 
   def validInput(list: List[String]): Try[String] = Try(list.tail.head)
 
