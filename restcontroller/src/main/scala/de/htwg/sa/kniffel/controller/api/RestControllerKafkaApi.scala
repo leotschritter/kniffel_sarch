@@ -65,8 +65,9 @@ class RestControllerKafkaApi(using controller: IController):
           Json.obj("msg" -> "quit")
         case "wd" =>
           val move = input \ "move"
+
           controller.writeDown(Move(
-            (move \ "result").as[Int],
+            (move \ "value").as[Int],
             (move \ "x").as[Int],
             (move \ "y").as[Int]))
           Json.obj("msg" -> "move")
