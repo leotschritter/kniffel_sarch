@@ -28,6 +28,13 @@ lazy val dependencies = Seq(
     "org.slf4j" % "slf4j-api" % "2.0.12"
   ),
   libraryDependencies += ("org.mongodb.scala" %% "mongo-scala-driver" % "4.9.0").cross(CrossVersion.for3Use2_13),
+  libraryDependencies ++= Seq(
+    ("org.apache.kafka" %% "kafka-streams-scala" % "3.7.0").cross(CrossVersion.for3Use2_13),
+    "org.apache.kafka" % "kafka-clients" % "3.7.0"
+  ),
+  libraryDependencies ++= Seq(
+    ("com.typesafe.akka" %% "akka-stream-kafka" % "4.0.2")
+  ),
 )
 
 

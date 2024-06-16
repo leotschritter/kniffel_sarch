@@ -16,8 +16,14 @@ lazy val dependencies = Seq(
     ExclusionRule(organization = "org.slf4j", name = "slf4j-log4j12"),
     ExclusionRule(organization = "log4j", name = "log4j")
   ),
-  libraryDependencies += "org.scalatestplus" %% "mockito-5-10" % "3.2.18.0" % Test
-
+  libraryDependencies += "org.scalatestplus" %% "mockito-5-10" % "3.2.18.0" % Test,
+  libraryDependencies ++= Seq(
+    ("org.apache.kafka" %% "kafka-streams-scala" % "3.7.0").cross(CrossVersion.for3Use2_13),
+    "org.apache.kafka" % "kafka-clients" % "3.7.0"
+  ),
+  libraryDependencies ++= Seq(
+    ("com.typesafe.akka" %% "akka-stream-kafka" % "4.0.2")
+  ),
 )
 
 

@@ -27,7 +27,14 @@ lazy val dependencies = Seq(
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
     "ch.qos.logback" % "logback-classic" % "1.5.6",
     "org.slf4j" % "slf4j-api" % "2.0.12"
-  )
+  ),
+  libraryDependencies ++= Seq(
+    ("org.apache.kafka" %% "kafka-streams-scala" % "3.7.0").cross(CrossVersion.for3Use2_13),
+    "org.apache.kafka" % "kafka-clients" % "3.7.0"
+  ),
+  libraryDependencies ++= Seq(
+    ("com.typesafe.akka" %% "akka-stream-kafka" % "4.0.2")
+  ),
 )
 
 lazy val root = (project in file("."))
@@ -52,6 +59,8 @@ lazy val gui = project in file("gui")
 lazy val tui = project in file("tui")
 
 lazy val restcontroller = project in file("restcontroller")
+
+lazy val kafka = project in file("kafka")
 
 import org.scoverage.coveralls.Imports.CoverallsKeys.*
 
