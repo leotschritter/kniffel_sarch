@@ -1,27 +1,91 @@
 package de.htwg.sa.kniffel.tui.aview
 
 import akka.NotUsed
-import akka.actor.ActorSystem
-import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge, Sink, Source}
-import akka.stream.scaladsl.GraphDSL.Builder
-import akka.stream.{FlowShape, Graph}
+import akka.kafka.{ConsumerSettings, ProducerSettings, Subscriptions}
+import akka.actor.typed.ActorSystem
+import akka.actor.typed.javadsl.Behaviors
+import akka.kafka.scaladsl.{Consumer, Producer}
+import akka.stream.scaladsl.{Flow, Source}
 import de.htwg.sa.kniffel.tui.integration.controller.ControllerESI
 import de.htwg.sa.kniffel.tui.integration.dicecup.DiceCupESI
 import de.htwg.sa.kniffel.tui.integration.field.FieldESI
 import de.htwg.sa.kniffel.tui.integration.game.GameESI
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
 import play.api.libs.json.{JsNumber, JsObject, Json}
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext}
+import scala.concurrent.ExecutionContext
 import scala.io.StdIn.readLine
 import scala.util.{Failure, Success, Try}
 
 class TUI(val gameESI: GameESI, val diceCupESI: DiceCupESI, val fieldESI: FieldESI, val controllerESI: ControllerESI):
   def this() = this(GameESI(), DiceCupESI(), FieldESI(), ControllerESI())
 
-  implicit val system: ActorSystem = ActorSystem()
-  implicit val executionContext: ExecutionContext = system.dispatcher
+  implicit val system: ActorSystem[?] = ActorSystem(Behaviors.empty, "kniffel")
+  implicit val executionContext: ExecutionContext = system.executionContext
+
+  private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
+    .withBootstrapServers("localhost:9092")
+
+  private val sink = Producer.plainSink(producerSettings)
+
+  private val kafkaFlow = Flow[List[String]].map { input =>
+    input.head match {
+      case "q" => Json.obj("msg" -> "quit")
+      case "po" =>
+        Json.obj("msg" -> "putOut")
+          .deepMerge(Json.obj("list" -> input.tail.map(_.toInt)))
+      case "pi" =>
+        Json.obj("msg" -> "putIn")
+          .deepMerge(Json.obj("list" -> input.tail.map(_.toInt)))
+      case "d" => Json.obj("msg" -> "dice")
+      case "u" => Json.obj("msg" -> "undo")
+      case "r" => Json.obj("msg" -> "redo")
+      case "s" => Json.obj("msg" -> "save")
+      case "lo" => Json.obj("msg" -> "loadOptions")
+      case "l" =>
+        validInput(input) match {
+          case Success(f) =>
+            Json.obj("msg" -> "load")
+              .deepMerge(Json.obj("id" -> Try(input.tail.head.toInt).toOption.getOrElse(1)))
+          case Failure(v) =>
+            Json.obj("msg" -> "load")
+              .deepMerge(Json.obj("id" -> 1))
+        }
+      case "wd" =>
+        validInput(input) match {
+          case Success(f) =>
+            val posAndDesc = input.tail.head
+            getIndexOfField(posAndDesc)
+              .match {
+                case Some(index) =>
+                  if (checkIfEmpty(index))
+                    Json.obj("msg" -> "wd")
+                      .deepMerge(moveToJson(getResult(index), getPlayerID, index))
+                  else
+                    println("Da steht schon was!")
+                    Json.obj("msg" -> "empty")
+                case None => Json.obj("msg" -> "empty")
+              }
+          case Failure(v) => Json.obj("msg" -> "empty")
+        }
+    }
+  }
   var continue = true
+
+  private val consumerSettings =
+    ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
+      .withBootstrapServers("localhost:9092")
+      .withGroupId("kniffel-group")
+      .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+
+
+  private val source = Consumer.plainSource(consumerSettings, Subscriptions.topics("tui-response-topic"))
+
+  source.runForeach(record => 
+    update((Json.parse(record.value()) \ "msg").as[String])
+  )
 
   def run(): Unit =
     println(fieldESI.sendPOSTRequest("field/mesh", controllerESI.sendGETRequest("controller/field")))
@@ -35,69 +99,17 @@ class TUI(val gameESI: GameESI, val diceCupESI: DiceCupESI, val fieldESI: FieldE
     }
 
 
-  def inputLoop(): Unit =
-    analyseInput(readLine) match
-      case None => inputLoop()
-      case Some(move) => writeDown(move)
-    if continue then inputLoop()
+  private def inputLoop(): Unit =
+    while continue do analyseInput(readLine)
 
-  private def analyseInputGraph: Graph[FlowShape[List[String], Option[String]], NotUsed] = GraphDSL.create() { implicit builder: Builder[NotUsed] =>
-    import GraphDSL.Implicits.*
+  private def analyseInput(input: String): Unit =
+    Source.single(input.split(" ").toList)
+      .via(kafkaFlow)
+      .map(result =>
+        new ProducerRecord[String, String]("tui-topic", Json.stringify(result)))
+      .runWith(sink)
 
-    val broadcast = builder.add(Broadcast[List[String]](1))
-    val merge = builder.add(Merge[Option[String]](1))
-
-    val inputFlowShape = builder.add(
-      Flow[List[String]].map { textInput =>
-        textInput.head match
-          case "q" => None
-          case "po" => diceCupPutOut(textInput.tail.map(_.toInt)); None
-          case "pi" => diceCupPutIn(textInput.tail.map(_.toInt)); None
-          case "d" => controllerESI.sendGETRequest("controller/doAndPublish/dice"); None
-          case "u" => controllerESI.sendGETRequest("controller/undo"); None
-          case "r" => controllerESI.sendGETRequest("controller/redo"); None
-          case "s" => controllerESI.sendGETRequest("controller/save"); None
-          case "lo" => println(controllerESI.sendGETRequest("controller/loadOptions")); None
-          case "l" =>
-            validInput(textInput) match {
-              case Success(f) => controllerESI.sendGETRequest("controller/load/"
-                + Try(textInput.tail.head.toInt).toOption.getOrElse(1));
-                None
-              case Failure(v) => controllerESI.sendGETRequest("controller/load"); None
-            }
-          case "wd" =>
-            validInput(textInput) match {
-              case Success(f) => val posAndDesc = textInput.tail.head
-                getIndexOfField(posAndDesc)
-                  .match {
-                    case Some(index) =>
-                      if (checkIfEmpty(index))
-                        Some(moveToJson(getResult(index), getPlayerID, index).toString)
-                      else
-                        println("Da steht schon was!")
-                        None
-                    case None => println("Falsche Eingabe!"); None
-                  }
-              case Failure(v) => println("Falsche Eingabe"); None
-            }
-          case _ =>
-            println("Falsche Eingabe!"); None
-      }
-    )
-
-    broadcast.out(0) ~> inputFlowShape ~> merge.in(0)
-    FlowShape(broadcast.in, merge.out)
-  }
-
-  def analyseInput(input: String): Option[String] =
-    val textInputAsList: List[String] = input.split("\\s").toList
-    val resultGraph = Source.single(textInputAsList)
-      .via(Flow.fromGraph(analyseInputGraph))
-      .runWith(Sink.head)
-      .map(result => result)
-    Await.result(resultGraph, Duration.Inf)
-
-  def validInput(list: List[String]): Try[String] = Try(list.tail.head)
+  private def validInput(list: List[String]): Try[String] = Try(list.tail.head)
 
   def writeDown(move: String): Unit = {
     controllerESI.sendPOSTRequest("controller/put", move)
@@ -123,10 +135,9 @@ class TUI(val gameESI: GameESI, val diceCupESI: DiceCupESI, val fieldESI: FieldE
     (Json.parse(gameESI.sendPOSTRequest("game/playerName",
       controllerESI.sendGETRequest("controller/game"))) \ "playerName").as[String]
 
-  private def getPlayerID: Int = {
+  private def getPlayerID: Int =
     (Json.parse(gameESI.sendPOSTRequest("game/playerID",
       controllerESI.sendGETRequest("controller/game"))) \ "playerID").as[Int]
-  }
 
   private def getIndexOfField(posAndDesc: String): Option[Int] =
     Try((Json.parse(diceCupESI.sendGETRequest("diceCup/indexOfField")) \ "indexOfField" \ posAndDesc).as[Int]).toOption

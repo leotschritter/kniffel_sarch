@@ -2,6 +2,7 @@ package de.htwg.sa.kniffel.tui
 
 import de.htwg.sa.kniffel.tui.api.TuiApi
 import de.htwg.sa.kniffel.tui.aview.TUI
+import org.slf4j.{Logger, LoggerFactory}
 
 
 object TuiService:
@@ -9,4 +10,9 @@ object TuiService:
 
   given TUI = tui
 
-  @main def main(): Unit = TuiApi().tui.run()
+  @main def main(): Unit =
+    LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)
+      .asInstanceOf[ch.qos.logback.classic.Logger]
+      .setLevel(ch.qos.logback.classic.Level.ERROR)
+    //Disable Logging
+    TuiApi().tui.run()
