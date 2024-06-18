@@ -60,8 +60,6 @@ lazy val tui = project in file("tui")
 
 lazy val restcontroller = project in file("restcontroller")
 
-lazy val kafka = project in file("kafka")
-
 import org.scoverage.coveralls.Imports.CoverallsKeys.*
 
 coverallsTokenFile := sys.env.get("COVERALLS_REPO_TOKEN")
