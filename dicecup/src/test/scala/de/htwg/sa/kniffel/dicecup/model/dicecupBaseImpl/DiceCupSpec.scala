@@ -126,28 +126,8 @@ class DiceCupSpec extends AnyWordSpec {
         diceCup.inCup.size should be(0)
       }
     }
+    
 
-
-    /*"when DiceCupState changed" should {
-      val diceCup: DiceCup = new DiceCup()
-      diceCup.state = new Start
-      "have the Start State" in {
-        diceCup.dice()
-        diceCup.inCup.size + diceCup.locked.size should be(5)
-        diceCup.inCup.foreach {
-          s =>
-            s should be < 7
-            s should be > 0
-        }
-      }
-      "have the Running State" in {
-        var diceCup1 = diceCup.dice()
-        diceCup1 = diceCup1.dice()
-        diceCup1 = diceCup1.dice()
-        val diceCup2 = diceCup1.dice()
-        diceCup1.dice().toString() should be (diceCup2.toString())
-      }
-    }*/
   }
 }
 
