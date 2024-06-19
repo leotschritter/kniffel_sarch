@@ -11,8 +11,8 @@ object TuiService:
   given TUI = tui
 
   @main def main(): Unit =
+    //Disable Logging
     LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)
       .asInstanceOf[ch.qos.logback.classic.Logger]
       .setLevel(ch.qos.logback.classic.Level.ERROR)
-    //Disable Logging
     TuiApi().tui.run()
