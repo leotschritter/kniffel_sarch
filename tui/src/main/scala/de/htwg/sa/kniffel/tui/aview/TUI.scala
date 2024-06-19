@@ -83,9 +83,14 @@ class TUI(val gameESI: GameESI, val diceCupESI: DiceCupESI, val fieldESI: FieldE
 
   private val source = Consumer.plainSource(consumerSettings, Subscriptions.topics("tui-response-topic"))
 
-  source.runForeach(record => 
-    update((Json.parse(record.value()) \ "msg").as[String])
-  )
+  source.runForeach { record =>
+    (Json.parse(record.value()) \ "msg").as[String] match {
+      case "quit" => update("quit")
+      case "save" => update("save")
+      case "empty" => update("empty")
+      case _ => update("move")
+    }
+  }
 
   def run(): Unit =
     println(fieldESI.sendPOSTRequest("field/mesh", controllerESI.sendGETRequest("controller/field")))
@@ -95,6 +100,7 @@ class TUI(val gameESI: GameESI, val diceCupESI: DiceCupESI, val fieldESI: FieldE
     event match {
       case "quit" => continue = false; Json.obj("event" -> event).toString
       case "save" => continue; Json.obj("event" -> event).toString
+      case "empty" => Json.obj("event" -> event).toString
       case _ => println(controllerESI.sendGETRequest("controller/")); Json.obj("event" -> event).toString
     }
 
@@ -116,13 +122,7 @@ class TUI(val gameESI: GameESI, val diceCupESI: DiceCupESI, val fieldESI: FieldE
     controllerESI.sendGETRequest("controller/next")
     controllerESI.sendGETRequest("controller/doAndPublish/nextRound")
   }
-
-  private def diceCupPutIn(pi: List[Int]): Unit =
-    controllerESI.sendGETRequest(s"controller/doAndPublish/putIn/list=${pi.mkString(",")}")
-
-  private def diceCupPutOut(po: List[Int]): Unit =
-    controllerESI.sendGETRequest(s"controller/doAndPublish/putOut/list=${po.mkString(",")}")
-
+  
   private def checkIfEmpty(index: Int): Boolean =
     (Json.parse(
       fieldESI.sendPOSTRequest(
