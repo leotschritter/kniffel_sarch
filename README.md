@@ -1,7 +1,7 @@
 ## sbt project compiled with Scala 3
 
 [![Scala CI](https://github.com/leotschritter/kniffel_sarch/actions/workflows/scala.yml/badge.svg)](https://github.com/leotschritter/kniffel_sarch/actions/workflows/scala.yml)
-[![Coverage Status](https://coveralls.io/repos/github/leotschritter/kniffel_sarch/badge.svg)](https://coveralls.io/github/leotschritter/kniffel_sarch)
+[![Coverage Status](https://coveralls.io/repos/github/leotschritter/kniffel_sarch/badge.svg?branch=SARCH-05-REST)](https://coveralls.io/github/leotschritter/kniffel_sarch?branch=SARCH-05-REST)
 ### Usage
 
 This is a normal sbt project. You can compile code with `sbt compile`, run it with `sbt run`, and `sbt console` will start a Scala 3 REPL.
